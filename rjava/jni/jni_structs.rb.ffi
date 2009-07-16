@@ -1,0 +1,35 @@
+module JNI
+  JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
+  	callback name, arg_types, return_type
+  end
+  
+  class EnvStruct < FFI::Struct
+    @@@
+    struct do |s|
+      s.name "struct JNINativeInterface_"
+      s.include "jni.h"
+      
+      JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
+        s.field name, name
+      end
+    end
+    @@@
+  end
+  
+  JNI::JvmFunctions.each_function do |name, arg_types, return_type, block|
+  	callback name, arg_types, return_type
+  end
+  
+  class JvmStruct < FFI::Struct
+    @@@
+    struct do |s|
+      s.name "struct JNIInvokeInterface_"
+      s.include "jni.h"
+      
+      JNI::JvmFunctions.each_function do |name, arg_types, return_type, block|
+        s.field name, name
+      end
+    end
+    @@@
+  end
+end

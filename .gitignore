@@ -1,0 +1,10 @@
+/stable
+/test/*.class
+/test/*.rb
+/test/*.test
+/test/*.test.failed
+/**/pkg
+.loadpath
+.project
+.DS_Store
+*~

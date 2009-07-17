@@ -1,0 +1,14 @@
+task :gemspec do
+  File.open("java2ruby.gemspec", "w") do |file|
+    file.write Gem::Specification.new { |s|
+      s.name = "java2ruby"
+      s.version = "1.0.0"
+      s.files = ["java2ruby.rb", "rjava.rb", "LICENSE"] + Dir.glob("converter/**/*.*") + Dir.glob("rjava/**/*.*")
+      s.homepage = %q{http://github.com/neelance/java2ruby/}
+      s.has_rdoc = true
+      s.rdoc_options = ["--charset=UTF-8"]
+      s.require_paths = ["."]
+      s.summary = "A source code converter from Java to Ruby, making it possible to use Java libraries with MRI."
+    }.to_yaml
+  end
+end

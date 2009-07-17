@@ -1,7 +1,7 @@
 --- !ruby/object:Gem::Specification 
 name: java2ruby
 version: !ruby/object:Gem::Version 
-  version: 1.0.0
+  version: 1.0.1
 platform: ruby
 authors: []
 
@@ -11,8 +11,17 @@ cert_chain: []
 
 date: 2009-07-17 00:00:00 +02:00
 default_executable: 
-dependencies: []
-
+dependencies: 
+- !ruby/object:Gem::Dependency 
+  name: ffi
+  type: :runtime
+  version_requirement: 
+  version_requirements: !ruby/object:Gem::Requirement 
+    requirements: 
+    - - ">="
+      - !ruby/object:Gem::Version 
+        version: "0"
+    version: 
 description: 
 email: 
 executables: []

@@ -1,116 +1,189 @@
 module Java2Ruby
-  class Converter
-    class StatementContext
-      def initialize(parent_context)
-        @parent_context = parent_context
+  class StatementContext
+    attr_accessor :parent_context
+    
+    def initialize
+      @variables = {}
+      @ruby_variable_names = Set.new
+    end
+    
+    def converter
+      @parent_context.converter
+    end
+    
+    def current_break_context
+      @parent_context.current_break_context
+    end
+    
+    def current_next_context
+      @parent_context.current_next_context
+    end
+    
+    def find_block(block_name)
+      @parent_context.find_block block_name
+    end
+    
+    def new_variable(name, type)
+      var_name = RJava.lower_name name
+      while ruby_variable_name_used?(var_name) or %w{alias and begin break case class def defined do else elsif end ensure false for if in module next nil not or redo rescue retry return self super then true undef unless until when while yield}.include?(var_name)
+        var_name << "_"
       end
-      
-      def converter
-        @parent_context.converter
-      end
-      
-      def current_block
-        @parent_context.current_block
-      end
-      
-      def find_block(block_name)
-        @parent_context.find_block block_name
+      @variables[name] = [type, var_name]
+      @ruby_variable_names << var_name
+      var_name
+    end
+    
+    def resolve(identifiers)
+      if @variables.has_key?(identifiers.first)
+        var = @variables[identifiers.shift]
+        Expression.new var[0], var[1]
+      else
+        @parent_context && @parent_context.resolve(identifiers)
       end
     end
     
-    class GlobalContext < StatementContext
-      attr_reader :converter
-      
-      def initialize(converter)
-        @converter = converter
-      end
-      
-      def current_block
-        nil
-      end
+    def ruby_variable_name_used?(name)
+      @ruby_variable_names.include?(name) || (@parent_context && @parent_context.ruby_variable_name_used?(name))
+    end
+  end
+  
+  class MethodContext < StatementContext
+    def initialize(method)
+      super()
+      @method = method
     end
     
-    class BlockContext < StatementContext
-      attr_accessor :block_name, :break_block_catch, :next_block_catch, :for_updates
-      
-      def initialize(parent_context, block_name = nil, break_block_catch = nil)
-        super parent_context
-        @block_name = block_name
-        @break_block_catch = break_block_catch
-        @next_block_catch = nil
-        @for_updates = []
-      end
-      
-      def current_block
-        self
-      end
-      
-      def find_block(block_name)
-        block_name == @block_name ? self : super
-      end
+    def converter
+      @method.converter
     end
     
-    class SwitchContext < StatementContext
-      attr_reader :break_case_catch
-      
-      def initialize(parent_context, break_case_catch)
-        super parent_context
-        @break_case_catch = break_case_catch
-      end
+    def ruby_variable_name_used?(name)
+      @method.parent_module.has_ruby_method?(name) || super
     end
     
-    class CatchBlock < OutputGenerator
-      attr_reader :name, :converter, :current_module, :current_method
+    def current_break_context
+      nil
+    end
+    
+    def current_next_context
+      nil
+    end
+    
+    def find_block(name)
+      nil
+    end
+  end
+  
+  class BlockContext < StatementContext
+    attr_reader :block_name, :break_catch
+    
+    def initialize(block_name, break_catch)
+      super()
+      @block_name = block_name
+      @break_catch = break_catch
+    end
+    
+    def current_break_context
+      @block_name ? self : super
+    end
+    
+    def find_block(block_name)
+      block_name == @block_name ? self : super
+    end
+  end
+  
+  class LoopContext < BlockContext
+    attr_reader :next_catch
+    
+    def initialize(block_name, break_catch, next_catch)
+      super block_name, break_catch
+      @next_catch = next_catch
+    end
+    
+    def current_break_context
+      self
+    end
+    
+    def current_next_context
+      self
+    end
+  end
+  
+  class ForContext < LoopContext
+    attr_reader :for_updates
+    
+    def initialize(block_name, break_catch, next_catch, for_updates)
+      super block_name, break_catch, next_catch
+      @for_updates = for_updates
+    end
+  end
+  
+  class SwitchContext < BlockContext
+    attr_reader :break_case_catch
+    
+    def initialize(block_name, break_catch, break_case_catch)
+      super block_name, break_catch
+      @break_case_catch = break_case_catch
+    end
+    
+    def current_break_context
+      self
+    end
+  end
+  
+  class CatchBlock < OutputGenerator
+    attr_reader :name, :current_module, :current_method
+    
+    def initialize(converter, name)
+      super converter
+      @current_module = converter.current_module
+      @current_method = converter.current_method
+      @name = name
+      @buffer = yield self
+      @write_catch = false
       
-      def initialize(converter, context, name)
-        super converter
-        @current_module = converter.current_module
-        @current_method = converter.current_method
-        @name = name
-        @buffer = yield self
-        @write_catch = false
-        
-        parts = self.output_parts # evaluates block and thus may modify @write_catch
-        
-        if @write_catch
-          @converter.puts_output "catch(:#{name}) do"
-          @converter.indent_output do
-            @converter.puts_output(*parts)
-          end
-          if context.current_block
-            @converter.puts_output "end == :thrown or break"
-          else
-            @converter.puts_output "end"
-          end
-        else
+      parts = self.output_parts # evaluates block and thus may modify @write_catch
+      
+      if @write_catch
+        @converter.puts_output "catch(:#{name}) do"
+        @converter.indent_output do
           @converter.puts_output(*parts)
         end
-      end
-      
-      def write_output
-        @buffer.call
-      end
-      
-      def enable
-        @write_catch = true
+        if @converter.statement_context.current_break_context
+          @converter.puts_output "end == :thrown or break"
+        else
+          @converter.puts_output "end"
+        end
+      else
+        @converter.puts_output(*parts)
       end
     end
     
-    def match_block(context)
+    def write_output
+      @buffer.call
+    end
+    
+    def enable
+      @write_catch = true
+    end
+  end
+  
+  class Converter
+    def match_block
       match :block do
         match "{"
-        match_block_statements context
+        match_block_statements
         match "}"
       end
     end
     
-    def match_block_statements(context)
+    def match_block_statements
       loop_match :blockStatement do
-        match_block_statement_children context
+        match_block_statement_children
       end
     end
     
-    def match_block_statement_children(context)
+    def match_block_statement_children
       if try_match :localVariableDeclarationStatement do
           match_localVariableDeclaration
           match ";"
@@ -120,12 +193,12 @@ module Java2Ruby
         puts_output inner_module.java_type, " = ", inner_module
       else
         match :statement do
-          match_statement_children context, nil
+          match_statement_children
         end
       end
     end
     
-    def match_statement_children(context, block_context)
+    def match_statement_children(block_name = nil, break_catch = nil)
       if try_match :statementExpression do
           puts_output match_expression
         end
@@ -134,14 +207,14 @@ module Java2Ruby
         puts_output "if ", match_parExpression
         indent_output do
           match :statement do
-            match_statement_children context, nil
+            match_statement_children
           end
         end
         if try_match "else"
           puts_output "else"
           indent_output do
             match :statement do
-              match_statement_children context, nil
+              match_statement_children
             end
           end
         end
@@ -149,13 +222,12 @@ module Java2Ruby
       elsif try_match "switch"
         case_expression = match_parExpression
         match "{"
-        CatchBlock.new(self, context, "break_case") do |break_case_catch|
+        CatchBlock.new(self, "break_case") do |break_case_catch|
           buffer_match :switchBlockStatementGroups do
             puts_output "case ", case_expression
             cases = []
             open_cases = []
             default_case = nil
-            switch_context = SwitchContext.new(context, break_case_catch)
             loop_match :switchBlockStatementGroup do
               current_case = [[], []]
               cases << current_case
@@ -175,7 +247,7 @@ module Java2Ruby
               while next_is? :blockStatement
                 last_statement = next_element
                 statement_buffer = buffer_match(:blockStatement) do
-                  match_block_statement_children switch_context
+                  match_block_statement_children
                 end
                 open_cases.each do |open_case|
                   open_case[1] << statement_buffer
@@ -189,13 +261,17 @@ module Java2Ruby
               next if the_case[0].empty?
               puts_output "when ", *the_case[0].insert_seperators(", ")
               indent_output do
-                the_case[1].each { |buffer| buffer.call }
+                switch_statement_context SwitchContext.new(block_name, break_catch, break_case_catch) do
+                  the_case[1].each { |buffer| buffer.call }
+                end
               end
             end
             if default_case
               puts_output "else"
               indent_output do
-                default_case[1].each { |buffer| buffer.call }
+                switch_statement_context SwitchContext.new(block_name, break_catch, break_case_catch) do
+                  default_case[1].each { |buffer| buffer.call }
+                end
               end
             end
             puts_output "end"
@@ -205,11 +281,11 @@ module Java2Ruby
       elsif try_match "while"
         puts_output "while ", match_parExpression
         indent_output do
-          block_context ||= BlockContext.new context
-          CatchBlock.new(self, context, "next_#{block_context.block_name}") do |next_block_catch|
-            block_context.next_block_catch = next_block_catch
+          CatchBlock.new(self, "next_#{block_name}") do |next_catch|
             buffer_match :statement do
-              match_statement_children block_context, nil
+              switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
+                match_statement_children
+              end
             end
           end
         end
@@ -217,11 +293,11 @@ module Java2Ruby
       elsif try_match "do"
         puts_output "begin"
         indent_output do
-          block_context ||= BlockContext.new context
-          CatchBlock.new(self, context, "next_#{block_context.block_name}") do |next_block_catch|
-            block_context.next_block_catch = next_block_catch
+          CatchBlock.new(self, "next_#{block_name}") do |next_catch|
             buffer_match :statement do
-              match_statement_children block_context, nil
+              switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
+                match_statement_children
+              end
             end
           end
         end
@@ -270,12 +346,11 @@ module Java2Ruby
             puts_output "loop do"
           end
           indent_output do
-            block_context ||= BlockContext.new context
-            CatchBlock.new(self, context, "next_#{block_context.block_name}") do |next_block_catch|
-              block_context.next_block_catch = next_block_catch
-              block_context.for_updates = for_updates
+            CatchBlock.new(self, "next_#{block_name}") do |next_catch|
               buffer_match :statement do
-                match_statement_children block_context, nil
+                switch_statement_context ForContext.new(block_name, break_catch, next_catch, for_updates) do
+                  match_statement_children
+                end
               end
             end
             for_updates.each { |e| puts_output e }
@@ -284,17 +359,11 @@ module Java2Ruby
         else
           puts_output for_each_list, ".each do |#{for_each_variable[0]}|"
           indent_output do
-            block_context ||= BlockContext.new context
-            CatchBlock.new(self, context, "next_#{block_context.block_name}") do |next_block_catch|
-              block_context.next_block_catch = next_block_catch
+            CatchBlock.new(self, "next_#{block_name}") do |next_catch|
               buffer_match :statement do
-                if current_method
-                  current_method.keep_variables do
-                    current_method.new_variable *for_each_variable
-                    match_statement_children block_context, nil
-                  end
-                else
-                  match_statement_children block_context, nil
+                switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
+                  @statement_context.new_variable *for_each_variable
+                  match_statement_children
                 end
               end
             end
@@ -304,7 +373,7 @@ module Java2Ruby
       elsif try_match "try"
         puts_output "begin"
         indent_output do
-          match_block context
+          match_block
         end
         try_match :catches do
           loop_match :catchClause do
@@ -319,11 +388,11 @@ module Java2Ruby
               end
             end
             match ")"
-            puts_output "rescue #{exception_type} => #{exception_variable}"
-            indent_output do
-              current_method.keep_variables do
-                current_method.new_variable exception_variable, exception_type
-                match_block context
+            switch_statement_context StatementContext.new do
+              var_name = @statement_context.new_variable exception_variable, exception_type
+              puts_output "rescue #{exception_type} => #{var_name}"
+              indent_output do
+                match_block
               end
             end
           end
@@ -331,46 +400,47 @@ module Java2Ruby
         if try_match "finally"
           puts_output "ensure"
           indent_output do
-            match_block context
+            match_block
           end
         end
         puts_output "end"
       elsif try_match "break"
         if try_match ";"
-          if context.is_a? SwitchContext
+          break_context = @statement_context.current_break_context
+          if break_context.is_a?(SwitchContext)
             puts_output "throw :break_case, :thrown"
-            context.break_case_catch.enable
+            break_context.break_case_catch.enable
           else
             puts_output "break"
           end
         else
           name = RJava.lower_name(match_name)
           match ";"
-          loop_context = context.find_block name
-          if loop_context == context.current_block
+          block_context = @statement_context.find_block name
+          if block_context == @statement_context.current_break_context
             puts_output "break"
           else
             puts_output "throw :break_#{name}, :thrown"
-            loop_context.break_block_catch.enable
+            block_context.break_catch.enable
           end
         end
       elsif try_match :disabled_break
         match ";"
       elsif try_match "continue"
         if try_match ";"
-          loop_context = context.current_block
-          loop_context.for_updates.each { |e| puts_output e }
+          loop_context = @statement_context.current_next_context
+          loop_context.for_updates.each { |e| puts_output e } if loop_context.is_a?(ForContext)
           puts_output "next"
         else
           name = RJava.lower_name(match_name)
           match ";"
-          loop_context = context.find_block name
-          if loop_context == context.current_block
-            loop_context.for_updates.each { |e| puts_output e }
+          loop_context = @statement_context.find_block name
+          if loop_context == @statement_context.current_next_context
+            loop_context.for_updates.each { |e| puts_output e } if loop_context.is_a?(ForContext)
             puts_output "next"
           else
             puts_output "throw :next_#{name}, :thrown"
-            loop_context.next_block_catch.enable
+            loop_context.next_catch.enable
           end
         end
       elsif try_match "return"
@@ -387,7 +457,7 @@ module Java2Ruby
       elsif try_match "synchronized"
         puts_output "synchronized(", match_parExpression, ") do"
         indent_output do
-          match_block context
+          match_block
         end
         puts_output "end"
       elsif try_match "assert"
@@ -400,16 +470,18 @@ module Java2Ruby
         assert_line.push " if not (", assert_expression, ")"
         puts_output(*assert_line)
       elsif next_is? :block
-        match_block context
+        block_context = BlockContext.new block_name, break_catch
+        switch_statement_context block_context do
+          match_block
+        end
       elsif try_match ";"
         # nothing
       else
         block_name = RJava.lower_name(match_name)
         match ":"
-        CatchBlock.new(self, context, "break_#{block_name}") do |break_block_catch|
+        CatchBlock.new(self, "break_#{block_name}") do |break_catch|
           buffer_match :statement do
-            this_block_context = BlockContext.new(context, block_name, break_block_catch)
-            match_statement_children this_block_context, this_block_context
+            match_statement_children block_name, break_catch
           end
         end
       end

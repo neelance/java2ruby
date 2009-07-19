@@ -24,45 +24,15 @@ module Java2Ruby
       @parent_module.converter
     end
     
-    def new_variable(name, type)
-      var_name = lower_name name
-      while @ruby_variable_names.include?(var_name) or @parent_module.has_ruby_method?(var_name) or %w{alias and begin break case class def defined do else elsif end ensure false for if in module next nil not or redo rescue retry return self super then true undef unless until when while yield}.include?(var_name)
-        var_name << "_"
-      end
-      @variables[name] = [type, var_name]
-      @ruby_variable_names << var_name
-      var_name
-    end
-    
-    def dup_variables
-      @variables.dup
-    end
-    
-    def keep_variables
-      outer_variables = @variables.dup
-      yield
-      @variables = outer_variables
-    end
-    
-    def resolve(identifiers)
-      if @variables.has_key?(identifiers.first)
-        var = @variables[identifiers.shift]
-        Expression.new var[0], var[1]
-      else
-        nil
-      end
-    end
-    
     def write_output
       write_loaders
-      @variables = @parent_module.outer_variables ? @parent_module.outer_variables.dup : {}
-      @ruby_variable_names = Set.new
       @method_classes = []
       
+      method_context = MethodContext.new self
       if @name.nil?
         puts_output "when_class_loaded do"
       else
-        parameter_names = @parameters.map { |name, type, array_arg| (array_arg ? "*" : "") + new_variable(name, type) }
+        parameter_names = @parameters.map { |name, type, array_arg| (array_arg ? "*" : "") + method_context.new_variable(name, type) }
         puts_output_without_comments "typesig { [#{@parameters.map{ |name, type, array_arg| type }.join(", ")}] }"
         if @parent_module.type != :inner_class
           parameter_part = parameter_names.empty? ? "" : "(#{parameter_names.join(", ")})"
@@ -72,8 +42,10 @@ module Java2Ruby
           puts_output "define_method :#{ruby_method_name @name} do#{parameter_part}"
         end
       end
-      indent_output do
-        write_inner_output
+      converter.switch_statement_context method_context do
+        indent_output do
+          write_inner_output
+        end
       end
       puts_output "end"
     end
@@ -133,7 +105,7 @@ module Java2Ruby
     def write_inner_output
       jni_parameters = ["JNI.env", "self.jni_id"]
       @parameters.each do |name, type, array_arg|
-        jni_parameters << type.ffi_parameter_cast(resolve([name]).output_parts.first)
+        jni_parameters << type.ffi_parameter_cast(converter.statement_context.resolve([name]).output_parts.first)
       end
       puts_output @return_type.ffi_return_cast("JNI.__send__(#{native_method_name}, #{jni_parameters.join(", ")})")
     end

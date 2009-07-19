@@ -424,7 +424,7 @@ module Java2Ruby
               method_identifier = arguments ? identifiers.pop : nil
               
               expression = nil
-              expression ||= current_method && current_method.resolve(identifiers)
+              expression ||= @statement_context && @statement_context.resolve(identifiers)
               expression ||= current_module && current_module.resolve(identifiers)
               
               identifiers.each do |identifier|
@@ -485,7 +485,6 @@ module Java2Ruby
             puts_output current_module.java_type, " = self.class" if current_module.type == :inner_class
             java_module = JavaModule.new current_module, :inner_class, nil
             java_module.superclass = type
-            java_module.outer_variables = current_method && current_method.dup_variables
             match_classBody java_module
             arguments.unshift "self"
             Expression.new nil, java_module, ".new_local", *compose_arguments(arguments)

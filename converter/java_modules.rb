@@ -120,7 +120,7 @@ module Java2Ruby
   
   class JavaModule < JavaMember
     attr_reader :context_module, :type, :name, :has_main
-    attr_accessor :superclass, :interfaces, :outer_variables
+    attr_accessor :superclass, :interfaces
     attr_accessor :variable_declarators, :fields, :generic_classes
     
     def initialize(context_module, type, name) # possible types: :class, :inner_class, :local_class, :interface, :local_interface
@@ -133,7 +133,6 @@ module Java2Ruby
       @interfaces = []
       @members = []
       @local_modules = {}
-      @outer_variables = nil
       @constructors = []
       @has_constructor = false
       @has_main = false

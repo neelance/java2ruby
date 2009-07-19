@@ -144,7 +144,6 @@ module Java2Ruby
           match "class"
           if current_method
             java_module = JavaModule.new context_module, :inner_class, match_name
-            java_module.outer_variables = current_method.dup_variables
             current_method.method_classes << java_module
           elsif context_module.is_a? JavaModule
             if class_modifiers.include? "static"
@@ -257,12 +256,12 @@ module Java2Ruby
         if try_match "static"
           block_body = buffer_match :block do
             match "{"
-            match_block_statements GlobalContext.new(converter)
+            match_block_statements
             match "}"
           end
           java_module.new_static_block block_body
         elsif next_is? :block
-          match_block GlobalContext.new(converter) # TODO what is this block?
+          match_block # TODO what is this block?
         else
           modifiers = match_modifiers
           static = modifiers.include?("static")
@@ -304,7 +303,7 @@ module Java2Ruby
                     end
                   end
                   
-                  match_block_statements GlobalContext.new(converter)
+                  match_block_statements
                   match "}"
                 end
                 java_module.new_constructor constructor_parameters, constructor_body
@@ -348,11 +347,11 @@ module Java2Ruby
                       if synchronized
                         puts_output "synchronized(self) do"
                         indent_output do
-                          match_block_statements GlobalContext.new(converter)
+                          match_block_statements
                         end
                         puts_output "end"
                       else
-                        match_block_statements GlobalContext.new(converter)
+                        match_block_statements
                       end
                       match "}"
                     end
@@ -402,11 +401,11 @@ module Java2Ruby
               if synchronized
                 puts_output "synchronized(self) do"
                 indent_output do
-                  match_block_statements GlobalContext.new(converter)
+                  match_block_statements
                 end
                 puts_output "end"
               else
-                match_block_statements GlobalContext.new(converter)
+                match_block_statements
               end
               match "}"
             end

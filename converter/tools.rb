@@ -51,6 +51,7 @@ module Java2Ruby
     end
     
     def write_comments
+      @comment_lines.shift while !@comment_lines.empty? and @comment_lines.first.empty?
       @comment_lines.pop while !@comment_lines.empty? and @comment_lines.last.empty?
       @comment_lines.map! { |comment| "# #{comment}" }
       @output_lines.concat @comment_lines

@@ -6,7 +6,7 @@ module Java2Ruby
         type = match_type
         match_variableDeclarators(type) do |name, var_type, value, default|
           real_value = (value && value.call) || default
-          var_name = current_method.new_variable name, var_type
+          var_name = @statement_context.new_variable name, var_type
           puts_output "#{var_name} = ", real_value
         end
       end

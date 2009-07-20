@@ -24,7 +24,9 @@ module Java2Ruby
       expressions = []
       loop_match :expressionList do
         loop do
-          expressions << match_expression
+          expression = match_expression
+          expression.result_used = false
+          expressions << expression
           try_match "," or break
         end
       end
@@ -200,9 +202,9 @@ module Java2Ruby
         else
           expression = match_primary
           if try_match "++"
-            expression = Expression.new nil, "((", expression, " += 1) - 1)"
+            expression = PostIncrementExpression.new expression
           elsif try_match "--"
-            expression = Expression.new nil, "((", expression, " -= 1) + 1)"
+            expression = PostDecrementExpression.new expression
           end
         end
       end

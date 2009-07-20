@@ -131,11 +131,12 @@ module Java2Ruby
   end
   
   class Expression
-    attr_accessor :type, :output_parts
+    attr_accessor :type, :output_parts, :result_used
     
     def initialize(type, *output_parts)
       @type = type
       @output_parts = output_parts
+      @result_used = true
     end
     
     def to_s
@@ -160,6 +161,28 @@ module Java2Ruby
       else
         self
       end
+    end
+  end
+  
+  class PostIncrementExpression < Expression
+    def initialize(variable)
+      super nil
+      @variable = variable
+    end
+    
+    def output_parts
+      @result_used ? ["((", @variable, " += 1) - 1)"] : [@variable, " += 1"]
+    end
+  end
+  
+  class PostDecrementExpression < Expression
+    def initialize(variable)
+      super nil
+      @variable = variable
+    end
+    
+    def output_parts
+      @result_used ? ["((", @variable, " -= 1) + 1)"] : [@variable, " -= 1"]
     end
   end
   

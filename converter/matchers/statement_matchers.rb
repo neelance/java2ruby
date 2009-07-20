@@ -200,7 +200,9 @@ module Java2Ruby
     
     def match_statement_children(block_name = nil, break_catch = nil)
       if try_match :statementExpression do
-          puts_output match_expression
+          expression = match_expression
+          expression.result_used = false
+          puts_output expression
         end
         match ";"
       elsif try_match "if"

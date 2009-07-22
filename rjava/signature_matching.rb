@@ -10,7 +10,7 @@ class Module
   end
   
   def method_added(name)
-    return if @current_typesig.nil?
+    return if !defined?(@current_typesig) or @current_typesig.nil?
     own_specific_method_variations = (method_variations[name] ||= [])
     own_specific_method_variations << [@current_typesig, 0, self, instance_method(name), nil]
     @current_typesig = nil

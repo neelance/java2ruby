@@ -4,8 +4,8 @@ module Java2Ruby
       match :localVariableDeclaration do
         match_variableModifiers
         type = match_type
-        match_variableDeclarators(type) do |name, var_type, value, default|
-          real_value = (value && value.call) || default
+        match_variableDeclarators(type) do |name, var_type, value|
+          real_value = (value && value.call) || type.default
           var_name = @statement_context.new_variable name, var_type
           puts_output "#{var_name} = ", real_value
         end
@@ -41,7 +41,7 @@ module Java2Ruby
             if try_match "="
               value = buffer_match_variableInitializer type
             end
-            yield name, type, value, type.default
+            yield name, type, value
           end
           try_match "," or break
         end
@@ -50,12 +50,12 @@ module Java2Ruby
     
     def buffer_match_variableInitializer(type)
       buffer_match :variableInitializer do
-       (type.is_a?(JavaArrayType) && try_match_arrayInitializer(type.entry_type)) || match_expression
+       (type.is_a?(JavaArrayType) && try_match_arrayInitializer(type)) || match_expression
       end
     end
     
     def try_match_arrayInitializer(type)
-      output_parts = ["Array.typed(", type, ").new(["]
+      output_parts = [type, ".new(["]
       try_match :arrayInitializer do
         match "{"
         loop do

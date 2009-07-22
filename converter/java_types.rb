@@ -186,6 +186,17 @@ module Java2Ruby
     def to_s
       "Array.typed(#{@entry_type})"
     end
+    
+    def default(sizes = nil)
+      if sizes.nil?
+        "nil"
+      elsif sizes.size == 1 and @entry_type.is_a?(JavaPrimitiveType) and @entry_type.name == "char"
+        Expression.new :Array, "CharArray.new(", sizes.first, ")"
+      else
+        size = sizes.shift
+        Expression.new :Array, "Array.typed(", @entry_type, ").new(", size, ") { ", (sizes.empty? ? @entry_type.default : @entry_type.default(sizes)), " }"
+      end
+    end
   end
   
   class JavaInnerClassType < JavaType

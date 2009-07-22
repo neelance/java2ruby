@@ -90,7 +90,7 @@ module Java2Ruby
                             match :constantDeclaratorRest do
                               match "="
                               value = buffer_match_variableInitializer type
-                              java_module.new_constant member_name, type, value, nil
+                              java_module.new_constant member_name, type, value
                             end
                           end
                           match ";"
@@ -192,9 +192,9 @@ module Java2Ruby
                     expression_parts = [enum_constant_module.java_type, ".new"]
                     expression_parts.concat compose_arguments(arguments)
                     expression_parts << ".set_value_name(\"#{enum_constant_name}\")"
-                    ruby_name = java_module.new_constant enum_constant_name, nil, Expression.new(nil, *expression_parts), nil
+                    ruby_name = java_module.new_constant enum_constant_name, nil, Expression.new(nil, *expression_parts)
                     constant_names << ruby_name
-                    context_module.new_constant enum_constant_name, nil, Expression.new(nil, "#{java_module.java_type}::#{ruby_name}"), nil if context_module.is_a? JavaModule
+                    context_module.new_constant enum_constant_name, nil, Expression.new(nil, "#{java_module.java_type}::#{ruby_name}") if context_module.is_a? JavaModule
                   end
                   try_match "," or break
                 end
@@ -295,11 +295,11 @@ module Java2Ruby
                   else
                     if current_module.superclass
                       arguments = (explicit_invocation_type == :super) ? explicit_invocation_arguments : []
-                      current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = #{field.default}" }
+                      current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = #{field.type.default}" }
                       puts_output "super", *compose_arguments(arguments, true)
                       current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value.call if field.value }
                     else
-                      current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value ? field.value.call : field.default }
+                      current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value ? field.value.call : field.type.default }
                     end
                   end
                   
@@ -315,15 +315,15 @@ module Java2Ruby
                   match_methodDeclaratorRest java_module, static, native, synchronized, type, method_name
                 end \
                 or try_match :fieldDeclaration do
-                  match_variableDeclarators(type) do |name, var_type, value, default|
+                  match_variableDeclarators(type) do |name, var_type, value|
                     if static
                       if final
-                        java_module.new_constant name, var_type, value, default 
+                        java_module.new_constant name, var_type, value
                       else
-                        java_module.new_static_field name, var_type, value, default
+                        java_module.new_static_field name, var_type, value
                       end
                     else
-                      java_module.new_field name, var_type, value, default
+                      java_module.new_field name, var_type, value
                     end
                   end
                   match ";"

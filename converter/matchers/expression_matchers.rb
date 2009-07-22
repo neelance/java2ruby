@@ -300,25 +300,14 @@ module Java2Ruby
             end
             if try_match :arrayCreatorRest do
                 sizes = []
-                values = nil
                 while try_match "["
                   if next_is? :expression
                     sizes << match_expression
                   end
                   match "]"
+                  type = JavaArrayType.new self, type
                 end
-                expression = try_match_arrayInitializer(type)
-                if not expression
-                  expression = Expression.new nil, type.default
-                  until sizes.empty?
-                    size = sizes.pop
-                    if sizes.empty? and type.is_a? JavaPrimitiveType and type.name == "char"
-                      expression = Expression.new :Array, "CharArray.new(", size, ")"
-                    else
-                      expression = Expression.new :Array, "Array.typed(", type, ").new(", size, ") { ", expression, " }"
-                    end
-                  end
-                end
+                expression = try_match_arrayInitializer(type) || type.default(sizes) 
               end
             elsif next_is? :classCreatorRest
               expression = match_classCreatorRest type

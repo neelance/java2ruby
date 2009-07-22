@@ -18,15 +18,14 @@ module Java2Ruby
   end
   
   class JavaConstant < JavaMember
-    attr_reader :name, :ruby_name, :type, :value, :default
+    attr_reader :name, :ruby_name, :type, :value
     
-    def initialize(parent_module, name, type, value, default)
+    def initialize(parent_module, name, type, value)
       super parent_module, true
       @name = name
       @ruby_name = converter.ruby_constant_name name
       @type = type
       @value = value
-      @default = default
     end
     
     def write_output
@@ -67,19 +66,18 @@ module Java2Ruby
   end
   
   class JavaStaticField < JavaMember
-    attr_reader :name, :ruby_name, :type, :value, :default
+    attr_reader :name, :ruby_name, :type, :value
     
-    def initialize(parent_module, name, type, value, default)
+    def initialize(parent_module, name, type, value)
       super parent_module, true
       @name = name
       @ruby_name = converter.ruby_field_name name
       @type = type
       @value = value
-      @default = default
     end
     
     def write_output
-      real_value = @value ? @value.call : @default
+      real_value = @value ? @value.call : @type.default
       puts_output ""
       puts_output "def #{@ruby_name}"
       indent_output do
@@ -98,15 +96,14 @@ module Java2Ruby
   end
   
   class JavaField < JavaMember
-    attr_reader :name, :ruby_name, :type, :value, :default
+    attr_reader :name, :ruby_name, :type, :value
     
-    def initialize(parent_module, name, type, value, default)
+    def initialize(parent_module, name, type, value)
       super parent_module, false
       @name = name
       @ruby_name = converter.ruby_field_name name
       @type = type
       @value = value
-      @default = default
     end
     
     def write_output
@@ -173,26 +170,26 @@ module Java2Ruby
       @local_modules[name]
     end
     
-    def new_constant(name, type, value, default)
+    def new_constant(name, type, value)
       # override System.out and System.err
       if @name == "System" and (name == "in" or name == "out" or name == "err")
-        new_static_field name, type, value, default
+        new_static_field name, type, value
         return
       end
-      constant = JavaConstant.new self, name, type, value, default
+      constant = JavaConstant.new self, name, type, value
       @constants[name] = constant
       @members << constant unless value.nil?
       constant.ruby_name
     end
     
-    def new_static_field(name, type, value, default)
-      field = JavaStaticField.new self, name, type, value, default
+    def new_static_field(name, type, value)
+      field = JavaStaticField.new self, name, type, value
       @static_fields[name] = field
       @members << field
     end
     
-    def new_field(name, type, value, default)
-      field = JavaField.new self, name, type, value, default
+    def new_field(name, type, value)
+      field = JavaField.new self, name, type, value
       @fields[name] = field
       @members << field
     end

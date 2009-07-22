@@ -65,11 +65,11 @@ module Java2Ruby
     
     def write_inner_output
       if current_module.superclass
-        current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = #{field.default}" }
+        current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = #{field.type.default}" }
         puts_output "super()"
         current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value.call if field.value }
       else
-        current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value ? field.value.call : field.default }
+        current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value ? field.value.call : field.type.default }
       end
     end
   end

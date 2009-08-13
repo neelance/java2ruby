@@ -6,6 +6,14 @@ class Object
   def synchronization_monitor
     @synchronization_monitor ||= Monitor.new
   end
+
+  def synchronization_condition_variable
+    @synchronization_condition_variable ||= synchronization_monitor.new_cond
+  end
+
+  def wait
+    synchronization_condition_variable.wait
+  end
 end
 
 module Kernel
@@ -117,6 +125,10 @@ class Array
       a << e
     end
     a
+  end
+
+  def is_a?(cls)
+    (self.class == Array && cls.ancestors.include?(Array)) || super
   end
 end
 

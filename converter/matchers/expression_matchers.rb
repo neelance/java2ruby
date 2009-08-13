@@ -283,6 +283,7 @@ module Java2Ruby
                 Expression.new nil, "Character.new(#{char})"
               else
                 literal.gsub!(/[fdFD]$/, "")
+                literal.gsub!(/^\./, "0.")
                 Expression.new :Float, literal
               end
             end

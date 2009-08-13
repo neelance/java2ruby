@@ -1857,7 +1857,7 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
           eee = EarlyExitException.new(1, self.attr_input)
           raise eee
         end
-        ((cnt1 += 1) - 1)
+        cnt1 += 1
       end while (true)
       # Java.g:909:38: ( IntegerTypeSuffix )?
       alt2 = 2
@@ -1967,7 +1967,7 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
           eee = EarlyExitException.new(6, self.attr_input)
           raise eee
         end
-        ((cnt6 += 1) - 1)
+        cnt6 += 1
       end while (true)
       # Java.g:913:32: ( IntegerTypeSuffix )?
       alt7 = 2
@@ -2054,7 +2054,7 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
             eee = EarlyExitException.new(8, self.attr_input)
             raise eee
           end
-          ((cnt8 += 1) - 1)
+          cnt8 += 1
         end while (true)
         match(Character.new(?..ord))
         # Java.g:922:25: ( '0' .. '9' )*
@@ -2113,10 +2113,10 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
             if (cnt12 >= 1)
               break
             end
-            eee_ = EarlyExitException.new(12, self.attr_input)
-            raise eee_
+            eee = EarlyExitException.new(12, self.attr_input)
+            raise eee
           end
-          ((cnt12 += 1) - 1)
+          cnt12 += 1
         end while (true)
         # Java.g:923:25: ( Exponent )?
         alt13 = 2
@@ -2158,10 +2158,10 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
             if (cnt15 >= 1)
               break
             end
-            eee__ = EarlyExitException.new(15, self.attr_input)
-            raise eee__
+            eee = EarlyExitException.new(15, self.attr_input)
+            raise eee
           end
-          ((cnt15 += 1) - 1)
+          cnt15 += 1
         end while (true)
         m_exponent
         # Java.g:924:30: ( FloatTypeSuffix )?
@@ -2193,10 +2193,10 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
             if (cnt17 >= 1)
               break
             end
-            eee___ = EarlyExitException.new(17, self.attr_input)
-            raise eee___
+            eee = EarlyExitException.new(17, self.attr_input)
+            raise eee
           end
-          ((cnt17 += 1) - 1)
+          cnt17 += 1
         end while (true)
         m_float_type_suffix
       end
@@ -2232,9 +2232,9 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
         if ((self.attr_input._la(1)).equal?(Character.new(?+.ord)) || (self.attr_input._la(1)).equal?(Character.new(?-.ord)))
           self.attr_input.consume
         else
-          mse_ = MismatchedSetException.new(nil, self.attr_input)
-          recover(mse_)
-          raise mse_
+          mse = MismatchedSetException.new(nil, self.attr_input)
+          recover(mse)
+          raise mse
         end
       end
       # Java.g:929:33: ( '0' .. '9' )+
@@ -2256,7 +2256,7 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
           eee = EarlyExitException.new(20, self.attr_input)
           raise eee
         end
-        ((cnt20 += 1) - 1)
+        cnt20 += 1
       end while (true)
     ensure
     end
@@ -2390,8 +2390,8 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
           raise nvae
         end
       else
-        nvae_ = NoViableAltException.new("", 23, 0, self.attr_input)
-        raise nvae_
+        nvae = NoViableAltException.new("", 23, 0, self.attr_input)
+        raise nvae
       end
       case (alt23)
       when 1
@@ -2451,8 +2451,8 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
           end
         end
       else
-        nvae_ = NoViableAltException.new("", 24, 0, self.attr_input)
-        raise nvae_
+        nvae = NoViableAltException.new("", 24, 0, self.attr_input)
+        raise nvae
       end
       case (alt24)
       when 1
@@ -3099,11 +3099,11 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
     
     when_class_loaded do
       num_states = DFA18_transitionS.attr_length
-      const_set :DFA18_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA18_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA18_transition[i] = DFA.unpack_encoded_string(DFA18_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -3175,11 +3175,11 @@ class JavaLexer < JavaLexerImports.const_get :Lexer
     
     when_class_loaded do
       num_states = DFA29_transitionS.attr_length
-      const_set :DFA29_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA29_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA29_transition[i] = DFA.unpack_encoded_string(DFA29_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     

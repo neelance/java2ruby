@@ -510,12 +510,12 @@ class JavaParser < JavaParserImports.const_get :DebugParser
   
   typesig { [] }
   def inc_rule_level
-    ((@rule_level += 1) - 1)
+    @rule_level += 1
   end
   
   typesig { [] }
   def dec_rule_level
-    ((@rule_level -= 1) + 1)
+    @rule_level -= 1
   end
   
   typesig { [TokenStream] }
@@ -667,7 +667,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(178, 9)
           push_follow(FOLLOW_annotations_in_compilationUnit44)
           annotations
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -689,9 +689,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_state.attr_failed = true
                     return
                   end
-                  nvae_ = NoViableAltException.new("", 4, 0, self.attr_input)
-                  self.attr_dbg.recognition_exception(nvae_)
-                  raise nvae_
+                  nvae = NoViableAltException.new("", 4, 0, self.attr_input)
+                  self.attr_dbg.recognition_exception(nvae)
+                  raise nvae
                 end
               end
             ensure
@@ -704,7 +704,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(179, 13)
               push_follow(FOLLOW_packageDeclaration_in_compilationUnit58)
               package_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -730,7 +730,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_dbg.location(179, 32)
                     push_follow(FOLLOW_importDeclaration_in_compilationUnit60)
                     import_declaration
-                    ((self.attr_state.attr__fsp -= 1) + 1)
+                    self.attr_state.attr__fsp -= 1
                     if (self.attr_state.attr_failed)
                       return
                     end
@@ -763,7 +763,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_dbg.location(179, 51)
                     push_follow(FOLLOW_typeDeclaration_in_compilationUnit63)
                     type_declaration
-                    ((self.attr_state.attr__fsp -= 1) + 1)
+                    self.attr_state.attr__fsp -= 1
                     if (self.attr_state.attr_failed)
                       return
                     end
@@ -780,7 +780,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(180, 13)
               push_follow(FOLLOW_classOrInterfaceDeclaration_in_compilationUnit78)
               class_or_interface_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -806,7 +806,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_dbg.location(180, 41)
                     push_follow(FOLLOW_typeDeclaration_in_compilationUnit80)
                     type_declaration
-                    ((self.attr_state.attr__fsp -= 1) + 1)
+                    self.attr_state.attr__fsp -= 1
                     if (self.attr_state.attr_failed)
                       return
                     end
@@ -845,7 +845,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(182, 9)
               push_follow(FOLLOW_packageDeclaration_in_compilationUnit101)
               package_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -875,7 +875,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_dbg.location(182, 29)
                 push_follow(FOLLOW_importDeclaration_in_compilationUnit104)
                 import_declaration
-                ((self.attr_state.attr__fsp -= 1) + 1)
+                self.attr_state.attr__fsp -= 1
                 if (self.attr_state.attr_failed)
                   return
                 end
@@ -908,7 +908,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_dbg.location(182, 48)
                 push_follow(FOLLOW_typeDeclaration_in_compilationUnit107)
                 type_declaration
-                ((self.attr_state.attr__fsp -= 1) + 1)
+                self.attr_state.attr__fsp -= 1
                 if (self.attr_state.attr_failed)
                   return
                 end
@@ -967,7 +967,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(186, 19)
         push_follow(FOLLOW_qualifiedName_in_packageDeclaration129)
         qualified_name
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -1050,7 +1050,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(190, 28)
         push_follow(FOLLOW_qualifiedName_in_importDeclaration159)
         qualified_name
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -1157,7 +1157,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(194, 9)
           push_follow(FOLLOW_classOrInterfaceDeclaration_in_typeDeclaration191)
           class_or_interface_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -1212,7 +1212,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(199, 9)
         push_follow(FOLLOW_classOrInterfaceModifiers_in_classOrInterfaceDeclaration224)
         class_or_interface_modifiers
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -1249,7 +1249,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(199, 36)
             push_follow(FOLLOW_classDeclaration_in_classOrInterfaceDeclaration227)
             class_declaration
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -1259,7 +1259,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(199, 55)
             push_follow(FOLLOW_interfaceDeclaration_in_classOrInterfaceDeclaration231)
             interface_declaration
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -1335,7 +1335,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(203, 9)
               push_follow(FOLLOW_classOrInterfaceModifier_in_classOrInterfaceModifiers255)
               class_or_interface_modifier
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -1422,7 +1422,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(207, 9)
           push_follow(FOLLOW_annotation_in_classOrInterfaceModifier275)
           annotation
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -1551,7 +1551,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(218, 9)
               push_follow(FOLLOW_modifier_in_modifiers395)
               modifier
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -1628,7 +1628,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(222, 9)
           push_follow(FOLLOW_normalClassDeclaration_in_classDeclaration415)
           normal_class_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -1638,7 +1638,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(223, 9)
           push_follow(FOLLOW_enumDeclaration_in_classDeclaration425)
           enum_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -1713,7 +1713,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(227, 28)
             push_follow(FOLLOW_typeParameters_in_normalClassDeclaration452)
             type_parameters
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -1747,7 +1747,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(228, 20)
             push_follow(FOLLOW_type_in_normalClassDeclaration466)
             type
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -1781,7 +1781,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(229, 23)
             push_follow(FOLLOW_typeList_in_normalClassDeclaration481)
             type_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -1792,7 +1792,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(230, 9)
         push_follow(FOLLOW_classBody_in_normalClassDeclaration493)
         class_body
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -1843,7 +1843,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(234, 13)
         push_follow(FOLLOW_typeParameter_in_typeParameters518)
         type_parameter
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -1874,7 +1874,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(234, 32)
               push_follow(FOLLOW_typeParameter_in_typeParameters523)
               type_parameter
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -1960,7 +1960,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(238, 31)
             push_follow(FOLLOW_typeBound_in_typeParameter551)
             type_bound
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2010,7 +2010,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(242, 9)
         push_follow(FOLLOW_type_in_typeBound580)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -2041,7 +2041,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(242, 19)
               push_follow(FOLLOW_type_in_typeBound585)
               type
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -2127,7 +2127,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(246, 39)
             push_follow(FOLLOW_typeList_in_enumDeclaration613)
             type_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2138,7 +2138,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(246, 50)
         push_follow(FOLLOW_enumBody_in_enumDeclaration617)
         enum_body
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -2207,7 +2207,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(250, 13)
             push_follow(FOLLOW_enumConstants_in_enumBody638)
             enum_constants
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2263,7 +2263,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(250, 33)
             push_follow(FOLLOW_enumBodyDeclarations_in_enumBody644)
             enum_body_declarations
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2318,7 +2318,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(254, 9)
         push_follow(FOLLOW_enumConstant_in_enumConstants666)
         enum_constant
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -2352,7 +2352,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(254, 27)
               push_follow(FOLLOW_enumConstant_in_enumConstants671)
               enum_constant
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -2423,7 +2423,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(258, 9)
             push_follow(FOLLOW_annotations_in_enumConstant696)
             annotations
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2457,7 +2457,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(258, 33)
             push_follow(FOLLOW_arguments_in_enumConstant701)
             arguments
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2486,7 +2486,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(258, 44)
             push_follow(FOLLOW_classBody_in_enumConstant704)
             class_body
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2560,7 +2560,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(262, 14)
               push_follow(FOLLOW_classBodyDeclaration_in_enumBodyDeclarations731)
               class_body_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -2637,7 +2637,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(266, 9)
           push_follow(FOLLOW_normalInterfaceDeclaration_in_interfaceDeclaration756)
           normal_interface_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -2647,7 +2647,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(267, 9)
           push_follow(FOLLOW_annotationTypeDeclaration_in_interfaceDeclaration766)
           annotation_type_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -2722,7 +2722,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(271, 32)
             push_follow(FOLLOW_typeParameters_in_normalInterfaceDeclaration793)
             type_parameters
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2756,7 +2756,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(271, 59)
             push_follow(FOLLOW_typeList_in_normalInterfaceDeclaration799)
             type_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -2767,7 +2767,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(271, 70)
         push_follow(FOLLOW_interfaceBody_in_normalInterfaceDeclaration803)
         interface_body
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -2813,7 +2813,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(275, 9)
         push_follow(FOLLOW_type_in_typeList826)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -2844,7 +2844,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(275, 19)
               push_follow(FOLLOW_type_in_typeList831)
               type
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -2921,7 +2921,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(279, 13)
               push_follow(FOLLOW_classBodyDeclaration_in_classBody858)
               class_body_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -3003,7 +3003,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(283, 13)
               push_follow(FOLLOW_interfaceBodyDeclaration_in_interfaceBody886)
               interface_body_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -3088,9 +3088,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_state.attr_failed = true
               return
             end
-            nvae_ = NoViableAltException.new("", 39, 0, self.attr_input)
-            self.attr_dbg.recognition_exception(nvae_)
-            raise nvae_
+            nvae = NoViableAltException.new("", 39, 0, self.attr_input)
+            self.attr_dbg.recognition_exception(nvae)
+            raise nvae
           end
         ensure
           self.attr_dbg.exit_decision(39)
@@ -3137,7 +3137,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(288, 19)
           push_follow(FOLLOW_block_in_classBodyDeclaration921)
           block
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3147,14 +3147,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(289, 9)
           push_follow(FOLLOW_modifiers_in_classBodyDeclaration931)
           modifiers
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(289, 19)
           push_follow(FOLLOW_memberDecl_in_classBodyDeclaration933)
           member_decl
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3232,9 +3232,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_state.attr_failed = true
               return
             end
-            nvae_ = NoViableAltException.new("", 40, 0, self.attr_input)
-            self.attr_dbg.recognition_exception(nvae_)
-            raise nvae_
+            nvae = NoViableAltException.new("", 40, 0, self.attr_input)
+            self.attr_dbg.recognition_exception(nvae)
+            raise nvae
           end
         ensure
           self.attr_dbg.exit_decision(40)
@@ -3246,7 +3246,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(293, 9)
           push_follow(FOLLOW_genericMethodOrConstructorDecl_in_memberDecl956)
           generic_method_or_constructor_decl
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3256,7 +3256,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(294, 9)
           push_follow(FOLLOW_memberDeclaration_in_memberDecl966)
           member_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3276,7 +3276,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(295, 27)
           push_follow(FOLLOW_voidMethodDeclaratorRest_in_memberDecl980)
           void_method_declarator_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3291,7 +3291,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(296, 20)
           push_follow(FOLLOW_constructorDeclaratorRest_in_memberDecl992)
           constructor_declarator_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3301,7 +3301,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(297, 9)
           push_follow(FOLLOW_interfaceDeclaration_in_memberDecl1002)
           interface_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3311,7 +3311,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(298, 9)
           push_follow(FOLLOW_classDeclaration_in_memberDecl1012)
           class_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3358,7 +3358,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(302, 9)
         push_follow(FOLLOW_type_in_memberDeclaration1035)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -3392,9 +3392,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_state.attr_failed = true
                 return
               end
-              nvae_ = NoViableAltException.new("", 41, 0, self.attr_input)
-              self.attr_dbg.recognition_exception(nvae_)
-              raise nvae_
+              nvae = NoViableAltException.new("", 41, 0, self.attr_input)
+              self.attr_dbg.recognition_exception(nvae)
+              raise nvae
             end
           ensure
             self.attr_dbg.exit_decision(41)
@@ -3406,7 +3406,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(302, 15)
             push_follow(FOLLOW_methodDeclaration_in_memberDeclaration1038)
             method_declaration
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -3416,7 +3416,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(302, 35)
             push_follow(FOLLOW_fieldDeclaration_in_memberDeclaration1042)
             field_declaration
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -3466,14 +3466,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(306, 9)
         push_follow(FOLLOW_typeParameters_in_genericMethodOrConstructorDecl1062)
         type_parameters
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(306, 24)
         push_follow(FOLLOW_genericMethodOrConstructorRest_in_genericMethodOrConstructorDecl1064)
         generic_method_or_constructor_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -3543,9 +3543,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_state.attr_failed = true
                 return
               end
-              nvae_ = NoViableAltException.new("", 43, 0, self.attr_input)
-              self.attr_dbg.recognition_exception(nvae_)
-              raise nvae_
+              nvae = NoViableAltException.new("", 43, 0, self.attr_input)
+              self.attr_dbg.recognition_exception(nvae)
+              raise nvae
             end
           end
         ensure
@@ -3573,9 +3573,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_state.attr_failed = true
                     return
                   end
-                  nvae__ = NoViableAltException.new("", 42, 0, self.attr_input)
-                  self.attr_dbg.recognition_exception(nvae__)
-                  raise nvae__
+                  nvae = NoViableAltException.new("", 42, 0, self.attr_input)
+                  self.attr_dbg.recognition_exception(nvae)
+                  raise nvae
                 end
               end
             ensure
@@ -3588,7 +3588,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(310, 10)
               push_follow(FOLLOW_type_in_genericMethodOrConstructorRest1088)
               type
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -3612,7 +3612,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(310, 36)
           push_follow(FOLLOW_methodDeclaratorRest_in_genericMethodOrConstructorRest1097)
           method_declarator_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3627,7 +3627,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(311, 20)
           push_follow(FOLLOW_constructorDeclaratorRest_in_genericMethodOrConstructorRest1109)
           constructor_declarator_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3679,7 +3679,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(315, 20)
         push_follow(FOLLOW_methodDeclaratorRest_in_methodDeclaration1130)
         method_declarator_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -3725,7 +3725,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(319, 9)
         push_follow(FOLLOW_variableDeclarators_in_fieldDeclaration1149)
         variable_declarators
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -3800,14 +3800,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(323, 9)
           push_follow(FOLLOW_modifiers_in_interfaceBodyDeclaration1178)
           modifiers
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(323, 19)
           push_follow(FOLLOW_interfaceMemberDecl_in_interfaceBodyDeclaration1180)
           interface_member_decl
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3890,7 +3890,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(328, 9)
           push_follow(FOLLOW_interfaceMethodOrFieldDecl_in_interfaceMemberDecl1209)
           interface_method_or_field_decl
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3900,7 +3900,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(329, 9)
           push_follow(FOLLOW_interfaceGenericMethodDecl_in_interfaceMemberDecl1219)
           interface_generic_method_decl
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3920,7 +3920,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(330, 27)
           push_follow(FOLLOW_voidInterfaceMethodDeclaratorRest_in_interfaceMemberDecl1233)
           void_interface_method_declarator_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3930,7 +3930,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(331, 9)
           push_follow(FOLLOW_interfaceDeclaration_in_interfaceMemberDecl1243)
           interface_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3940,7 +3940,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(332, 9)
           push_follow(FOLLOW_classDeclaration_in_interfaceMemberDecl1253)
           class_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -3987,7 +3987,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(336, 9)
         push_follow(FOLLOW_type_in_interfaceMethodOrFieldDecl1276)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -3999,7 +3999,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(336, 25)
         push_follow(FOLLOW_interfaceMethodOrFieldRest_in_interfaceMethodOrFieldDecl1280)
         interface_method_or_field_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4069,7 +4069,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(340, 9)
           push_follow(FOLLOW_constantDeclaratorsRest_in_interfaceMethodOrFieldRest1303)
           constant_declarators_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -4084,7 +4084,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(341, 9)
           push_follow(FOLLOW_interfaceMethodDeclaratorRest_in_interfaceMethodOrFieldRest1315)
           interface_method_declarator_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -4131,7 +4131,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(345, 9)
         push_follow(FOLLOW_formalParameters_in_methodDeclaratorRest1338)
         formal_parameters
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4197,7 +4197,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(346, 19)
             push_follow(FOLLOW_qualifiedNameList_in_methodDeclaratorRest1358)
             qualified_name_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4238,7 +4238,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(347, 13)
             push_follow(FOLLOW_methodBody_in_methodDeclaratorRest1374)
             method_body
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4296,7 +4296,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(353, 9)
         push_follow(FOLLOW_formalParameters_in_voidMethodDeclaratorRest1421)
         formal_parameters
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4326,7 +4326,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(353, 36)
             push_follow(FOLLOW_qualifiedNameList_in_voidMethodDeclaratorRest1426)
             qualified_name_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4367,7 +4367,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(354, 13)
             push_follow(FOLLOW_methodBody_in_voidMethodDeclaratorRest1442)
             method_body
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4425,7 +4425,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(360, 9)
         push_follow(FOLLOW_formalParameters_in_interfaceMethodDeclaratorRest1489)
         formal_parameters
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4491,7 +4491,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(360, 47)
             push_follow(FOLLOW_qualifiedNameList_in_interfaceMethodDeclaratorRest1501)
             qualified_name_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4546,7 +4546,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(364, 9)
         push_follow(FOLLOW_typeParameters_in_interfaceGenericMethodDecl1528)
         type_parameters
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4583,7 +4583,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(364, 25)
             push_follow(FOLLOW_type_in_interfaceGenericMethodDecl1531)
             type
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4607,7 +4607,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(365, 9)
         push_follow(FOLLOW_interfaceMethodDeclaratorRest_in_interfaceGenericMethodDecl1548)
         interface_method_declarator_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4653,7 +4653,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(369, 9)
         push_follow(FOLLOW_formalParameters_in_voidInterfaceMethodDeclaratorRest1571)
         formal_parameters
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4683,7 +4683,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(369, 36)
             push_follow(FOLLOW_qualifiedNameList_in_voidInterfaceMethodDeclaratorRest1576)
             qualified_name_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4738,7 +4738,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(373, 9)
         push_follow(FOLLOW_formalParameters_in_constructorDeclaratorRest1603)
         formal_parameters
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4768,7 +4768,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(373, 36)
             push_follow(FOLLOW_qualifiedNameList_in_constructorDeclaratorRest1608)
             qualified_name_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -4779,7 +4779,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(373, 56)
         push_follow(FOLLOW_constructorBody_in_constructorDeclaratorRest1612)
         constructor_body
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4830,7 +4830,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(377, 20)
         push_follow(FOLLOW_constantDeclaratorRest_in_constantDeclarator1633)
         constant_declarator_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4876,7 +4876,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(381, 9)
         push_follow(FOLLOW_variableDeclarator_in_variableDeclarators1656)
         variable_declarator
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4907,7 +4907,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(381, 33)
               push_follow(FOLLOW_variableDeclarator_in_variableDeclarators1661)
               variable_declarator
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -4960,7 +4960,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(385, 9)
         push_follow(FOLLOW_variableDeclaratorId_in_variableDeclarator1682)
         variable_declarator_id
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -4990,7 +4990,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(385, 35)
             push_follow(FOLLOW_variableInitializer_in_variableDeclarator1687)
             variable_initializer
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -5040,7 +5040,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(389, 9)
         push_follow(FOLLOW_constantDeclaratorRest_in_constantDeclaratorsRest1712)
         constant_declarator_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -5071,7 +5071,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(389, 37)
               push_follow(FOLLOW_constantDeclarator_in_constantDeclaratorsRest1717)
               constant_declarator
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -5165,7 +5165,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(393, 24)
         push_follow(FOLLOW_variableInitializer_in_constantDeclaratorRest1747)
         variable_initializer
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -5315,7 +5315,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(401, 9)
           push_follow(FOLLOW_arrayInitializer_in_variableInitializer1796)
           array_initializer
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -5325,7 +5325,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(402, 9)
           push_follow(FOLLOW_expression_in_variableInitializer1806)
           expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -5395,7 +5395,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(406, 14)
             push_follow(FOLLOW_variableInitializer_in_arrayInitializer1836)
             variable_initializer
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -5429,7 +5429,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                   self.attr_dbg.location(406, 39)
                   push_follow(FOLLOW_variableInitializer_in_arrayInitializer1841)
                   variable_initializer
-                  ((self.attr_state.attr__fsp -= 1) + 1)
+                  self.attr_state.attr__fsp -= 1
                   if (self.attr_state.attr_failed)
                     return
                   end
@@ -5560,7 +5560,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(410, 9)
           push_follow(FOLLOW_annotation_in_modifier1872)
           annotation
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -5695,7 +5695,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(425, 9)
         push_follow(FOLLOW_qualifiedName_in_packageOrTypeName2001)
         qualified_name
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -5785,7 +5785,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(433, 9)
         push_follow(FOLLOW_qualifiedName_in_typeName2039)
         qualified_name
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -5855,7 +5855,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(437, 4)
           push_follow(FOLLOW_classOrInterfaceType_in_type2053)
           class_or_interface_type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -5901,7 +5901,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(438, 4)
           push_follow(FOLLOW_primitiveType_in_type2065)
           primitive_type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -6010,7 +6010,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(442, 15)
             push_follow(FOLLOW_typeArguments_in_classOrInterfaceType2085)
             type_arguments
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -6071,7 +6071,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                   self.attr_dbg.location(442, 46)
                   push_follow(FOLLOW_typeArguments_in_classOrInterfaceType2093)
                   type_arguments
-                  ((self.attr_state.attr__fsp -= 1) + 1)
+                  self.attr_state.attr__fsp -= 1
                   if (self.attr_state.attr_failed)
                     return
                   end
@@ -6213,7 +6213,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(458, 9)
           push_follow(FOLLOW_annotation_in_variableModifier2212)
           annotation
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -6265,7 +6265,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(462, 13)
         push_follow(FOLLOW_typeArgument_in_typeArguments2233)
         type_argument
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -6296,7 +6296,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(462, 31)
               push_follow(FOLLOW_typeArgument_in_typeArguments2238)
               type_argument
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -6378,7 +6378,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(466, 9)
           push_follow(FOLLOW_type_in_typeArgument2265)
           type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -6425,7 +6425,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(467, 36)
               push_follow(FOLLOW_type_in_typeArgument2286)
               type
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -6476,7 +6476,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(471, 9)
         push_follow(FOLLOW_qualifiedName_in_qualifiedNameList2311)
         qualified_name
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -6507,7 +6507,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(471, 28)
               push_follow(FOLLOW_qualifiedName_in_qualifiedNameList2316)
               qualified_name
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -6583,7 +6583,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(475, 13)
             push_follow(FOLLOW_formalParameterDecls_in_formalParameters2339)
             formal_parameter_decls
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -6638,21 +6638,21 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(479, 9)
         push_follow(FOLLOW_variableModifiers_in_formalParameterDecls2365)
         variable_modifiers
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(479, 27)
         push_follow(FOLLOW_type_in_formalParameterDecls2367)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(479, 32)
         push_follow(FOLLOW_formalParameterDeclsRest_in_formalParameterDecls2369)
         formal_parameter_decls_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -6722,7 +6722,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(483, 9)
           push_follow(FOLLOW_variableDeclaratorId_in_formalParameterDeclsRest2392)
           variable_declarator_id
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -6752,7 +6752,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(483, 35)
               push_follow(FOLLOW_formalParameterDecls_in_formalParameterDeclsRest2397)
               formal_parameter_decls
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -6771,7 +6771,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(484, 15)
           push_follow(FOLLOW_variableDeclaratorId_in_formalParameterDeclsRest2411)
           variable_declarator_id
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -6818,7 +6818,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(488, 9)
         push_follow(FOLLOW_block_in_methodBody2434)
         block
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -6890,7 +6890,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(492, 13)
             push_follow(FOLLOW_explicitConstructorInvocation_in_constructorBody2455)
             explicit_constructor_invocation
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -6920,7 +6920,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(492, 44)
               push_follow(FOLLOW_blockStatement_in_constructorBody2458)
               block_statement
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -7011,7 +7011,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(496, 9)
               push_follow(FOLLOW_nonWildcardTypeArguments_in_explicitConstructorInvocation2480)
               non_wildcard_type_arguments
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -7036,7 +7036,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(496, 54)
           push_follow(FOLLOW_arguments_in_explicitConstructorInvocation2491)
           arguments
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -7051,7 +7051,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(497, 9)
           push_follow(FOLLOW_primary_in_explicitConstructorInvocation2503)
           primary
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -7081,7 +7081,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(497, 21)
               push_follow(FOLLOW_nonWildcardTypeArguments_in_explicitConstructorInvocation2507)
               non_wildcard_type_arguments
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -7097,7 +7097,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(497, 55)
           push_follow(FOLLOW_arguments_in_explicitConstructorInvocation2512)
           arguments
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -7262,7 +7262,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(506, 9)
           push_follow(FOLLOW_integerLiteral_in_literal2565)
           integer_literal
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -7296,7 +7296,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(510, 9)
           push_follow(FOLLOW_booleanLiteral_in_literal2605)
           boolean_literal
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -7483,7 +7483,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(528, 9)
               push_follow(FOLLOW_annotation_in_annotations2704)
               annotation
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -7499,7 +7499,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.recognition_exception(eee)
               raise eee
             end
-            ((cnt88 += 1) - 1)
+            cnt88 += 1
           end while (true)
         ensure
           self.attr_dbg.exit_sub_rule(88)
@@ -7551,7 +7551,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(532, 13)
         push_follow(FOLLOW_annotationName_in_annotation2726)
         annotation_name
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -7610,7 +7610,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_dbg.location(532, 36)
                 push_follow(FOLLOW_elementValuePairs_in_annotation2734)
                 element_value_pairs
-                ((self.attr_state.attr__fsp -= 1) + 1)
+                self.attr_state.attr__fsp -= 1
                 if (self.attr_state.attr_failed)
                   return
                 end
@@ -7620,7 +7620,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_dbg.location(532, 56)
                 push_follow(FOLLOW_elementValue_in_annotation2738)
                 element_value
-                ((self.attr_state.attr__fsp -= 1) + 1)
+                self.attr_state.attr__fsp -= 1
                 if (self.attr_state.attr_failed)
                   return
                 end
@@ -7759,7 +7759,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(540, 9)
         push_follow(FOLLOW_elementValuePair_in_elementValuePairs2793)
         element_value_pair
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -7790,7 +7790,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(540, 31)
               push_follow(FOLLOW_elementValuePair_in_elementValuePairs2798)
               element_value_pair
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -7853,7 +7853,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(544, 24)
         push_follow(FOLLOW_elementValue_in_elementValuePair2823)
         element_value
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -7923,7 +7923,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(548, 9)
           push_follow(FOLLOW_conditionalExpression_in_elementValue2846)
           conditional_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -7933,7 +7933,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(549, 9)
           push_follow(FOLLOW_annotation_in_elementValue2856)
           annotation
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -7943,7 +7943,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(550, 9)
           push_follow(FOLLOW_elementValueArrayInitializer_in_elementValue2866)
           element_value_array_initializer
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8013,7 +8013,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(554, 14)
             push_follow(FOLLOW_elementValue_in_elementValueArrayInitializer2892)
             element_value
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -8047,7 +8047,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                   self.attr_dbg.location(554, 32)
                   push_follow(FOLLOW_elementValue_in_elementValueArrayInitializer2897)
                   element_value
-                  ((self.attr_state.attr__fsp -= 1) + 1)
+                  self.attr_state.attr__fsp -= 1
                   if (self.attr_state.attr_failed)
                     return
                   end
@@ -8151,7 +8151,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(558, 36)
         push_follow(FOLLOW_annotationTypeBody_in_annotationTypeDeclaration2937)
         annotation_type_body
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -8221,7 +8221,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(562, 14)
               push_follow(FOLLOW_annotationTypeElementDeclaration_in_annotationTypeBody2963)
               annotation_type_element_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -8279,14 +8279,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(566, 9)
         push_follow(FOLLOW_modifiers_in_annotationTypeElementDeclaration2990)
         modifiers
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(566, 19)
         push_follow(FOLLOW_annotationTypeElementRest_in_annotationTypeElementDeclaration2992)
         annotation_type_element_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -8360,14 +8360,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(570, 9)
           push_follow(FOLLOW_type_in_annotationTypeElementRest3015)
           type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(570, 14)
           push_follow(FOLLOW_annotationMethodOrConstantRest_in_annotationTypeElementRest3017)
           annotation_method_or_constant_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8382,7 +8382,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(571, 9)
           push_follow(FOLLOW_normalClassDeclaration_in_annotationTypeElementRest3029)
           normal_class_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8419,7 +8419,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(572, 9)
           push_follow(FOLLOW_normalInterfaceDeclaration_in_annotationTypeElementRest3042)
           normal_interface_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8456,7 +8456,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(573, 9)
           push_follow(FOLLOW_enumDeclaration_in_annotationTypeElementRest3055)
           enum_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8493,7 +8493,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(574, 9)
           push_follow(FOLLOW_annotationTypeDeclaration_in_annotationTypeElementRest3068)
           annotation_type_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8588,9 +8588,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_state.attr_failed = true
               return
             end
-            nvae_ = NoViableAltException.new("", 103, 0, self.attr_input)
-            self.attr_dbg.recognition_exception(nvae_)
-            raise nvae_
+            nvae = NoViableAltException.new("", 103, 0, self.attr_input)
+            self.attr_dbg.recognition_exception(nvae)
+            raise nvae
           end
         ensure
           self.attr_dbg.exit_decision(103)
@@ -8602,7 +8602,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(578, 9)
           push_follow(FOLLOW_annotationMethodRest_in_annotationMethodOrConstantRest3094)
           annotation_method_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8612,7 +8612,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(579, 9)
           push_follow(FOLLOW_annotationConstantRest_in_annotationMethodOrConstantRest3104)
           annotation_constant_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8692,7 +8692,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(583, 28)
             push_follow(FOLLOW_defaultValue_in_annotationMethodRest3133)
             default_value
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -8742,7 +8742,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(587, 9)
         push_follow(FOLLOW_variableDeclarators_in_annotationConstantRest3157)
         variable_declarators
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -8793,7 +8793,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(591, 19)
         push_follow(FOLLOW_elementValue_in_defaultValue3182)
         element_value
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -8863,7 +8863,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(597, 13)
               push_follow(FOLLOW_blockStatement_in_block3205)
               block_statement
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -8936,7 +8936,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(601, 9)
           push_follow(FOLLOW_localVariableDeclarationStatement_in_blockStatement3231)
           local_variable_declaration_statement
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8946,7 +8946,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(602, 9)
           push_follow(FOLLOW_classOrInterfaceDeclaration_in_blockStatement3241)
           class_or_interface_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -8956,7 +8956,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(603, 9)
           push_follow(FOLLOW_statement_in_blockStatement3251)
           statement
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9003,7 +9003,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(607, 10)
         push_follow(FOLLOW_localVariableDeclaration_in_localVariableDeclarationStatement3275)
         local_variable_declaration
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -9054,21 +9054,21 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(611, 9)
         push_follow(FOLLOW_variableModifiers_in_localVariableDeclaration3296)
         variable_modifiers
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(611, 27)
         push_follow(FOLLOW_type_in_localVariableDeclaration3298)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(611, 32)
         push_follow(FOLLOW_variableDeclarators_in_localVariableDeclaration3300)
         variable_declarators
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -9133,7 +9133,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(615, 9)
               push_follow(FOLLOW_variableModifier_in_variableModifiers3323)
               variable_modifier
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9201,7 +9201,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(619, 7)
           push_follow(FOLLOW_block_in_statement3341)
           block
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9216,7 +9216,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(620, 16)
           push_follow(FOLLOW_expression_in_statement3353)
           expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9246,7 +9246,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(620, 32)
               push_follow(FOLLOW_expression_in_statement3358)
               expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9270,14 +9270,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(621, 14)
           push_follow(FOLLOW_parExpression_in_statement3374)
           par_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(621, 28)
           push_follow(FOLLOW_statement_in_statement3376)
           statement
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9310,7 +9310,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(621, 61)
               push_follow(FOLLOW_statement_in_statement3388)
               statement
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9334,7 +9334,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(622, 19)
           push_follow(FOLLOW_forControl_in_statement3404)
           for_control
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9346,7 +9346,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(622, 34)
           push_follow(FOLLOW_statement_in_statement3408)
           statement
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9361,14 +9361,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(623, 17)
           push_follow(FOLLOW_parExpression_in_statement3420)
           par_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(623, 31)
           push_follow(FOLLOW_statement_in_statement3422)
           statement
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9383,7 +9383,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(624, 14)
           push_follow(FOLLOW_statement_in_statement3434)
           statement
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9395,7 +9395,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(624, 32)
           push_follow(FOLLOW_parExpression_in_statement3438)
           par_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9415,7 +9415,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(625, 15)
           push_follow(FOLLOW_block_in_statement3452)
           block
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9439,9 +9439,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                       self.attr_state.attr_failed = true
                       return
                     end
-                    nvae_ = NoViableAltException.new("", 110, 1, self.attr_input)
-                    self.attr_dbg.recognition_exception(nvae_)
-                    raise nvae_
+                    nvae = NoViableAltException.new("", 110, 1, self.attr_input)
+                    self.attr_dbg.recognition_exception(nvae)
+                    raise nvae
                   end
                 end
               else
@@ -9452,9 +9452,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_state.attr_failed = true
                     return
                   end
-                  nvae__ = NoViableAltException.new("", 110, 0, self.attr_input)
-                  self.attr_dbg.recognition_exception(nvae__)
-                  raise nvae__
+                  nvae = NoViableAltException.new("", 110, 0, self.attr_input)
+                  self.attr_dbg.recognition_exception(nvae)
+                  raise nvae
                 end
               end
             ensure
@@ -9467,7 +9467,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(626, 11)
               push_follow(FOLLOW_catches_in_statement3464)
               catches
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9479,7 +9479,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(626, 29)
               push_follow(FOLLOW_block_in_statement3468)
               block
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9489,7 +9489,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(627, 11)
               push_follow(FOLLOW_catches_in_statement3480)
               catches
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9504,7 +9504,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(628, 23)
               push_follow(FOLLOW_block_in_statement3496)
               block
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9523,7 +9523,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(630, 18)
           push_follow(FOLLOW_parExpression_in_statement3518)
           par_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9535,7 +9535,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(630, 36)
           push_follow(FOLLOW_switchBlockStatementGroups_in_statement3522)
           switch_block_statement_groups
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9555,14 +9555,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(631, 24)
           push_follow(FOLLOW_parExpression_in_statement3536)
           par_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(631, 38)
           push_follow(FOLLOW_block_in_statement3538)
           block
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9595,7 +9595,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(632, 18)
               push_follow(FOLLOW_expression_in_statement3550)
               expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9619,7 +9619,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(633, 17)
           push_follow(FOLLOW_expression_in_statement3565)
           expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9722,7 +9722,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(637, 9)
           push_follow(FOLLOW_statementExpression_in_statement3618)
           statement_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9747,7 +9747,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(638, 24)
           push_follow(FOLLOW_statement_in_statement3634)
           statement
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -9794,7 +9794,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(642, 9)
         push_follow(FOLLOW_catchClause_in_catches3657)
         catch_clause
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -9820,7 +9820,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(642, 22)
               push_follow(FOLLOW_catchClause_in_catches3660)
               catch_clause
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -9883,7 +9883,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(646, 21)
         push_follow(FOLLOW_formalParameter_in_catchClause3689)
         formal_parameter
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -9895,7 +9895,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(646, 41)
         push_follow(FOLLOW_block_in_catchClause3693)
         block
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -9941,21 +9941,21 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(650, 9)
         push_follow(FOLLOW_variableModifiers_in_formalParameter3712)
         variable_modifiers
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(650, 27)
         push_follow(FOLLOW_type_in_formalParameter3714)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(650, 32)
         push_follow(FOLLOW_variableDeclaratorId_in_formalParameter3716)
         variable_declarator_id
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10020,7 +10020,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(654, 10)
               push_follow(FOLLOW_switchBlockStatementGroup_in_switchBlockStatementGroups3744)
               switch_block_statement_group
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -10103,7 +10103,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(662, 9)
               push_follow(FOLLOW_switchLabel_in_switchBlockStatementGroup3771)
               switch_label
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -10119,7 +10119,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.recognition_exception(eee)
               raise eee
             end
-            ((cnt117 += 1) - 1)
+            cnt117 += 1
           end while (true)
         ensure
           self.attr_dbg.exit_sub_rule(117)
@@ -10146,7 +10146,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(662, 22)
               push_follow(FOLLOW_blockStatement_in_switchBlockStatementGroup3774)
               block_statement
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -10227,9 +10227,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_state.attr_failed = true
                     return
                   end
-                  nvae_ = NoViableAltException.new("", 119, 3, self.attr_input)
-                  self.attr_dbg.recognition_exception(nvae_)
-                  raise nvae_
+                  nvae = NoViableAltException.new("", 119, 3, self.attr_input)
+                  self.attr_dbg.recognition_exception(nvae)
+                  raise nvae
                 end
               end
             else
@@ -10240,9 +10240,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                   self.attr_state.attr_failed = true
                   return
                 end
-                nvae__ = NoViableAltException.new("", 119, 1, self.attr_input)
-                self.attr_dbg.recognition_exception(nvae__)
-                raise nvae__
+                nvae = NoViableAltException.new("", 119, 1, self.attr_input)
+                self.attr_dbg.recognition_exception(nvae)
+                raise nvae
               end
             end
           else
@@ -10253,9 +10253,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_state.attr_failed = true
                 return
               end
-              nvae___ = NoViableAltException.new("", 119, 0, self.attr_input)
-              self.attr_dbg.recognition_exception(nvae___)
-              raise nvae___
+              nvae = NoViableAltException.new("", 119, 0, self.attr_input)
+              self.attr_dbg.recognition_exception(nvae)
+              raise nvae
             end
           end
         ensure
@@ -10273,7 +10273,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(666, 16)
           push_follow(FOLLOW_constantExpression_in_switchLabel3800)
           constant_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -10293,7 +10293,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(667, 16)
           push_follow(FOLLOW_enumConstantName_in_switchLabel3814)
           enum_constant_name
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -10373,7 +10373,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(673, 9)
           push_follow(FOLLOW_enhancedForControl_in_forControl3859)
           enhanced_for_control
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -10401,7 +10401,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(674, 9)
               push_follow(FOLLOW_forInit_in_forControl3869)
               for_init
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -10435,7 +10435,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(674, 22)
               push_follow(FOLLOW_expression_in_forControl3874)
               expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -10469,7 +10469,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(674, 38)
               push_follow(FOLLOW_forUpdate_in_forControl3879)
               for_update
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -10535,7 +10535,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(678, 9)
           push_follow(FOLLOW_localVariableDeclaration_in_forInit3899)
           local_variable_declaration
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -10545,7 +10545,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(679, 9)
           push_follow(FOLLOW_expressionList_in_forInit3909)
           expression_list
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -10592,14 +10592,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(683, 9)
         push_follow(FOLLOW_variableModifiers_in_enhancedForControl3932)
         variable_modifiers
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
         self.attr_dbg.location(683, 27)
         push_follow(FOLLOW_type_in_enhancedForControl3934)
         type
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10616,7 +10616,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(683, 47)
         push_follow(FOLLOW_expression_in_enhancedForControl3940)
         expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10662,7 +10662,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(687, 9)
         push_follow(FOLLOW_expressionList_in_forUpdate3959)
         expression_list
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10713,7 +10713,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(693, 13)
         push_follow(FOLLOW_expression_in_parExpression3982)
         expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10764,7 +10764,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(697, 9)
         push_follow(FOLLOW_expression_in_expressionList4007)
         expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10795,7 +10795,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(697, 25)
               push_follow(FOLLOW_expression_in_expressionList4012)
               expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -10848,7 +10848,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(701, 9)
         push_follow(FOLLOW_expression_in_statementExpression4033)
         expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10894,7 +10894,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(705, 9)
         push_follow(FOLLOW_expression_in_constantExpression4056)
         expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10940,7 +10940,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(709, 9)
         push_follow(FOLLOW_conditionalExpression_in_expression4079)
         conditional_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -10968,14 +10968,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(709, 32)
             push_follow(FOLLOW_assignmentOperator_in_expression4082)
             assignment_operator
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
             self.attr_dbg.location(709, 51)
             push_follow(FOLLOW_expression_in_expression4084)
             expression
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -11236,7 +11236,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(742, 9)
         push_follow(FOLLOW_conditionalOrExpression_in_conditionalExpression4332)
         conditional_or_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11266,7 +11266,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(742, 39)
             push_follow(FOLLOW_expression_in_conditionalExpression4338)
             expression
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -11278,7 +11278,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(742, 54)
             push_follow(FOLLOW_expression_in_conditionalExpression4342)
             expression
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -11328,7 +11328,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(746, 9)
         push_follow(FOLLOW_conditionalAndExpression_in_conditionalOrExpression4364)
         conditional_and_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11359,7 +11359,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(746, 41)
               push_follow(FOLLOW_conditionalAndExpression_in_conditionalOrExpression4370)
               conditional_and_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -11412,7 +11412,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(750, 9)
         push_follow(FOLLOW_inclusiveOrExpression_in_conditionalAndExpression4392)
         inclusive_or_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11443,7 +11443,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(750, 38)
               push_follow(FOLLOW_inclusiveOrExpression_in_conditionalAndExpression4398)
               inclusive_or_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -11496,7 +11496,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(754, 9)
         push_follow(FOLLOW_exclusiveOrExpression_in_inclusiveOrExpression4420)
         exclusive_or_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11527,7 +11527,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(754, 37)
               push_follow(FOLLOW_exclusiveOrExpression_in_inclusiveOrExpression4426)
               exclusive_or_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -11580,7 +11580,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(758, 9)
         push_follow(FOLLOW_andExpression_in_exclusiveOrExpression4448)
         and_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11611,7 +11611,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(758, 29)
               push_follow(FOLLOW_andExpression_in_exclusiveOrExpression4454)
               and_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -11664,7 +11664,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(762, 9)
         push_follow(FOLLOW_equalityExpression_in_andExpression4476)
         equality_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11695,7 +11695,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(762, 34)
               push_follow(FOLLOW_equalityExpression_in_andExpression4482)
               equality_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -11748,7 +11748,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(766, 9)
         push_follow(FOLLOW_instanceOfExpression_in_equalityExpression4504)
         instance_of_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11788,7 +11788,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(766, 46)
               push_follow(FOLLOW_instanceOfExpression_in_equalityExpression4516)
               instance_of_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -11841,7 +11841,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(770, 9)
         push_follow(FOLLOW_relationalExpression_in_instanceOfExpression4538)
         relational_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11871,7 +11871,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(770, 44)
             push_follow(FOLLOW_type_in_instanceOfExpression4543)
             type
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -11921,7 +11921,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(774, 9)
         push_follow(FOLLOW_shiftExpression_in_relationalExpression4564)
         shift_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -11957,14 +11957,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(774, 27)
               push_follow(FOLLOW_relationalOp_in_relationalExpression4568)
               relational_op
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
               self.attr_dbg.location(774, 40)
               push_follow(FOLLOW_shiftExpression_in_relationalExpression4570)
               shift_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -12048,9 +12048,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_state.attr_failed = true
                     return
                   end
-                  nvae_ = NoViableAltException.new("", 137, 2, self.attr_input)
-                  self.attr_dbg.recognition_exception(nvae_)
-                  raise nvae_
+                  nvae = NoViableAltException.new("", 137, 2, self.attr_input)
+                  self.attr_dbg.recognition_exception(nvae)
+                  raise nvae
                 end
               end
             else
@@ -12058,9 +12058,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_state.attr_failed = true
                 return
               end
-              nvae__ = NoViableAltException.new("", 137, 0, self.attr_input)
-              self.attr_dbg.recognition_exception(nvae__)
-              raise nvae__
+              nvae = NoViableAltException.new("", 137, 0, self.attr_input)
+              self.attr_dbg.recognition_exception(nvae)
+              raise nvae
             end
           end
         ensure
@@ -12168,7 +12168,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(789, 9)
         push_follow(FOLLOW_additiveExpression_in_shiftExpression4695)
         additive_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -12217,14 +12217,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(789, 30)
               push_follow(FOLLOW_shiftOp_in_shiftExpression4699)
               shift_op
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
               self.attr_dbg.location(789, 38)
               push_follow(FOLLOW_additiveExpression_in_shiftExpression4701)
               additive_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -12400,7 +12400,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(808, 9)
         push_follow(FOLLOW_multiplicativeExpression_in_additiveExpression4840)
         multiplicative_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -12440,7 +12440,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(808, 48)
               push_follow(FOLLOW_multiplicativeExpression_in_additiveExpression4852)
               multiplicative_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -12493,7 +12493,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(812, 9)
         push_follow(FOLLOW_unaryExpression_in_multiplicativeExpression4874)
         unary_expression
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -12533,7 +12533,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(812, 47)
               push_follow(FOLLOW_unaryExpression_in_multiplicativeExpression4892)
               unary_expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -12619,7 +12619,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(816, 13)
           push_follow(FOLLOW_unaryExpression_in_unaryExpression4920)
           unary_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12634,7 +12634,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(817, 13)
           push_follow(FOLLOW_unaryExpression_in_unaryExpression4932)
           unary_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12649,7 +12649,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(818, 14)
           push_follow(FOLLOW_unaryExpression_in_unaryExpression4944)
           unary_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12664,7 +12664,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(819, 14)
           push_follow(FOLLOW_unaryExpression_in_unaryExpression4956)
           unary_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12674,7 +12674,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(820, 9)
           push_follow(FOLLOW_unaryExpressionNotPlusMinus_in_unaryExpression4966)
           unary_expression_not_plus_minus
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12741,7 +12741,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(824, 13)
           push_follow(FOLLOW_unaryExpression_in_unaryExpressionNotPlusMinus4987)
           unary_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12756,7 +12756,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(825, 13)
           push_follow(FOLLOW_unaryExpression_in_unaryExpressionNotPlusMinus4999)
           unary_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12766,7 +12766,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(826, 9)
           push_follow(FOLLOW_castExpression_in_unaryExpressionNotPlusMinus5009)
           cast_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12776,7 +12776,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(827, 9)
           push_follow(FOLLOW_primary_in_unaryExpressionNotPlusMinus5019)
           primary
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12802,7 +12802,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_dbg.location(827, 17)
                 push_follow(FOLLOW_selector_in_unaryExpressionNotPlusMinus5021)
                 selector
-                ((self.attr_state.attr__fsp -= 1) + 1)
+                self.attr_state.attr__fsp -= 1
                 if (self.attr_state.attr_failed)
                   return
                 end
@@ -12913,9 +12913,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_state.attr_failed = true
               return
             end
-            nvae_ = NoViableAltException.new("", 147, 0, self.attr_input)
-            self.attr_dbg.recognition_exception(nvae_)
-            raise nvae_
+            nvae = NoViableAltException.new("", 147, 0, self.attr_input)
+            self.attr_dbg.recognition_exception(nvae)
+            raise nvae
           end
         ensure
           self.attr_dbg.exit_decision(147)
@@ -12932,7 +12932,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(831, 12)
           push_follow(FOLLOW_primitiveType_in_castExpression5049)
           primitive_type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12944,7 +12944,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(831, 30)
           push_follow(FOLLOW_unaryExpression_in_castExpression5053)
           unary_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -12967,8 +12967,8 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_is_cyclic_decision = true
                 alt146 = @dfa146.predict(self.attr_input)
               rescue NoViableAltException => nvae
-                self.attr_dbg.recognition_exception(nvae__)
-                raise nvae__
+                self.attr_dbg.recognition_exception(nvae)
+                raise nvae
               end
             ensure
               self.attr_dbg.exit_decision(146)
@@ -12980,7 +12980,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(832, 13)
               push_follow(FOLLOW_type_in_castExpression5065)
               type
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -12990,7 +12990,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(832, 20)
               push_follow(FOLLOW_expression_in_castExpression5069)
               expression
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -13006,7 +13006,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(832, 36)
           push_follow(FOLLOW_unaryExpressionNotPlusMinus_in_castExpression5074)
           unary_expression_not_plus_minus
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13087,7 +13087,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(836, 9)
           push_follow(FOLLOW_parExpression_in_primary5093)
           par_expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13152,8 +13152,8 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_is_cyclic_decision = true
                 alt149 = @dfa149.predict(self.attr_input)
               rescue NoViableAltException => nvae
-                self.attr_dbg.recognition_exception(nvae_)
-                raise nvae_
+                self.attr_dbg.recognition_exception(nvae)
+                raise nvae
               end
             ensure
               self.attr_dbg.exit_decision(149)
@@ -13165,7 +13165,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(837, 34)
               push_follow(FOLLOW_identifierSuffix_in_primary5112)
               identifier_suffix
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -13184,7 +13184,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(838, 17)
           push_follow(FOLLOW_superSuffix_in_primary5125)
           super_suffix
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13194,7 +13194,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(839, 9)
           push_follow(FOLLOW_literal_in_primary5135)
           literal
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13209,7 +13209,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(840, 15)
           push_follow(FOLLOW_creator_in_primary5147)
           creator
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13274,8 +13274,8 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_is_cyclic_decision = true
                 alt151 = @dfa151.predict(self.attr_input)
               rescue NoViableAltException => nvae
-                self.attr_dbg.recognition_exception(nvae__)
-                raise nvae__
+                self.attr_dbg.recognition_exception(nvae)
+                raise nvae
               end
             ensure
               self.attr_dbg.exit_decision(151)
@@ -13287,7 +13287,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(841, 38)
               push_follow(FOLLOW_identifierSuffix_in_primary5166)
               identifier_suffix
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -13301,7 +13301,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(842, 9)
           push_follow(FOLLOW_primitiveType_in_primary5177)
           primitive_type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13466,7 +13466,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_dbg.recognition_exception(eee)
                 raise eee
               end
-              ((cnt154 += 1) - 1)
+              cnt154 += 1
             end while (true)
           ensure
             self.attr_dbg.exit_sub_rule(154)
@@ -13497,8 +13497,8 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                   self.attr_is_cyclic_decision = true
                   alt155 = @dfa155.predict(self.attr_input)
                 rescue NoViableAltException => nvae
-                  self.attr_dbg.recognition_exception(nvae_)
-                  raise nvae_
+                  self.attr_dbg.recognition_exception(nvae)
+                  raise nvae
                 end
               ensure
                 self.attr_dbg.exit_decision(155)
@@ -13515,7 +13515,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_dbg.location(848, 14)
                 push_follow(FOLLOW_expression_in_identifierSuffix5243)
                 expression
-                ((self.attr_state.attr__fsp -= 1) + 1)
+                self.attr_state.attr__fsp -= 1
                 if (self.attr_state.attr_failed)
                   return
                 end
@@ -13532,11 +13532,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                   self.attr_state.attr_failed = true
                   return
                 end
-                eee_ = EarlyExitException.new(155, self.attr_input)
-                self.attr_dbg.recognition_exception(eee_)
-                raise eee_
+                eee = EarlyExitException.new(155, self.attr_input)
+                self.attr_dbg.recognition_exception(eee)
+                raise eee
               end
-              ((cnt155 += 1) - 1)
+              cnt155 += 1
             end while (true)
           ensure
             self.attr_dbg.exit_sub_rule(155)
@@ -13547,7 +13547,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(849, 9)
           push_follow(FOLLOW_arguments_in_identifierSuffix5258)
           arguments
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13575,7 +13575,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(851, 13)
           push_follow(FOLLOW_explicitGenericInvocation_in_identifierSuffix5282)
           explicit_generic_invocation
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13608,7 +13608,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(853, 21)
           push_follow(FOLLOW_arguments_in_identifierSuffix5308)
           arguments
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13628,7 +13628,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(854, 19)
           push_follow(FOLLOW_innerCreator_in_identifierSuffix5322)
           inner_creator
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13699,21 +13699,21 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(858, 9)
           push_follow(FOLLOW_nonWildcardTypeArguments_in_creator5341)
           non_wildcard_type_arguments
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(858, 34)
           push_follow(FOLLOW_createdName_in_creator5343)
           created_name
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
           self.attr_dbg.location(858, 46)
           push_follow(FOLLOW_classCreatorRest_in_creator5345)
           class_creator_rest
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13723,7 +13723,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(859, 9)
           push_follow(FOLLOW_createdName_in_creator5355)
           created_name
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13745,9 +13745,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_state.attr_failed = true
                     return
                   end
-                  nvae_ = NoViableAltException.new("", 157, 0, self.attr_input)
-                  self.attr_dbg.recognition_exception(nvae_)
-                  raise nvae_
+                  nvae = NoViableAltException.new("", 157, 0, self.attr_input)
+                  self.attr_dbg.recognition_exception(nvae)
+                  raise nvae
                 end
               end
             ensure
@@ -13760,7 +13760,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(859, 22)
               push_follow(FOLLOW_arrayCreatorRest_in_creator5358)
               array_creator_rest
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -13770,7 +13770,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(859, 41)
               push_follow(FOLLOW_classCreatorRest_in_creator5362)
               class_creator_rest
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -13845,7 +13845,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(863, 9)
           push_follow(FOLLOW_classOrInterfaceType_in_createdName5382)
           class_or_interface_type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13855,7 +13855,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(864, 9)
           push_follow(FOLLOW_primitiveType_in_createdName5392)
           primitive_type
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -13920,7 +13920,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(868, 9)
             push_follow(FOLLOW_nonWildcardTypeArguments_in_innerCreator5415)
             non_wildcard_type_arguments
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -13936,7 +13936,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(868, 46)
         push_follow(FOLLOW_classCreatorRest_in_innerCreator5420)
         class_creator_rest
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14058,7 +14058,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(873, 28)
             push_follow(FOLLOW_arrayInitializer_in_arrayCreatorRest5462)
             array_initializer
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -14068,7 +14068,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(874, 13)
             push_follow(FOLLOW_expression_in_arrayCreatorRest5476)
             expression
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -14089,8 +14089,8 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                     self.attr_is_cyclic_decision = true
                     alt162 = @dfa162.predict(self.attr_input)
                   rescue NoViableAltException => nvae
-                    self.attr_dbg.recognition_exception(nvae_)
-                    raise nvae_
+                    self.attr_dbg.recognition_exception(nvae)
+                    raise nvae
                   end
                 ensure
                   self.attr_dbg.exit_decision(162)
@@ -14107,7 +14107,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                   self.attr_dbg.location(874, 33)
                   push_follow(FOLLOW_expression_in_arrayCreatorRest5483)
                   expression
-                  ((self.attr_state.attr__fsp -= 1) + 1)
+                  self.attr_state.attr__fsp -= 1
                   if (self.attr_state.attr_failed)
                     return
                   end
@@ -14208,7 +14208,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(879, 9)
         push_follow(FOLLOW_arguments_in_classCreatorRest5523)
         arguments
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14233,7 +14233,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(879, 19)
             push_follow(FOLLOW_classBody_in_classCreatorRest5525)
             class_body
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -14283,7 +14283,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(883, 9)
         push_follow(FOLLOW_nonWildcardTypeArguments_in_explicitGenericInvocation5549)
         non_wildcard_type_arguments
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14295,7 +14295,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(883, 45)
         push_follow(FOLLOW_arguments_in_explicitGenericInvocation5553)
         arguments
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14346,7 +14346,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(887, 13)
         push_follow(FOLLOW_typeList_in_nonWildcardTypeArguments5578)
         type_list
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14423,9 +14423,9 @@ class JavaParser < JavaParserImports.const_get :DebugParser
                 self.attr_state.attr_failed = true
                 return
               end
-              nvae_ = NoViableAltException.new("", 167, 0, self.attr_input)
-              self.attr_dbg.recognition_exception(nvae_)
-              raise nvae_
+              nvae = NoViableAltException.new("", 167, 0, self.attr_input)
+              self.attr_dbg.recognition_exception(nvae)
+              raise nvae
             end
           end
         ensure
@@ -14466,7 +14466,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(891, 24)
               push_follow(FOLLOW_arguments_in_selector5607)
               arguments
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -14503,7 +14503,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(893, 21)
           push_follow(FOLLOW_superSuffix_in_selector5634)
           super_suffix
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -14523,7 +14523,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(894, 19)
           push_follow(FOLLOW_innerCreator_in_selector5648)
           inner_creator
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -14538,7 +14538,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(895, 13)
           push_follow(FOLLOW_expression_in_selector5660)
           expression
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -14614,7 +14614,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
           self.attr_dbg.location(899, 9)
           push_follow(FOLLOW_arguments_in_superSuffix5685)
           arguments
-          ((self.attr_state.attr__fsp -= 1) + 1)
+          self.attr_state.attr__fsp -= 1
           if (self.attr_state.attr_failed)
             return
           end
@@ -14652,7 +14652,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(900, 24)
               push_follow(FOLLOW_arguments_in_superSuffix5699)
               arguments
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -14726,7 +14726,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
             self.attr_dbg.location(904, 13)
             push_follow(FOLLOW_expressionList_in_arguments5721)
             expression_list
-            ((self.attr_state.attr__fsp -= 1) + 1)
+            self.attr_state.attr__fsp -= 1
             if (self.attr_state.attr_failed)
               return
             end
@@ -14768,7 +14768,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(178, 9)
     push_follow(FOLLOW_annotations_in_synpred5_Java44)
     annotations
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -14805,7 +14805,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(179, 13)
         push_follow(FOLLOW_packageDeclaration_in_synpred5_Java58)
         package_declaration
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14831,7 +14831,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(179, 32)
               push_follow(FOLLOW_importDeclaration_in_synpred5_Java60)
               import_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -14864,7 +14864,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(179, 51)
               push_follow(FOLLOW_typeDeclaration_in_synpred5_Java63)
               type_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -14881,7 +14881,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(180, 13)
         push_follow(FOLLOW_classOrInterfaceDeclaration_in_synpred5_Java78)
         class_or_interface_declaration
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14907,7 +14907,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
               self.attr_dbg.location(180, 41)
               push_follow(FOLLOW_typeDeclaration_in_synpred5_Java80)
               type_declaration
-              ((self.attr_state.attr__fsp -= 1) + 1)
+              self.attr_state.attr__fsp -= 1
               if (self.attr_state.attr_failed)
                 return
               end
@@ -14934,7 +14934,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(492, 13)
     push_follow(FOLLOW_explicitConstructorInvocation_in_synpred113_Java2455)
     explicit_constructor_invocation
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -14968,7 +14968,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
         self.attr_dbg.location(496, 9)
         push_follow(FOLLOW_nonWildcardTypeArguments_in_synpred117_Java2480)
         non_wildcard_type_arguments
-        ((self.attr_state.attr__fsp -= 1) + 1)
+        self.attr_state.attr__fsp -= 1
         if (self.attr_state.attr_failed)
           return
         end
@@ -14993,7 +14993,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(496, 54)
     push_follow(FOLLOW_arguments_in_synpred117_Java2491)
     arguments
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15014,7 +15014,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(528, 9)
     push_follow(FOLLOW_annotation_in_synpred128_Java2704)
     annotation
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15030,7 +15030,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(601, 9)
     push_follow(FOLLOW_localVariableDeclarationStatement_in_synpred151_Java3231)
     local_variable_declaration_statement
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15046,7 +15046,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(602, 9)
     push_follow(FOLLOW_classOrInterfaceDeclaration_in_synpred152_Java3241)
     class_or_interface_declaration
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15067,7 +15067,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(621, 61)
     push_follow(FOLLOW_statement_in_synpred157_Java3388)
     statement
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15083,7 +15083,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(626, 11)
     push_follow(FOLLOW_catches_in_synpred162_Java3464)
     catches
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15095,7 +15095,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(626, 29)
     push_follow(FOLLOW_block_in_synpred162_Java3468)
     block
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15111,7 +15111,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(627, 11)
     push_follow(FOLLOW_catches_in_synpred163_Java3480)
     catches
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15127,7 +15127,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(662, 9)
     push_follow(FOLLOW_switchLabel_in_synpred178_Java3771)
     switch_label
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15148,7 +15148,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(666, 16)
     push_follow(FOLLOW_constantExpression_in_synpred180_Java3800)
     constant_expression
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15174,7 +15174,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(667, 16)
     push_follow(FOLLOW_enumConstantName_in_synpred181_Java3814)
     enum_constant_name
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15195,7 +15195,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(673, 9)
     push_follow(FOLLOW_enhancedForControl_in_synpred182_Java3859)
     enhanced_for_control
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15211,7 +15211,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(678, 9)
     push_follow(FOLLOW_localVariableDeclaration_in_synpred186_Java3899)
     local_variable_declaration
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15227,14 +15227,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(709, 32)
     push_follow(FOLLOW_assignmentOperator_in_synpred188_Java4082)
     assignment_operator
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
     self.attr_dbg.location(709, 51)
     push_follow(FOLLOW_expression_in_synpred188_Java4084)
     expression
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15427,7 +15427,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(826, 9)
     push_follow(FOLLOW_castExpression_in_synpred229_Java5009)
     cast_expression
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15448,7 +15448,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(831, 12)
     push_follow(FOLLOW_primitiveType_in_synpred233_Java5049)
     primitive_type
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15460,7 +15460,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(831, 30)
     push_follow(FOLLOW_unaryExpression_in_synpred233_Java5053)
     unary_expression
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15476,7 +15476,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(832, 13)
     push_follow(FOLLOW_type_in_synpred234_Java5065)
     type
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15511,7 +15511,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(837, 34)
     push_follow(FOLLOW_identifierSuffix_in_synpred237_Java5112)
     identifier_suffix
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15546,7 +15546,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(841, 38)
     push_follow(FOLLOW_identifierSuffix_in_synpred243_Java5166)
     identifier_suffix
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15567,7 +15567,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(848, 14)
     push_follow(FOLLOW_expression_in_synpred249_Java5243)
     expression
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15593,7 +15593,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     self.attr_dbg.location(874, 33)
     push_follow(FOLLOW_expression_in_synpred262_Java5483)
     expression
-    ((self.attr_state.attr__fsp -= 1) + 1)
+    self.attr_state.attr__fsp -= 1
     if (self.attr_state.attr_failed)
       return
     end
@@ -15608,7 +15608,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
   # $ANTLR end synpred262_Java
   # Delegated rules
   def synpred157__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15619,14 +15619,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred211__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15637,14 +15637,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred249__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15655,14 +15655,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred243__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15673,14 +15673,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred5__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15691,14 +15691,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred229__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15709,14 +15709,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred178__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15727,14 +15727,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred215__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15745,14 +15745,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred113__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15763,14 +15763,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred151__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15781,14 +15781,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred117__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15799,14 +15799,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred162__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15817,14 +15817,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred217__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15835,14 +15835,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred186__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15853,14 +15853,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred188__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15871,14 +15871,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred212__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15889,14 +15889,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred163__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15907,14 +15907,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred152__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15925,14 +15925,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred242__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15943,14 +15943,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred199__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15961,14 +15961,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred216__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15979,14 +15979,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred236__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -15997,14 +15997,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred262__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16015,14 +16015,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred198__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16033,14 +16033,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred233__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16051,14 +16051,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred180__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16069,14 +16069,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred128__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16087,14 +16087,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred200__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16105,14 +16105,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred234__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16123,14 +16123,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred182__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16141,14 +16141,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred181__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16159,14 +16159,14 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
   
   typesig { [] }
   def synpred237__java
-    ((self.attr_state.attr_backtracking += 1) - 1)
+    self.attr_state.attr_backtracking += 1
     self.attr_dbg.begin_backtrack(self.attr_state.attr_backtracking)
     start = self.attr_input.mark
     begin
@@ -16177,7 +16177,7 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     success = !self.attr_state.attr_failed
     self.attr_input.rewind(start)
     self.attr_dbg.end_backtrack(self.attr_state.attr_backtracking, success)
-    ((self.attr_state.attr_backtracking -= 1) + 1)
+    self.attr_state.attr_backtracking -= 1
     self.attr_state.attr_failed = false
     return success
   end
@@ -16326,11 +16326,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA8_transitionS.attr_length
-      const_set :DFA8_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA8_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA8_transition[i] = DFA.unpack_encoded_string(DFA8_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -16438,11 +16438,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA81_transitionS.attr_length
-      const_set :DFA81_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA81_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA81_transition[i] = DFA.unpack_encoded_string(DFA81_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -16742,11 +16742,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA85_transitionS.attr_length
-      const_set :DFA85_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA85_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA85_transition[i] = DFA.unpack_encoded_string(DFA85_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -16870,11 +16870,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA106_transitionS.attr_length
-      const_set :DFA106_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA106_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA106_transition[i] = DFA.unpack_encoded_string(DFA106_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -17030,11 +17030,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA114_transitionS.attr_length
-      const_set :DFA114_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA114_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA114_transition[i] = DFA.unpack_encoded_string(DFA114_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -17111,11 +17111,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA123_transitionS.attr_length
-      const_set :DFA123_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA123_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA123_transition[i] = DFA.unpack_encoded_string(DFA123_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -17575,11 +17575,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA124_transitionS.attr_length
-      const_set :DFA124_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA124_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA124_transition[i] = DFA.unpack_encoded_string(DFA124_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -17703,11 +17703,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA126_transitionS.attr_length
-      const_set :DFA126_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA126_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA126_transition[i] = DFA.unpack_encoded_string(DFA126_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -17975,11 +17975,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA127_transitionS.attr_length
-      const_set :DFA127_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA127_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA127_transition[i] = DFA.unpack_encoded_string(DFA127_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -18139,11 +18139,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA139_transitionS.attr_length
-      const_set :DFA139_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA139_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA139_transition[i] = DFA.unpack_encoded_string(DFA139_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -18339,11 +18339,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA145_transitionS.attr_length
-      const_set :DFA145_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA145_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA145_transition[i] = DFA.unpack_encoded_string(DFA145_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -18451,11 +18451,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA146_transitionS.attr_length
-      const_set :DFA146_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA146_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA146_transition[i] = DFA.unpack_encoded_string(DFA146_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -18563,11 +18563,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA149_transitionS.attr_length
-      const_set :DFA149_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA149_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA149_transition[i] = DFA.unpack_encoded_string(DFA149_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -18691,11 +18691,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA151_transitionS.attr_length
-      const_set :DFA151_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA151_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA151_transition[i] = DFA.unpack_encoded_string(DFA151_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -18819,11 +18819,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA156_transitionS.attr_length
-      const_set :DFA156_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA156_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA156_transition[i] = DFA.unpack_encoded_string(DFA156_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -18900,11 +18900,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA155_transitionS.attr_length
-      const_set :DFA155_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA155_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA155_transition[i] = DFA.unpack_encoded_string(DFA155_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     
@@ -19012,11 +19012,11 @@ class JavaParser < JavaParserImports.const_get :DebugParser
     
     when_class_loaded do
       num_states = DFA162_transitionS.attr_length
-      const_set :DFA162_transition, Array.typed(::Java::Short).new(num_states) { 0 }
+      const_set :DFA162_transition, Array.typed(Array.typed(::Java::Short)).new(num_states) { nil }
       i = 0
       while i < num_states
         DFA162_transition[i] = DFA.unpack_encoded_string(DFA162_transitionS[i])
-        ((i += 1) - 1)
+        i += 1
       end
     end
     

@@ -11,16 +11,20 @@ module Java2Ruby
       @parent_context.converter
     end
     
-    def current_break_context
-      @parent_context.current_break_context
+    def current_java_break_context
+      @parent_context.current_java_break_context
     end
     
-    def current_next_context
-      @parent_context.current_next_context
+    def current_java_next_context
+      @parent_context.current_java_next_context
     end
     
     def find_block(block_name)
       @parent_context.find_block block_name
+    end
+
+    def current_ruby_break_context
+      @parent_context.current_ruby_break_context
     end
     
     def new_variable(name, type)
@@ -61,15 +65,19 @@ module Java2Ruby
       @method.parent_module.has_ruby_method?(name) || super
     end
     
-    def current_break_context
+    def current_java_break_context
       nil
     end
     
-    def current_next_context
+    def current_java_next_context
       nil
     end
     
     def find_block(name)
+      nil
+    end
+
+    def current_ruby_break_context
       nil
     end
   end
@@ -81,10 +89,6 @@ module Java2Ruby
       super()
       @block_name = block_name
       @break_catch = break_catch
-    end
-    
-    def current_break_context
-      @block_name ? self : super
     end
     
     def find_block(block_name)
@@ -100,11 +104,15 @@ module Java2Ruby
       @next_catch = next_catch
     end
     
-    def current_break_context
+    def current_java_break_context
       self
     end
     
-    def current_next_context
+    def current_java_next_context
+      self
+    end
+
+    def current_ruby_break_context
       self
     end
   end
@@ -126,7 +134,7 @@ module Java2Ruby
       @break_case_catch = break_case_catch
     end
     
-    def current_break_context
+    def current_java_break_context
       self
     end
   end
@@ -149,7 +157,7 @@ module Java2Ruby
         @converter.indent_output do
           @converter.puts_output(*parts)
         end
-        if @converter.statement_context.current_break_context
+        if @converter.statement_context.current_ruby_break_context
           @converter.puts_output "end == :thrown or break"
         else
           @converter.puts_output "end"
@@ -408,7 +416,7 @@ module Java2Ruby
         puts_output "end"
       elsif try_match "break"
         if try_match ";"
-          break_context = @statement_context.current_break_context
+          break_context = @statement_context.current_java_break_context
           if break_context.is_a?(SwitchContext)
             puts_output "throw :break_case, :thrown"
             break_context.break_case_catch.enable
@@ -419,7 +427,7 @@ module Java2Ruby
           name = RJava.lower_name(match_name)
           match ";"
           block_context = @statement_context.find_block name
-          if block_context == @statement_context.current_break_context
+          if block_context == @statement_context.current_ruby_break_context
             puts_output "break"
           else
             puts_output "throw :break_#{name}, :thrown"
@@ -430,14 +438,14 @@ module Java2Ruby
         match ";"
       elsif try_match "continue"
         if try_match ";"
-          loop_context = @statement_context.current_next_context
+          loop_context = @statement_context.current_java_next_context
           loop_context.for_updates.each { |e| puts_output e } if loop_context.is_a?(ForContext)
           puts_output "next"
         else
           name = RJava.lower_name(match_name)
           match ";"
           loop_context = @statement_context.find_block name
-          if loop_context == @statement_context.current_next_context
+          if loop_context == @statement_context.current_java_next_context
             loop_context.for_updates.each { |e| puts_output e } if loop_context.is_a?(ForContext)
             puts_output "next"
           else

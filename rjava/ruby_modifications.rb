@@ -109,7 +109,7 @@ class Array
   attr_reader :type
   
   def self.typed(type)
-    @@typed_classes[type] ||= begin
+    @@typed_classes[type.__id__] ||= begin
       cls = Class.new(Array)
       cls.class_eval do
         @type = type

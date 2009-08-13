@@ -29,7 +29,7 @@ module Java2Ruby
     
     def new_variable(name, type)
       var_name = RJava.lower_name name
-      while ruby_variable_name_used?(var_name) or %w{alias and begin break case class def defined do else elsif end ensure false for if in module next nil not or redo rescue retry return self super then true undef unless until when while yield}.include?(var_name)
+      while ruby_variable_name_used?(var_name) or RJava::RUBY_KEYWORDS.include?(var_name)
         var_name << "_"
       end
       @variables[name] = [type, var_name]

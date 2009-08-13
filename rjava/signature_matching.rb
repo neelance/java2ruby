@@ -41,7 +41,6 @@ class Module
           specific_size_variations.reject! { |v| v[0] == var[0] }
           specific_size_variations.unshift var
         end
-        
         if size_hash.inject(0) { |v, (size, specific_size_variations)| v + specific_size_variations.size } == 1
           single_variation = size_hash.values.first.first
           cls.alias_method name, single_variation[4]
@@ -64,7 +63,7 @@ class Module
                 sig_classes = var[0]
                 matching = true
                 arg_count.times do |i|
-                  if args[i] and not args[i].is_a? sig_classes[i]
+                  if not (args[i].nil? or args[i].is_a?(sig_classes[i]))
                     matching = false
                     break
                   end

@@ -336,8 +336,20 @@ module Java2Ruby
         puts_output "extend LocalClass" if @type == :inner_class or @type == :local_class
         puts_output "include_class_members #{@context_module.java_type}"
         puts_output "include #{@superclass} if #{@superclass}.class == Module" if @type == :inner_class and @superclass
-        @interfaces.each do |interface|
-          puts_output "include #{interface}"
+        unless @interfaces.empty?
+          if @superclass
+            puts_output "overload_protected {"
+            indent_output do
+              @interfaces.each do |interface|
+                puts_output "include #{interface}"
+              end
+            end
+            puts_output "}"
+          else
+            @interfaces.each do |interface|
+              puts_output "include #{interface}"
+            end
+          end
         end
         
         write_members = lambda { |static, member_block|

@@ -81,6 +81,10 @@ class Object
   def get_class
     self.class
   end
+
+  def hash_code
+    hash
+  end
 end
 
 class Module
@@ -303,6 +307,12 @@ class Float
   
   def self.is_na_n(value)
     value.nan?
+  end
+end
+
+class Symbol
+  def hash_code
+		to_s.hash_code
   end
 end
 

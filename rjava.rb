@@ -1,6 +1,8 @@
 $rjava_verbose = $*.delete("--rjava-verbose")
 
 module RJava
+  RUBY_KEYWORDS = %w{alias and begin break case class def defined do else elsif end ensure false for if in module next nil not or redo rescue retry return self super then true undef unless until when while yield}
+
   def self.create_java_proxy(constant_name, class_name, target)
     proxy_class = JavaUtilities.create_proxy_class(constant_name, JavaUtilities.get_java_class(class_name), target)
     if proxy_class.is_a? Class
@@ -83,13 +85,15 @@ module RJava
   def self.ruby_method_name(name)
     case name
     when :constructor
-        "initialize"
+      "initialize"
     when "initialize"
-        "initialize_"
+      "initialize_"
     when "toString"
-        "to_s"
+      "to_s"
     else
-      lower_name name, true
+      ruby_name = lower_name name, true
+      ruby_name << "_" if RUBY_KEYWORDS.include?(ruby_name)
+      ruby_name
     end
   end
   

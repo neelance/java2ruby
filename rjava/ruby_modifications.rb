@@ -14,6 +14,14 @@ class Object
   def wait
     synchronization_condition_variable.wait
   end
+
+  def notify
+    synchronization_condition_variable.signal
+  end
+
+  def notify_all
+    synchronization_condition_variable.broadcast
+  end
 end
 
 module Kernel
@@ -99,6 +107,18 @@ class Module
       define_method "attr_#{RJava.lower_name name.to_s}" do
         class_module.expand_lazy_constant name
         const_get name
+      end
+    end
+  end
+
+  def overload_protected
+	  ancestor_list = ancestors
+    yield
+    ancestors.each do |ancestor|
+      next if ancestor_list.include?(ancestor)
+      ancestor.instance_methods(false).each do |name|
+				next if not superclass.method_defined?(name)
+        define_method name, superclass.instance_method(name)
       end
     end
   end

@@ -298,23 +298,10 @@ module JNI
     end
   end
   
-  def self.load_library(name)
-    if File.exist? name
-      @@lib_files << name
-      ffi_lib(*@@lib_files)
-      return
-    end
-    
-    $:.each do |path|
-      file = File.join path, name
-      if File.exist? file
-        @@lib_files << file
-        ffi_lib(*@@lib_files)
-        return
-      end
-    end
-    
-    raise LoadError, name
+  def self.load_library(path)
+    raise if not File.exist? path
+    @@lib_files << path
+    ffi_lib(*@@lib_files)
   end
   
   def self.native_method(name, arg_types, return_type)

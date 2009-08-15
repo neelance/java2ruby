@@ -299,7 +299,7 @@ module Java2Ruby
     
     def write_output
       if @name == "Throwable"
-        @superclass = JavaClassType.new converter, nil, nil, JavaPackage::ROOT, ["Exception"]
+        @superclass = JavaClassType.new converter, nil, nil, JavaPackage::ROOT, [:ruby_exception]
       end
       
       # write module

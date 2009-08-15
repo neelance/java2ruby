@@ -90,6 +90,8 @@ module RJava
       "initialize_"
     when "toString"
       "to_s"
+    when "equals"
+      "=="
     else
       ruby_name = lower_name name, true
       ruby_name << "_" if RUBY_KEYWORDS.include?(ruby_name)
@@ -98,6 +100,7 @@ module RJava
   end
   
   def self.ruby_constant_name(name)
+    return "Exception" if name == :ruby_exception
     if name.to_s[0..0] =~ /[a-z]/
       if name.to_s[1..1] =~ /[A-Z]/
         name = name.to_s[0..0].upcase + "_" + name.to_s[1..-1]
@@ -105,7 +108,7 @@ module RJava
         name = name.to_s[0..0].upcase + name.to_s[1..-1]
       end
     end
-    name = "Java#{name}" if %w{Comparable Error File Integer List Set Thread ThreadGroup Throwable}.include? name
+    name = "Java#{name}" if %w{Comparable Error Exception File Integer List Set Thread ThreadGroup Throwable}.include? name
     name << "_" if %w{BEGIN END}.include? name
     name
   end
@@ -118,6 +121,10 @@ module RJava
     names.map do |name|
       ruby_constant_name name
     end
+  end
+
+  def self.cast_to_string(v)
+    v && v.to_s
   end
   
   def self.cast_to_short(v)

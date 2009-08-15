@@ -31,7 +31,7 @@ class ClassLoaderBase
   end
   
   def import_package(dir, package_path)
-    name = (dir[0..0].upcase << dir[1..-1]).to_sym
+    name = RJava.ruby_constant_name(dir).to_sym
     sub_package_path = File.join package_path, dir
     if @target_module.const_defined? name
       import_classes @target_module.const_get(name), sub_package_path

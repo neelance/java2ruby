@@ -118,12 +118,20 @@ class Class
   def get_declared_field(name)
     Java::Lang::Reflect::Field.new(self, name, nil, nil, nil, nil, nil)
   end
+
+  def is_instance(obj)
+    obj.is_a? self
+  end
+
+  def is_assignable_from(cls)
+    cls.ancestors.include? self
+  end
 end
 
 class String
   include_const Java::Lang, :Character
   
-  def self.new(str = nil, offset = nil, length = nil)
+  def self.new(str = nil, offset = nil, length = nil, charset = nil)
     if not str
       ""
     elsif str.is_a? CharArray
@@ -153,6 +161,7 @@ class String
   alias_method :replace_all, :gsub
   alias_method :to_lower_case, :downcase
   alias_method :to_upper_case, :upcase
+  alias_method :trim, :strip
   
   def to_char_array
     ca = CharArray.new 0
@@ -180,8 +189,8 @@ class String
     Character.new self[index].ord
   end
   
-  def index_of(t)
-    index(t.to_s) || -1
+  def index_of(t, offset = 0)
+    index(t.to_s, offset) || -1
   end
   
   def to_u
@@ -200,9 +209,9 @@ class String
   
   def last_index_of(str)
     if str.is_a? String
-      rindex str
+      rindex(str) || -1
     else
-      rindex str.to_int.chr
+      rindex(str.to_int.chr) || -1
     end
   end
 
@@ -216,7 +225,26 @@ class String
   end
 
   def starts_with(str)
-    self.size >= str.size && self[0...str.size] == str
+    self =~ /^#{str}/
+  end
+
+  def ends_with(str)
+    self =~ /#{str}$/
+  end
+
+  def region_matches(*args)
+    ignore_case, toffset, other, ooffset, len = false
+    case args.size
+    when 4
+      toffset, other, ooffset, len = args
+    when 5
+      ignore_case, toffset, other, ooffset, len = args
+    end
+    if ignore_case
+	    self[toffset, len].downcase == other[ooffset, len].downcase
+    else
+	    self[toffset, len] == other[ooffset, len]
+    end
   end
 end
 
@@ -313,6 +341,10 @@ end
 class Symbol
   def hash_code
 		to_s.hash_code
+  end
+
+  def equal?(other)
+    (other.is_a?(String) && self == other.intern) || super
   end
 end
 

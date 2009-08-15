@@ -400,7 +400,7 @@ module Java2Ruby
                     expression = match_classCreatorRest JavaClassType.new(converter, nil, nil, nil, [type]) # TODO this is wrong
                   end
                 elsif try_match "class"
-                  suffix << ".class"
+                  # class names are Class instances by themselves
                 else
                   raise ArgumentError
                 end
@@ -411,7 +411,7 @@ module Java2Ruby
           if expression.nil?
             if identifiers.size == 1 and arguments
               current_module && current_module.method_used(identifiers.first)
-              expression = Expression.new nil, ruby_method_name(identifiers.first), *compose_arguments(arguments)
+              expression = Expression.new nil, (identifiers.first == "equals" ? "self.==" : ruby_method_name(identifiers.first)), *compose_arguments(arguments)
             else
               method_identifier = arguments ? identifiers.pop : nil
               

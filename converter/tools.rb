@@ -157,7 +157,7 @@ module Java2Ruby
     def typecast(target_type)
       case
       when target_type == JavaType::STRING && self.type != JavaType::STRING
-        Expression.new JavaType::STRING, "(", self, ").to_s"
+        Expression.new JavaType::STRING, "RJava.cast_to_string(", self, ")"
       else
         self
       end

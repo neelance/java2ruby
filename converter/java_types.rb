@@ -130,8 +130,6 @@ module Java2Ruby
       single = @package.nil? && @names.size == 1
       if single and @names.first == "Number"
         name_parts = ["Numeric"]
-      elsif single and @names.first == "Throwable"
-        name_parts = ["Exception"]
       elsif single and @context_module and @context_module.generic_classes.include? @names.first
         name_parts = ["Object"]
       elsif single and @context_method and method_class = @context_method.method_classes.find { |cls| cls.name == @names.first } 

@@ -124,7 +124,7 @@ module RJava
   end
 
   def self.cast_to_string(v)
-    v && v.to_s
+    v.nil? ? nil : v.to_s
   end
   
   def self.cast_to_short(v)

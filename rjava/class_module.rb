@@ -38,4 +38,6 @@ class Class
    (@included_with_missing_static_module ||= []) << subclass
     update_static_module_includes if defined? @class_module
   end
+
+  alias_method :class_inherited, :inherited
 end

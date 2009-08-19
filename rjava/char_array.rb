@@ -5,7 +5,7 @@ class CharArray < Array.typed(Java::Char)
     undef_method method
   end
   
-  attr_accessor :data
+  attr_accessor :data, :array
   
   def initialize(size)
     @data = "\0" * size
@@ -13,6 +13,7 @@ class CharArray < Array.typed(Java::Char)
   end
   
   def use_array
+    return if @array
     @array = @data.split("").map { |c| c.ord }
     @data = nil
   end

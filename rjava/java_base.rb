@@ -135,7 +135,13 @@ class String
     if not str
       ""
     elsif str.is_a? CharArray
-      offset ? str.data[offset, length] : str.data
+      if str.data
+        offset ? str.data[offset, length] : str.data
+      else
+        new_str = UnicodeString.new ""
+        new_str.chars.concat str.array[offset, length]
+        new_str
+      end
     elsif defined? ArrayJavaProxy and str.is_a? ArrayJavaProxy
       str = String.from_java_bytes str
       offset ? str[offset, length] : str
@@ -258,6 +264,10 @@ class UnicodeString # TODO try to use normal binary encoded strings in ruby 1.9
       @chars << string[i].ord
     end
   end
+
+  def is_a?(cls)
+    cls == String
+  end
   
   def size
     @chars.size
@@ -273,6 +283,15 @@ class UnicodeString # TODO try to use normal binary encoded strings in ruby 1.9
     ca = CharArray.new 0
     ca[0, 0] = @chars
     ca
+  end
+
+  def get_chars(src_begin, src_end, dst, dst_begin)
+    if dst.is_a? CharArray
+      dst.use_array
+      dst.array[dst_begin, src_end - src_begin] = @chars[src_begin...src_end]
+    else
+      dst[dst_begin, src_end - src_begin] = @chars[src_begin...src_end]
+    end
   end
   
   def <<(other)

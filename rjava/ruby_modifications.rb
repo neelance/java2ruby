@@ -64,12 +64,27 @@ end
 
 if is_ruby_1_8?
   class String
+    def intern
+      empty? ? :__empty_string__ : to_sym
+    end
+
     def force_encoding(enc)
       self
     end
     
     def ord
       self[0]
+    end
+  end
+
+  class Symbol
+    alias_method :symbol_to_s, :to_s
+    def to_s
+      self == :__empty_string__ ? "" : symbol_to_s
+    end
+
+    def length
+      to_s.length
     end
   end
 end

@@ -108,7 +108,7 @@ module RJava
         name = name.to_s[0..0].upcase + name.to_s[1..-1]
       end
     end
-    name = "Java#{name}" if %w{Comparable Error Exception File Integer List Set Thread ThreadGroup Throwable}.include? name
+    name = "Java#{name}" if %w{Comparable Date Error Exception File Integer List Set Thread ThreadGroup Throwable}.include? name
     name << "_" if %w{BEGIN END}.include? name
     name
   end

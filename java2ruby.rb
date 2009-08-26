@@ -1,6 +1,6 @@
-$: << File.dirname(__FILE__)
-$: << "#{File.dirname(__FILE__)}/../jre4ruby"
-$: << "#{File.dirname(__FILE__)}/../antlr4ruby"
+$:.unshift File.dirname(__FILE__)
+$:.unshift "#{File.dirname(__FILE__)}/../jre4ruby"
+$:.unshift "#{File.dirname(__FILE__)}/../antlr4ruby"
 
 require "#{File.dirname(__FILE__)}/converter/converter"
 

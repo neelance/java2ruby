@@ -30,7 +30,7 @@ module Java2Ruby
       @name = name
     end
     
-    def to_s
+    def to_s(in_class = false)
       "::Java::#{@name[0..0].upcase}#{@name[1..-1]}"
     end
     
@@ -121,23 +121,29 @@ module Java2Ruby
       self.equal?(other) or (other.is_a? JavaClassType and @package == other.package and @names == other.names)
     end
     
-    def to_s
-      class_name = @converter.ruby_class_name(@package, @names)
-      return class_name if class_name
-      
-      name_parts = []
-      name_parts << @package.ruby_name unless @package.nil? or @package.root?
-      single = @package.nil? && @names.size == 1
-      if single and @names.first == "Number"
-        name_parts = ["Numeric"]
-      elsif single and @context_module and @context_module.generic_classes.include? @names.first
-        name_parts = ["Object"]
-      elsif single and @context_method and method_class = @context_method.method_classes.find { |cls| cls.name == @names.first } 
-        name_parts = [method_class.java_type]
-      else
-        name_parts.concat @names.map { |name| @converter.ruby_constant_name name }
+    def to_s(in_class = (@context_method.nil? || @context_method.static))
+      class_name = @converter && @converter.ruby_class_name(@package, @names)
+      class_name ||= begin
+        name_parts = []
+        name_parts << @package.ruby_name unless @package.nil? or @package.root?
+        single = @package.nil? && @names.size == 1
+        if single and ["Object", "String", "Boolean"].include? @names.first
+          name_parts = [@names.first]
+        elsif single and @names.first == "Number"
+          name_parts = ["Numeric"]
+        elsif single and @context_module and @context_module.generic_classes.include? @names.first
+          name_parts = ["Object"]
+        elsif single and @context_method and method_class = @context_method.method_classes.find { |cls| cls.name == @names.first } 
+          name_parts = [method_class.java_type]
+        else
+          if (@package.nil? or @package.root?) and @context_module and [:inner_class, :local_class, :static_local_class].include?(@context_module.type)
+            name_parts << (in_class ? "class_self" : "self.class")
+          end
+          name_parts.concat @names.map { |name| @converter.ruby_constant_name name }
+        end
+        name_parts.join "::"
       end
-      name_parts.join "::"
+      class_name
     end
     
     def simple_name
@@ -181,8 +187,8 @@ module Java2Ruby
       "_3#{@entry_type.jni_signature}"
     end
     
-    def to_s
-      "Array.typed(#{@entry_type})"
+    def to_s(in_class = false)
+      "Array.typed(#{@entry_type.to_s(in_class)})"
     end
     
     def default(sizes = nil)
@@ -202,7 +208,7 @@ module Java2Ruby
       @name = name
     end
     
-    def to_s
+    def to_s(in_class = false)
       @name
     end
     

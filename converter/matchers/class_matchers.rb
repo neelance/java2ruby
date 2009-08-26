@@ -208,7 +208,7 @@ module Java2Ruby
             end
           end
           
-          java_module.new_method(false, "set_value_name", [["name", "String", false]], nil, lambda { puts_output "@value_name = name"; puts_output "self" })
+          java_module.new_method(false, "set_value_name", [["name", JavaClassType::STRING, false]], nil, lambda { puts_output "@value_name = name"; puts_output "self" })
           java_module.new_method(false, "to_s", [], nil, lambda { puts_output "@value_name" })
           java_module.new_method(true, "values", [], nil, lambda { puts_output "[#{constant_names.join(', ')}]" })
         end

@@ -335,7 +335,7 @@ module Java2Ruby
       indent_output do
         puts_output "extend LocalClass" if @type == :inner_class or @type == :local_class
         puts_output "include_class_members #{@context_module.java_type}"
-        puts_output "include #{@superclass} if #{@superclass}.class == Module" if @type == :inner_class and @superclass
+        puts_output "include #{@superclass.to_s(true)} if #{@superclass.to_s(true)}.class == Module" if @type == :inner_class and @superclass
         unless @interfaces.empty?
           if @superclass
             puts_output "overload_protected {"

@@ -33,7 +33,7 @@ module Java2Ruby
         puts_output "when_class_loaded do"
       else
         parameter_names = @parameters.map { |name, type, array_arg| (array_arg ? "*" : "") + method_context.new_variable(name, type) }
-        puts_output_without_comments "typesig { [#{@parameters.map{ |name, type, array_arg| type }.join(", ")}] }"
+        puts_output_without_comments "typesig { [#{@parameters.map{ |name, type, array_arg| type.to_s(true) }.join(", ")}] }"
         if @parent_module.type != :inner_class
           parameter_part = parameter_names.empty? ? "" : "(#{parameter_names.join(", ")})"
           puts_output "def #{ruby_method_name @name}#{parameter_part}"

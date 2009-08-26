@@ -3,6 +3,10 @@ require "monitor"
 class Object
   RUBY_ENGINE = "ruby" if not defined? RUBY_ENGINE
   
+  def class_self
+    self.class
+  end
+  
   def synchronization_monitor
     @synchronization_monitor ||= Monitor.new
   end
@@ -72,6 +76,10 @@ end
 
 class Module
   public :define_method
+  
+  def class_self
+    self
+  end
   
   def included_in
     @included_in ||= []

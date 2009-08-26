@@ -1,15 +1,23 @@
+require "rake/rdoctask"
+
+files = ["java2ruby.rb", "rjava.rb", "LICENSE"] + Dir.glob("converter/**/*.*") + Dir.glob("rjava/**/*.*")
+
 task :gemspec do
   File.open("java2ruby.gemspec", "w") do |file|
     file.write Gem::Specification.new { |s|
       s.name = "java2ruby"
       s.version = "1.0.1"
-      s.files = ["java2ruby.rb", "rjava.rb", "LICENSE"] + Dir.glob("converter/**/*.*") + Dir.glob("rjava/**/*.*")
+      s.files = files
       s.homepage = %q{http://github.com/neelance/java2ruby/}
-      s.has_rdoc = true
-      s.rdoc_options = ["--charset=UTF-8"]
+      s.has_rdoc = false
       s.require_paths = ["."]
       s.summary = "A source code converter from Java to Ruby, making it possible to use Java libraries with MRI."
       s.add_dependency "ffi"
     }.to_yaml
   end
+end
+
+Rake::RDocTask.new do |rd|
+  rd.rdoc_files.include(*files.select { |file| file =~ /\.rb$/ })
+  rd.rdoc_dir = "doc"
 end

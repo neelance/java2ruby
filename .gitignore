@@ -1,9 +1,4 @@
-/stable
-/test/*.class
-/test/*.rb
-/test/*.test
-/test/*.test.failed
-/**/pkg
+/doc
 .loadpath
 .project
 .DS_Store

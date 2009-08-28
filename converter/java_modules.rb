@@ -427,7 +427,7 @@ module Java2Ruby
     end
     
     def write_output
-      puts_output "module ", java_type
+      puts_output "module ", java_type, " #:nodoc:"
       indent_output do
         puts_output "class_module.module_eval {"
         indent_output do

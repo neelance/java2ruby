@@ -218,7 +218,7 @@ module Java2Ruby
       @next_element_index = 0
       @next_element = @elements.first
       result = yield
-      raise ArgumentError, "Elements of #{element} not processed: #{@elements.join(", ")}" if not @next_element_index == @elements.size
+      raise ArgumentError, "Elements of #{element} not processed: #{@elements[@next_element_index..-1].join(", ")}" if not @next_element_index == @elements.size
       
       @elements = parent_elements
       @next_element_index = parent_next_element_index

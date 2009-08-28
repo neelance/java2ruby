@@ -436,11 +436,24 @@ module Java2Ruby
       loop_match :selector do
         if try_match "."
           selector = match_name
-          if next_is? :arguments
-            arguments = match_arguments
-            expression = method_call expression, selector, arguments
+          if selector == "super"
+            match :superSuffix do
+              match "."
+              identifier = match_name
+              if next_is? :arguments
+                arguments = match_arguments
+                expression = Expression.new nil, expression, ".superclass.instance_method(:", ruby_method_name(identifier), ").bind(self).call", *compose_arguments(arguments)
+              else
+                raise ArgumentError
+              end
+            end
           else
-            expression = Expression.new nil, expression, ".attr_", ruby_field_name(selector)
+            if next_is? :arguments
+              arguments = match_arguments
+              expression = method_call expression, selector, arguments
+            else
+              expression = Expression.new nil, expression, ".attr_", ruby_field_name(selector)
+            end
           end
         else
           match "["

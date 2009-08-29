@@ -1,12 +1,8 @@
 module Java2Ruby
   class ConversionController
-    attr_reader :is_constant_hooks, :ruby_constant_name_hooks, :ruby_class_name_hooks, :ruby_field_name_hooks
+    attr_reader :prefix, :prefix_class_names, :constants, :no_constants, :constant_name_mapping, :field_name_mapping
     
     def initialize
-      @is_constant_hooks = [lambda { |converter, name, value| name =~ /^[A-Z]/ }]
-      @ruby_constant_name_hooks = []
-      @ruby_class_name_hooks = []
-      @ruby_field_name_hooks = []
       @current_converter_id = 0
       @pending_converters = {}
       @queued_converters = []
@@ -15,7 +11,7 @@ module Java2Ruby
       @converted_amount = 0
     end
     
-    def add_files(src_dir, lib_dir, files)
+    def add_files(files, src_dir, lib_dir, conversion_rules)
       files.each do |file|
         src_file = "#{src_dir}/#{file}"  
         next if File.directory? src_file
@@ -26,7 +22,7 @@ module Java2Ruby
           
           size = File.size src_file
           @amount_to_convert += size
-          converter = Java2Ruby::Converter.new src_file, lib_file_dir, self, @current_converter_id, size
+          converter = Java2Ruby::Converter.new src_file, conversion_rules, lib_file_dir, self, @current_converter_id, size
           if File.exist? converter.ruby_file
             @converted_amount += size
           else
@@ -42,22 +38,6 @@ module Java2Ruby
           cp src_file, lib_file unless File.exist? lib_file
         end
       end
-    end
-    
-    def add_is_constant_hook(&hook)
-      @is_constant_hooks << hook
-    end
-    
-    def add_ruby_constant_name_hook(&hook)
-      @ruby_constant_name_hooks << hook
-    end
-    
-    def add_ruby_class_name_hook(&hook)
-      @ruby_class_name_hooks << hook
-    end
-    
-    def add_ruby_field_name_hook(&hook)
-      @ruby_field_name_hooks << hook
     end
     
     def run(process_count)

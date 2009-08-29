@@ -89,9 +89,14 @@ module Java2Ruby
     attr_accessor :java_file, :basename, :ruby_file, :controller, :converter_id, :size, :error
     attr_accessor :current_generator, :statement_context
     
-    def initialize(java_file, ruby_dir = nil, controller = nil, converter_id = nil, size = nil)
+    def initialize(java_file, conversion_rules = {}, ruby_dir = nil, controller = nil, converter_id = nil, size = nil)
       @java_file = java_file
-      @controller = controller || ConversionController.new
+      @prefix = conversion_rules["prefix"] || "Java"
+      @prefix_class_names = conversion_rules["prefix_class_names"] || []
+      @constants = conversion_rules["constants"] || []
+      @no_constants = conversion_rules["no_constants"] || []
+      @constant_name_mapping = conversion_rules["constant_name_mapping"] || {}
+      @field_name_mapping = conversion_rules["field_name_mapping"] || {}
       @basename = File.basename @java_file, ".java"
       @ruby_file = "#{ruby_dir || File.dirname(@java_file)}/#{JavaClassType.new self, nil, nil, nil, [@basename]}.rb"
       @converter_id = converter_id
@@ -103,35 +108,27 @@ module Java2Ruby
     end
     
     def is_constant?(name)
-      value = false
-      @controller.is_constant_hooks.each do |hook|
-        value = hook.call self, name, value
-      end
-      value
+      @constants.include?(name) || (!@no_constants.include?(name) && name =~ /^[A-Z]/)
     end
     
     def ruby_constant_name(name)
-      @controller.ruby_constant_name_hooks.each do |hook|
-        ruby_name = hook.call self, name
-        return ruby_name if ruby_name
-      end
-      RJava.ruby_constant_name name
+      @constant_name_mapping[name] || RJava.ruby_constant_name(name)
     end
     
     def ruby_class_name(package, names)
-      @controller.ruby_class_name_hooks.each do |hook|
-        ruby_name = hook.call self, package, names
-        return ruby_name if ruby_name
+      if @prefix_class_names.include?(names.first)
+        name_parts = []
+        name_parts << @package.ruby_name unless @package.nil? or @package.root?
+        name_parts << "#{@prefix}#{names.shift}"
+        name_parts.concat names
+        name_parts.join "::"
+      else
+        nil
       end
-      nil
     end
     
     def ruby_field_name(name)
-      @controller.ruby_field_name_hooks.each do |hook|
-        ruby_name = hook.call self, name
-        return ruby_name if ruby_name
-      end
-      RJava.lower_name name
+      @field_name_mapping[name] || RJava.lower_name(name)
     end
     
     def ruby_method_name(name)

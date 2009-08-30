@@ -2,14 +2,15 @@ require "set"
 
 module Java2Ruby  
   class JavaMethod < JavaMember
-    attr_reader :name, :method_classes
+    attr_reader :name, :method_classes, :generic_classes
     
-    def initialize(parent_module, static, name, parameters, return_type, body = nil)
+    def initialize(parent_module, static, name, parameters, return_type, body = nil, generic_classes = nil)
       super parent_module, static
       @name = name
       @parameters = parameters
-      @return_type = return_type;
+      @return_type = return_type
       @body = body
+      @generic_classes = generic_classes || []
     end
     
     def current_module

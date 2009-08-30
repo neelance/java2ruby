@@ -110,10 +110,10 @@ module Java2Ruby
                   elsif next_is? :interfaceDeclaration
                     java_module.add_local_module match_interfaceDeclaration(java_module)
                   elsif try_match :interfaceGenericMethodDecl do
-                      match_typeParameters
+                      generic_classes = match_typeParameters
                       return_type = match_type
                       member_name = match_name
-                      match_interfaceMethodDeclaratorRest java_module, return_type, member_name
+                      match_interfaceMethodDeclaratorRest java_module, return_type, member_name, generic_classes
                     end
                   else
                     try_match_normalInterfaceDeclaration java_module
@@ -128,12 +128,12 @@ module Java2Ruby
       java_module
     end
     
-    def match_interfaceMethodDeclaratorRest(java_module, return_type, method_name)
+    def match_interfaceMethodDeclaratorRest(java_module, return_type, method_name, generic_classes = nil)
       match :interfaceMethodDeclaratorRest do
         method_parameters = match_formalParameters
         try_match_throws
         match ";"
-        java_module.new_abstract_method(false, method_name, method_parameters, return_type)
+        java_module.new_abstract_method(false, method_name, method_parameters, return_type, generic_classes)
       end
     end
     
@@ -364,7 +364,7 @@ module Java2Ruby
             elsif next_is? :interfaceDeclaration
               java_module.add_local_module match_interfaceDeclaration(java_module)
             elsif try_match :genericMethodOrConstructorDecl do
-                match_typeParameters
+                generic_classes = match_typeParameters
                 match :genericMethodOrConstructorRest do
                   return_type = if try_match "void"
                     JavaType::VOID
@@ -372,7 +372,7 @@ module Java2Ruby
                     match_type
                   end
                   method_name = match_name
-                  match_methodDeclaratorRest java_module, static, native, synchronized, return_type, method_name
+                  match_methodDeclaratorRest java_module, static, native, synchronized, return_type, method_name, generic_classes
                 end
               end
             end
@@ -381,7 +381,7 @@ module Java2Ruby
       end
     end
     
-    def match_methodDeclaratorRest(java_module, static, native, synchronized, return_type, method_name)
+    def match_methodDeclaratorRest(java_module, static, native, synchronized, return_type, method_name, generic_classes = nil)
       match :methodDeclaratorRest do
         method_parameters = match_formalParameters
         if try_match "["
@@ -390,9 +390,9 @@ module Java2Ruby
         try_match_throws
         if try_match ";"
           if native
-            java_module.new_native_method(static, method_name, method_parameters, return_type)
+            java_module.new_native_method(static, method_name, method_parameters, return_type, generic_classes)
           else
-            java_module.new_abstract_method(static, method_name, method_parameters, return_type)
+            java_module.new_abstract_method(static, method_name, method_parameters, return_type, generic_classes)
           end
         else
           match :methodBody do
@@ -409,7 +409,7 @@ module Java2Ruby
               end
               match "}"
             end
-            java_module.new_method(static, method_name, method_parameters, return_type, method_body)
+            java_module.new_method(static, method_name, method_parameters, return_type, method_body, generic_classes)
           end
         end
       end

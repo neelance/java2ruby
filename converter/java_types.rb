@@ -133,6 +133,8 @@ module Java2Ruby
           name_parts = ["Numeric"]
         elsif single and @context_module and @context_module.generic_classes.include? @names.first
           name_parts = ["Object"]
+        elsif single and @context_method and @context_method.generic_classes.include? @names.first
+          name_parts = ["Object"]
         elsif single and @context_method and method_class = @context_method.method_classes.find { |cls| cls.name == @names.first } 
           name_parts = [method_class.java_type]
         else

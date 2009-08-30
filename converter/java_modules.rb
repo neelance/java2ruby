@@ -194,17 +194,17 @@ module Java2Ruby
       @members << field
     end
     
-    def new_method(static, name, parameters, return_type, body)
+    def new_method(static, name, parameters, return_type, body, generic_classes = nil)
       @has_main = true if static and name == "main"
-      @members << JavaMethod.new(self, static, name, parameters, return_type, body)
+      @members << JavaMethod.new(self, static, name, parameters, return_type, body, generic_classes)
     end
     
-    def new_abstract_method(static, name, parameters, return_type)
-      @members << JavaAbstractMethod.new(self, static, name, parameters, return_type)
+    def new_abstract_method(static, name, parameters, return_type, generic_classes = nil)
+      @members << JavaAbstractMethod.new(self, static, name, parameters, return_type, generic_classes)
     end
     
-    def new_native_method(static, name, parameters, return_type)
-      @members << JavaNativeMethod.new(self, static, name, parameters, return_type)
+    def new_native_method(static, name, parameters, return_type, generic_classes = nil)
+      @members << JavaNativeMethod.new(self, static, name, parameters, return_type, generic_classes)
     end
     
     def new_static_block(block_body)

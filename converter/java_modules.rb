@@ -269,6 +269,7 @@ module Java2Ruby
           Expression.new nil, "System"
         end
       elsif first_identifier == @name and field1 = find_static_field(identifiers.first)
+        identifiers.shift
         Expression.new field1.type, "self.attr_#{field1.ruby_name}"
       elsif field2 = find_static_field(first_identifier)
         Expression.new field2.type, "self.attr_#{field2.ruby_name}"
@@ -328,8 +329,13 @@ module Java2Ruby
       end
       
       # default constructor
-      if @type != :interface and @type != :local_interface and not @has_constructor
-        @members << JavaDefaultConstructor.new(self)
+      if not @has_constructor
+        case @type
+        when :class, :local_class, :static_local_class
+          @members << JavaDefaultConstructor.new(self, false)
+        when :inner_class
+          @members << JavaDefaultConstructor.new(self, !@superclass.nil?)
+        end
       end
       
       indent_output do

@@ -59,21 +59,22 @@ module Java2Ruby
   end
   
   class JavaDefaultConstructor < JavaMethod
-    def initialize(parent_module)
-      super parent_module, false, :constructor, [], nil, nil
+    def initialize(parent_module, pass_args)
+      super parent_module, false, :constructor, (pass_args ? [["args", JavaType::OBJECT, true]] : []), nil, nil
+      @pass_args = pass_args
     end
     
     def write_inner_output
       if current_module.superclass
         current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = #{field.type.default}" }
-        puts_output "super()"
+        puts_output(@pass_args ? "super(*args)" : "super()")
         current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value.call if field.value }
       else
         current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value ? field.value.call : field.type.default }
       end
     end
   end
-  
+
   class JavaAbstractMethod < JavaMethod
     def write_inner_output
       puts_output "raise NotImplementedError"

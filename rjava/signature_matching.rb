@@ -1,6 +1,10 @@
 class Module
   public :define_method, :alias_method
   
+  def can_be_nil?
+    true
+  end
+
   def typesig(*sig, &block)
     @current_typesig = block || sig
   end
@@ -63,7 +67,9 @@ class Module
                 sig_classes = var[0]
                 matching = true
                 arg_count.times do |i|
-                  if not (args[i].nil? or args[i].is_a?(sig_classes[i]))
+                  arg = args[i]
+                  sig_class = sig_classes[i]
+                  if not ((arg.nil? and sig_class.can_be_nil?) or arg.is_a?(sig_class))
                     matching = false
                     break
                   end

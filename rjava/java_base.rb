@@ -16,27 +16,52 @@ else
 end
 
 module Java::Char
+  def self.can_be_nil?
+    false
+  end
 end
 
 module Java::Byte
+  def self.can_be_nil?
+    false
+  end
 end
 
 module Java::Short
+  def self.can_be_nil?
+    false
+  end
 end
 
 module Java::Int
+  def self.can_be_nil?
+    false
+  end
 end
 
 module Java::Long
+  def self.can_be_nil?
+    false
+  end
 end
 
 module Java::Float
+  def self.can_be_nil?
+    false
+  end
 end
 
 module Java::Double
+  def self.can_be_nil?
+    false
+  end
 end
 
 module Java::Boolean
+  def self.can_be_nil?
+    false
+  end
+
   def self.new(value)
     value
   end

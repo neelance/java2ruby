@@ -222,6 +222,7 @@ module Java2Ruby
   end
   
   class JavaType
+    OBJECT = JavaClassType.new nil, nil, nil, nil, ["Object"]
     STRING = JavaClassType.new nil, nil, nil, nil, ["String"]
   end
 end

@@ -12,7 +12,7 @@ module Java2Ruby
       @body = body
       @generic_classes = generic_classes || []
       @method_classes = []
-      @parameters.each { |name, type, array_arg| type.context_method = self }
+      @parameters.each { |name, type, array_arg| type.context_method = self } if @parameters
     end
     
     def current_module

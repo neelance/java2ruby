@@ -11,6 +11,8 @@ module Java2Ruby
       @return_type = return_type
       @body = body
       @generic_classes = generic_classes || []
+      @method_classes = []
+      @parameters.each { |name, type, array_arg| type.context_method = self }
     end
     
     def current_module
@@ -24,11 +26,10 @@ module Java2Ruby
     def converter
       @parent_module.converter
     end
-    
+
     def write_output
       write_loaders
-      @method_classes = []
-      
+
       method_context = MethodContext.new self
       if @name.nil?
         puts_output "when_class_loaded do"

@@ -4,7 +4,7 @@ module Java2Ruby
   class JavaMethod < JavaMember
     attr_reader :name, :method_classes, :generic_classes
     
-    def initialize(parent_module, static, name, parameters, return_type, body = nil, generic_classes = nil)
+    def initialize(parent_module, static, name, parameters, return_type, body, generic_classes)
       super parent_module, static
       @name = name
       @parameters = parameters
@@ -61,7 +61,7 @@ module Java2Ruby
   
   class JavaDefaultConstructor < JavaMethod
     def initialize(parent_module, pass_args)
-      super parent_module, false, :constructor, (pass_args ? [["args", JavaType::OBJECT, true]] : []), nil, nil
+      super parent_module, false, :constructor, (pass_args ? [["args", JavaType::OBJECT, true]] : []), nil, nil, nil
       @pass_args = pass_args
     end
     

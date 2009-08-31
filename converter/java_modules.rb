@@ -200,20 +200,20 @@ module Java2Ruby
     end
     
     def new_abstract_method(static, name, parameters, return_type, generic_classes = nil)
-      @members << JavaAbstractMethod.new(self, static, name, parameters, return_type, generic_classes)
+      @members << JavaAbstractMethod.new(self, static, name, parameters, return_type, nil, generic_classes)
     end
     
     def new_native_method(static, name, parameters, return_type, generic_classes = nil)
-      @members << JavaNativeMethod.new(self, static, name, parameters, return_type, generic_classes)
+      @members << JavaNativeMethod.new(self, static, name, parameters, return_type, nil, generic_classes)
     end
     
     def new_static_block(block_body)
-      @members << JavaMethod.new(self, true, nil, nil, nil, block_body)
+      @members << JavaMethod.new(self, true, nil, nil, nil, block_body, nil)
     end
     
     def new_constructor(parameters, body)
       @has_constructor = true
-      @members << JavaMethod.new(self, false, :constructor, parameters, nil, body)
+      @members << JavaMethod.new(self, false, :constructor, parameters, nil, body, nil)
     end
     
     def method_used(name)

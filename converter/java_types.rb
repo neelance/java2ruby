@@ -1,5 +1,7 @@
 module Java2Ruby
   class JavaType < OutputGenerator
+    attr_accessor :context_method
+
     def initialize
       super nil
     end
@@ -122,6 +124,7 @@ module Java2Ruby
     end
     
     def to_s(in_class = (@context_method.nil? || @context_method.static))
+#puts "--", @names.first, @context_method && @context_method.generic_classes
       class_name = @converter && @converter.ruby_class_name(@package, @names)
       class_name ||= begin
         name_parts = []
@@ -185,6 +188,11 @@ module Java2Ruby
       @entry_type = entry_type
     end
     
+    def context_method=(method)
+      super
+      @entry_type.context_method = method
+    end
+
     def jni_signature
       "_3#{@entry_type.jni_signature}"
     end

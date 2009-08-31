@@ -4,13 +4,15 @@ module Java2Ruby
   class JavaMethod < JavaMember
     attr_reader :name, :method_classes, :generic_classes
     
-    def initialize(parent_module, static, name, parameters, return_type, body = nil, generic_classes = nil)
+    def initialize(parent_module, static, name, parameters, return_type, body, generic_classes)
       super parent_module, static
       @name = name
       @parameters = parameters
       @return_type = return_type
       @body = body
       @generic_classes = generic_classes || []
+      @method_classes = []
+      @parameters.each { |name, type, array_arg| type.context_method = self }
     end
     
     def current_module
@@ -24,11 +26,10 @@ module Java2Ruby
     def converter
       @parent_module.converter
     end
-    
+
     def write_output
       write_loaders
-      @method_classes = []
-      
+
       method_context = MethodContext.new self
       if @name.nil?
         puts_output "when_class_loaded do"
@@ -61,7 +62,7 @@ module Java2Ruby
   
   class JavaDefaultConstructor < JavaMethod
     def initialize(parent_module, pass_args)
-      super parent_module, false, :constructor, (pass_args ? [["args", JavaType::OBJECT, true]] : []), nil, nil
+      super parent_module, false, :constructor, (pass_args ? [["args", JavaType::OBJECT, true]] : []), nil, nil, nil
       @pass_args = pass_args
     end
     

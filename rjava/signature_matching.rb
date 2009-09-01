@@ -1,3 +1,11 @@
+class Vararg
+  attr_reader :type
+
+  def initialize(type)
+    @type = type
+  end
+end
+
 class Module
   public :define_method, :alias_method
   
@@ -16,7 +24,7 @@ class Module
   def method_added(name)
     return if !defined?(@current_typesig) or @current_typesig.nil?
     own_specific_method_variations = (method_variations[name] ||= [])
-    own_specific_method_variations << [@current_typesig, 0, self, instance_method(name), nil]
+    own_specific_method_variations << [@current_typesig, 0, self, instance_method(name), nil, nil]
     @current_typesig = nil
     
     specific_method_variations = []
@@ -35,13 +43,15 @@ class Module
         size_hash = {}
         specific_method_variations.reverse_each do |var|
           var[0] = var[0].call if var[0].is_a?(Proc)
-          if var[4].nil?
+          var[4] ||= begin
             var_name = "#{name}_#{var[0].__id__.abs}".to_sym
             var[2].define_method var_name, var[3]
-            var[4] = var_name
+            var_name
           end
-          
-          specific_size_variations = (size_hash[var[0].size] ||= [])
+          var[5] ||= var[0].map { |t| t.is_a?(Vararg) ? t.type : t }
+
+          vararg = !var[0].empty? && var[0].last.is_a?(Vararg)
+          specific_size_variations = (size_hash[vararg ? :varargs : var[0].size] ||= [])
           specific_size_variations.reject! { |v| v[0] == var[0] }
           specific_size_variations.unshift var
         end
@@ -63,20 +73,26 @@ class Module
             var_name = cache[classes]
             if not var_name
               arg_count = args.size
-              matching_var = size_hash[arg_count].find { |var|
-                sig_classes = var[0]
-                matching = true
-                arg_count.times do |i|
-                  arg = args[i]
-                  sig_class = sig_classes[i]
-                  if not ((arg.nil? and sig_class.can_be_nil?) or arg.is_a?(sig_class))
-                    matching = false
-                    break
+              find_var = lambda { |hash|
+                hash && hash.find { |var|
+                  sig_classes = var[5]
+                  matching = true
+                  arg_count.times do |i|
+                    arg = args[i]
+                    sig_class = sig_classes[i] || sig_classes.last
+                    if not ((arg.nil? and sig_class.can_be_nil?) or arg.is_a?(sig_class))
+                      matching = false
+                      break
+                    end
                   end
-                end
-                matching
-              } or raise ArgumentError
-              
+                  matching
+                }
+              }
+
+              matching_var = find_var.call size_hash[arg_count]
+              matching_var ||= find_var.call size_hash[:varargs]
+              raise ArgumentError if not matching_var
+
               var_name = matching_var[4]
               cache[classes] = var_name
             end

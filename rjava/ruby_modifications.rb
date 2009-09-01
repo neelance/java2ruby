@@ -148,15 +148,17 @@ class Module
 end
 
 class Array
+  class TypedArray < Array
+    def is_a?(cls)
+      (cls.ancestors.include?(TypedArray) && self.class.type.ancestors.include?(cls.type)) || super
+    end
+  end
+
   @@typed_classes = {}
-  attr_reader :type
-  
   def self.typed(type)
     @@typed_classes[type.__id__] ||= begin
-      cls = Class.new(Array)
-      cls.class_eval do
-        @type = type
-      end
+      cls = Class.new(TypedArray)
+      (class << cls; self; end).define_method(:type) { type }
       cls
     end
   end
@@ -171,7 +173,7 @@ class Array
   end
 
   def is_a?(cls)
-    (self.class == Array && cls.ancestors.include?(Array)) || super
+    (self.class == Array && cls.ancestors.include?(TypedArray)) || super
   end
 end
 

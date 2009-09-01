@@ -7,6 +7,7 @@ module Java2Ruby
     def initialize(parent_module, static, name, parameters, return_type, body, generic_classes)
       super parent_module, static
       @name = name
+      @ruby_name = ruby_method_name @name
       @parameters = parameters
       @return_type = return_type
       @body = body
@@ -34,14 +35,14 @@ module Java2Ruby
       if @name.nil?
         puts_output "when_class_loaded do"
       else
+        puts_output_without_comments "typesig { [#{@parameters.map{ |name, type, array_arg| array_arg ? "Vararg.new(#{type.to_s(true)})" : type.to_s(true) }.join(", ")}] }"
         parameter_names = @parameters.map { |name, type, array_arg| (array_arg ? "*" : "") + method_context.new_variable(name, type) }
-        puts_output_without_comments "typesig { [#{@parameters.map{ |name, type, array_arg| type.to_s(true) }.join(", ")}] }"
         if @parent_module.type != :inner_class
           parameter_part = parameter_names.empty? ? "" : "(#{parameter_names.join(", ")})"
-          puts_output "def #{ruby_method_name @name}#{parameter_part}"
+          puts_output "def #{@ruby_name}#{parameter_part}"
         else
           parameter_part = parameter_names.empty? ? "" : " |#{parameter_names.join(", ")}|"
-          puts_output "define_method :#{ruby_method_name @name} do#{parameter_part}"
+          puts_output "define_method :#{@ruby_name} do#{parameter_part}"
         end
       end
       converter.switch_statement_context method_context do
@@ -50,6 +51,23 @@ module Java2Ruby
         end
       end
       puts_output "end"
+
+      if not @parameters.empty? and @parameters.last[2] and @name != :constructor # array_arg
+        puts_output ""
+        puts_output "typesig { [#{@parameters.map{ |name, type, array_arg| array_arg ? JavaArrayType.new(converter, type).to_s(true) : type.to_s(true) }.join(", ")}] }"
+        method_context = MethodContext.new self
+        parameter_names = @parameters.map { |name, type, array_arg| method_context.new_variable(name, type) }
+        if @parent_module.type != :inner_class
+          puts_output "def #{@ruby_name}(#{parameter_names.join(", ")})"
+        else
+          puts_output "define_method :#{@ruby_name} do# |#{parameter_names.join(", ")}|"
+        end
+        indent_output do
+          argument_names = parameter_names[0..-2] + ["*#{parameter_names[-1]}"]
+          puts_output "#{@ruby_name}(#{argument_names.join(", ")})"
+        end
+        puts_output "end"        
+      end
     end
     
     def write_loaders

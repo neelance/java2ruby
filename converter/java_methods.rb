@@ -7,7 +7,7 @@ module Java2Ruby
     def initialize(parent_module, static, name, parameters, return_type, body, generic_classes)
       super parent_module, static
       @name = name
-      @ruby_name = ruby_method_name @name
+      @ruby_name = @name && ruby_method_name(@name)
       @parameters = parameters
       @return_type = return_type
       @body = body
@@ -52,7 +52,7 @@ module Java2Ruby
       end
       puts_output "end"
 
-      if not @parameters.empty? and @parameters.last[2] and @name != :constructor # array_arg
+      if @parameters and not @parameters.empty? and @parameters.last[2] and @name != :constructor # array_arg
         puts_output ""
         puts_output "typesig { [#{@parameters.map{ |name, type, array_arg| array_arg ? JavaArrayType.new(converter, type).to_s(true) : type.to_s(true) }.join(", ")}] }"
         method_context = MethodContext.new self

@@ -110,6 +110,10 @@ module JNI
     type_map = [["Byte", :uint8], ["Char", :uint16], ["Short", :int16], ["Int", :int32], ["Long", :int64], ["Float", :float], ["Double", :double]]
     
     @@global_refs = []
+
+    map_function :GetVersion, [:long], :int do |env|
+      0x00010006
+    end
     
     map_function :ExceptionOccurred, [:long], :long do |env|
       0
@@ -252,7 +256,6 @@ module JNI
       vm_ptr.put_pointer 0, JNI.jvm
       0
     end
-    
   end
   
   module JvmFunctions

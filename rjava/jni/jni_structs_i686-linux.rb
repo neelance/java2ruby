@@ -6,7 +6,8 @@ module JNI
   end
   
   class EnvStruct < FFI::Struct
-    layout :ExceptionOccurred, :ExceptionOccurred, 60,
+    layout :GetVersion, :GetVersion, 16,
+           :ExceptionOccurred, :ExceptionOccurred, 60,
            :NewGlobalRef, :NewGlobalRef, 84,
            :DeleteGlobalRef, :DeleteGlobalRef, 88,
            :IsSameObject, :IsSameObject, 96,

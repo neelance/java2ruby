@@ -66,6 +66,10 @@ module Java::Boolean
     value
   end
 
+  def self.get_boolean(name)
+    Java::Lang::System.get_property(name) == "true"
+  end
+
   def boolean_value
     self
   end
@@ -159,7 +163,7 @@ class String
   def self.new(str = nil, offset = nil, length = nil, charset = nil)
     if not str
       ""
-    elsif str.is_a? CharArray
+    elsif str.class == CharArray
       if str.data
         offset ? str.data[offset, length] : str.data
       else
@@ -199,6 +203,10 @@ class String
     ca.data = self.dup
     ca
   end
+
+  def equals_ignore_case(other)
+    other.is_a?(String) && casecmp(other) == 0
+  end
   
   def substring(start_offset, end_offset = nil)
     if end_offset
@@ -209,8 +217,12 @@ class String
   end
   
   def get_chars(src_begin, src_end, dst, dst_begin)
-    if dst.is_a? CharArray
-      dst.data[dst_begin, src_end - src_begin] = self[src_begin...src_end]
+    if dst.class == CharArray
+      if dst.data
+        dst.data[dst_begin, src_end - src_begin] = self[src_begin...src_end]
+      else
+        dst.array[dst_begin, src_end - src_begin] = self[src_begin...src_end].split("").map { |c| c.ord }
+      end
     else
       dst[dst_begin, src_end - src_begin] = (src_begin...src_end).map { |i| Character.new self[i].ord }
     end
@@ -403,6 +415,10 @@ module Math
 
   def self.abs(v)
     v.abs
+  end
+
+  def self.ceil(v)
+    v.ceil
   end
 end
 

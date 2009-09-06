@@ -58,6 +58,9 @@ module Java::Double
 end
 
 module Java::Boolean
+  TRUE = true
+  FALSE = false
+
   def self.can_be_nil?
     false
   end
@@ -154,6 +157,14 @@ class Class
 
   def is_assignable_from(cls)
     cls.ancestors.include? self
+  end
+
+  def get_resource_as_stream(name)
+    if name[0..0] == "/"
+      Java::Lang::ClassLoader.get_system_resource_as_stream name[1..-1]
+    else
+      raise NotImplementedError
+    end
   end
 end
 
@@ -419,6 +430,10 @@ module Math
 
   def self.ceil(v)
     v.ceil
+  end
+
+  def self.round(v)
+    v.round
   end
 end
 

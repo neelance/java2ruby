@@ -5,6 +5,7 @@ class Module
     if not defined? @class_module
       @class_module = Module.new
       const_set :ClassModule, @class_module
+      @class_module.include superclass.class_module if self.is_a?(Class) and self.superclass != Object
       (class << @class_module; self; end;).include @class_module
       (class << self; self; end;).include @class_module
       self.include @class_module
@@ -30,14 +31,4 @@ class Module
   def include_class_members(target)
     class_module.include target.class_module
   end
-end
-
-class Class
-  undef_method :inherited
-  def inherited(subclass)
-   (@included_with_missing_static_module ||= []) << subclass
-    update_static_module_includes if defined? @class_module
-  end
-
-  alias_method :class_inherited, :inherited
 end

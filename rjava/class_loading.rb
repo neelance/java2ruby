@@ -19,8 +19,7 @@ class ClassLoaderBase
           if File.directory? File.join(search_path, entry)
             dirs << entry if entry =~ /^[a-z][a-z0-9]*$/
           else
-            name = entry.split(".").first
-            names << name if name =~ /^[A-Z][a-zA-Z0-9_]*$/
+            names << entry.split(".").first if entry =~ /^[A-Z][a-zA-Z0-9_]*\.(rb|class)$/
           end
         end
       end

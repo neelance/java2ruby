@@ -2,11 +2,13 @@
 
 module JNI
   JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
+ffi_convention "stdcall"
   	callback name, arg_types, return_type
   end
   
   class EnvStruct < FFI::Struct
-    layout :ExceptionOccurred, :ExceptionOccurred, 60,
+    layout :GetVersion, :GetVersion, 16,
+           :ExceptionOccurred, :ExceptionOccurred, 60,
            :NewGlobalRef, :NewGlobalRef, 84,
            :DeleteGlobalRef, :DeleteGlobalRef, 88,
            :IsSameObject, :IsSameObject, 96,
@@ -68,6 +70,7 @@ module JNI
            :NewLongArray, :NewLongArray, 720,
            :NewFloatArray, :NewFloatArray, 724,
            :NewDoubleArray, :NewDoubleArray, 728,
+           :GetBooleanArrayElements, :GetBooleanArrayElements, 732,
            :GetByteArrayElements, :GetByteArrayElements, 736,
            :GetCharArrayElements, :GetCharArrayElements, 740,
            :GetShortArrayElements, :GetShortArrayElements, 744,
@@ -75,6 +78,7 @@ module JNI
            :GetLongArrayElements, :GetLongArrayElements, 752,
            :GetFloatArrayElements, :GetFloatArrayElements, 756,
            :GetDoubleArrayElements, :GetDoubleArrayElements, 760,
+           :ReleaseBooleanArrayElements, :ReleaseBooleanArrayElements, 764,
            :ReleaseByteArrayElements, :ReleaseByteArrayElements, 768,
            :ReleaseCharArrayElements, :ReleaseCharArrayElements, 772,
            :ReleaseShortArrayElements, :ReleaseShortArrayElements, 776,

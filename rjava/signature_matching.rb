@@ -24,6 +24,7 @@ class Module
   def method_added(name)
     return if !defined?(@current_typesig) or @current_typesig.nil?
     own_specific_method_variations = (method_variations[name] ||= [])
+    own_specific_method_variations.reject! { |var| var[0] == @current_typesig }
     own_specific_method_variations << [@current_typesig, 0, self, instance_method(name), nil, nil]
     @current_typesig = nil
     
@@ -102,5 +103,17 @@ class Module
         end
       end
     end
+  end
+end
+
+class Object
+  typesig Object
+  alias_method :==, :==
+end
+
+class Exception
+  alias_method :full_backtrace, :backtrace
+  def backtrace
+    full_backtrace && full_backtrace.reject { |bt| bt.include?(__FILE__) }
   end
 end

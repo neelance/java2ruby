@@ -1,19 +1,28 @@
-class ClassLoaderBase
-  def import_classes(target_module, package_path)
-    old_target_module = @target_module
-    begin
-      @target_module = target_module
-      call_loader_proc package_path
-    ensure
-      @target_module = old_target_module
-    end
+module RJava::ClassLoading
+  @@class_paths = []
+
+  def self.add_class_path(*layer_paths)
+    @@class_paths << layer_paths
+    import_classes Object, "", layer_paths
   end
-  
-  def list_paths(*paths)
+
+  def self.bootstrap_class_paths
+    paths = []
+    @@class_paths.each do |layer_paths|
+      $:.each do |load_path|
+        full_path = File.expand_path(layer_paths.first, load_path)
+        paths << full_path if File.exist?(full_path)
+      end
+    end
+    paths
+  end
+
+  def self.import_classes(target_module, package_path, layer_paths)
     dirs = []
     names = []
-    paths.each do |search_path|
-      if File.exists? search_path
+    $:.each do |load_path|
+      search_path = "#{load_path}/#{layer_paths.first}/#{package_path}"
+      if File.directory? search_path
         Dir.entries(search_path).each do |entry|
           next if entry == "." or entry == ".."
           if File.directory? File.join(search_path, entry)
@@ -26,49 +35,44 @@ class ClassLoaderBase
     end
     dirs.uniq!
     names.uniq!
-    [dirs, names]
-  end
-  
-  def import_package(dir, package_path)
-    name = RJava.ruby_constant_name(dir).to_sym
-    sub_package_path = File.join package_path, dir
-    if @target_module.const_defined? name
-      import_classes @target_module.const_get(name), sub_package_path
-    else
-      target_module = @target_module
-      generator = @target_module.lazy_constants[name] || lambda { target_module.const_set name, Module.new }
-      @target_module.lazy_constants[name] = lambda {
-        mod = generator.call
-        import_classes mod, sub_package_path
-        mod
+    
+    dirs.each do |dir|
+      name = RJava.ruby_constant_name(dir).to_sym
+      sub_package_path = File.join package_path, dir
+      if target_module.const_defined? name
+        import_classes target_module.const_get(name), sub_package_path, layer_paths
+      else
+        target_module = target_module
+        target_module.lazy_constants[name] ||= lambda {
+          mod = Module.new
+          @@class_paths.each do |cur_layer_paths|
+            import_classes mod, sub_package_path, cur_layer_paths
+          end
+          target_module.const_set name, mod
+        }
+      end
+    end
+    
+    names.each do |name|
+      target_module.lazy_constants[name.to_sym] ||= lambda {
+        file_path = "#{package_path}/#{name}.rb"
+        loadable_files = layer_paths.map { |layer_path| "#{layer_path}/#{file_path}" }.select { |file| $:.any? { |load_path| File.exist?("#{load_path}/#{file}") } }
+        if not loadable_files.empty?
+         require(*loadable_files)
+        elsif is_jruby? or JavaUtilities.get_java_class(java_class_name)
+          java_class_name = "#{package_path.gsub("/", ".")}.#{name}"
+          puts "using java proxy: #{java_class_name}" if $rjava_verbose
+          RJava.create_java_proxy sym, java_class_name, target_module
+        else
+          raise LoadError, name
+        end
       }
     end
-  end
-  
-  def import_class(name, *files)
-    @target_module.lazy_constants[name.to_sym] = lambda { require(*files) }
-  end
-  
-  def import_java_class(name, java_class_name)
-    return false if not is_jruby? or not JavaUtilities.get_java_class(java_class_name)
-    
-    @target_class.lazy_constants[name.to_sym] = lambda {
-      puts "using java proxy: #{java_class_name}" if $rjava_verbose
-      RJava.create_java_proxy sym, java_class_name, @target_class
-    }
-    true
   end
 end
 
 module Kernel
-  def add_class_loader(&loader_proc)
-    loader = ClassLoaderBase.new
-    loader_class = (class << loader; self; end)
-    loader_class.class_eval do
-      define_method :call_loader_proc, &loader_proc
-    end    
-    loader.import_classes Object, ""
+  def add_class_path(*layer_paths)
+    RJava::ClassLoading.add_class_path *layer_paths
   end
 end
-
-require "jre4ruby" # TODO should not be here

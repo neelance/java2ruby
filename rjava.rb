@@ -149,6 +149,9 @@ require "rjava/class_module"
 require "rjava/local_class"
 require "rjava/extended_require"
 require "rjava/class_loading"
+
+require "jre4ruby" # TODO should not be here
+
 require "rjava/java_base"
 require "rjava/char_array"
 require "rjava/jni/jni"

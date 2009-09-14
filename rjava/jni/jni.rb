@@ -304,11 +304,11 @@ module JNI
   end
   
   def self.load_library(path)
-    raise if not File.exist? path
+    raise LoadError, path if not File.exist? path
     @@lib_files << path
     ffi_lib(*@@lib_files)
   end
-  ffi_convention "stdcall"
+
   def self.native_method(name, arg_types, return_type)
    (class << self; self; end).define_method(name) { |*args|
       begin

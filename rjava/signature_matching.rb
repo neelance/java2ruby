@@ -5,7 +5,7 @@ class Vararg
     @type = type
   end
 end
-
+$typesig_time = 0
 class Module
   public :define_method, :alias_method
   
@@ -14,7 +14,8 @@ class Module
   end
 
   def typesig(*sig, &block)
-    @current_typesig = block || sig
+    sig << block if block
+    @current_typesig = sig
   end
   
   def method_variations
@@ -24,8 +25,13 @@ class Module
   def method_added(name)
     return if !defined?(@current_typesig) or @current_typesig.nil?
     own_specific_method_variations = (method_variations[name] ||= [])
-    own_specific_method_variations.reject! { |var| var[0] == @current_typesig }
-    own_specific_method_variations << [@current_typesig, 0, self, instance_method(name), nil, nil]
+    data = [@current_typesig, 0, self, instance_method(name), nil, nil]
+    if @current_typesig.first == :precedence
+      @current_typesig.shift
+      own_specific_method_variations.unshift data
+    else
+      own_specific_method_variations << data
+    end
     @current_typesig = nil
     
     specific_method_variations = []
@@ -43,7 +49,7 @@ class Module
       define_method name do |*args|
         size_hash = {}
         specific_method_variations.reverse_each do |var|
-          var[0] = var[0].call if var[0].is_a?(Proc)
+          var[0] = var[0].first.call if var[0].first.is_a?(Proc)
           var[4] ||= begin
             var_name = "#{name}_#{var[0].__id__.abs}".to_sym
             var[2].define_method var_name, var[3]
@@ -70,8 +76,12 @@ class Module
           
           cache = {}
           method = cls.define_method name do |*args|
-            classes = args.map { |arg| arg.class }
-            var_name = cache[classes]
+            current_cache = cache
+            args.each do |arg|
+              current_cache = (current_cache[arg.class] ||= {})
+            end
+            var_name = current_cache[nil]
+            
             if not var_name
               arg_count = args.size
               find_var = lambda { |hash|
@@ -95,7 +105,7 @@ class Module
               raise ArgumentError if not matching_var
 
               var_name = matching_var[4]
-              cache[classes] = var_name
+              current_cache[nil] = var_name
             end
             __send__ var_name, *args
           end
@@ -108,7 +118,7 @@ end
 
 class Object
   typesig Object
-  alias_method :==, :==
+  define_method :==, instance_method(:==)
 end
 
 class Exception

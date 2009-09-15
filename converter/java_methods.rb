@@ -7,7 +7,7 @@ module Java2Ruby
     def initialize(parent_module, static, name, parameters, return_type, body, generic_classes)
       super parent_module, static
       @name = name
-      @ruby_name = @name && ruby_method_name(@name)
+      @ruby_name = @name && ruby_method_name(@name, false)
       @parameters = parameters
       @return_type = return_type
       @body = body

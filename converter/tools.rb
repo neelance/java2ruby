@@ -125,8 +125,8 @@ module Java2Ruby
       @converter.ruby_field_name name
     end
     
-    def ruby_method_name(name)
-      @converter.ruby_method_name name
+    def ruby_method_name(name, call = true)
+      @converter.ruby_method_name name, call
     end  
   end
   

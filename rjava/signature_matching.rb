@@ -107,6 +107,7 @@ class Module
               var_name = matching_var[4]
               current_cache[nil] = var_name
             end
+#puts name
             __send__ var_name, *args
           end
           method.call(*args)
@@ -119,6 +120,13 @@ end
 class Object
   typesig Object
   define_method :==, instance_method(:==)
+  
+  alias_method :method_really_missing, :method_missing
+  def method_missing(name, *args, &block)
+    orig_name = name.to_s.split("___").first
+    return __send__ orig_name, *args, &block
+    method_really_missing name, *args
+  end
 end
 
 class Exception

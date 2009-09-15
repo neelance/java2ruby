@@ -1,34 +1,34 @@
 module Java2Ruby
   class Converter
-    def match_compilationUnit(basename)
+    def match_compilationUnit
       puts_output "require \"rjava\""
       puts_output ""
       
       match :compilationUnit do
-        package = JavaPackage.new
+        @package = JavaPackage.new
         if try_match :packageDeclaration do
             match "package"
             match :qualifiedName do
               loop do
-                package << match_name
+                @package << match_name
                 try_match "." or break
               end
             end
             match ";"
           end
-          puts_output "module #{package.ruby_name}"
+          puts_output "module #{@package.ruby_name}"
           indent_output do
-            match_compilation_unit_content basename, package
+            match_compilation_unit_content
           end
           puts_output "end"
         else
-          match_compilation_unit_content basename, package
+          match_compilation_unit_content
         end
       end
     end
     
-    def match_compilation_unit_content(basename, package)
-      imports_module = JavaImportsModule.new package, basename, converter
+    def match_compilation_unit_content
+      imports_module = JavaImportsModule.new @package, @basename, converter
 
       loop_match :importDeclaration do
         match "import"
@@ -56,7 +56,7 @@ module Java2Ruby
         or begin
           java_module = match_classOrInterfaceDeclaration imports_module
           java_modules << java_module
-          base_module = java_module if java_module.name == basename
+          base_module = java_module if java_module.name == @basename
         end
       end
       

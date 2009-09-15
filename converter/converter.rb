@@ -97,6 +97,7 @@ module Java2Ruby
       @no_constants = conversion_rules["no_constants"] || []
       @constant_name_mapping = conversion_rules["constant_name_mapping"] || {}
       @field_name_mapping = conversion_rules["field_name_mapping"] || {}
+      @explicit_calls = conversion_rules["explicit_calls"] || {}
       @basename = File.basename @java_file, ".java"
       @ruby_file = "#{ruby_dir || File.dirname(@java_file)}/#{JavaClassType.new self, nil, nil, nil, [@basename]}.rb"
       @converter_id = converter_id
@@ -118,7 +119,7 @@ module Java2Ruby
     def ruby_class_name(package, names)
       if @prefix_class_names.include?(names.first)
         name_parts = []
-        name_parts << @package.ruby_name unless @package.nil? or @package.root?
+        name_parts << package.ruby_name unless package.nil? or package.root?
         name_parts << "#{@prefix}#{names.shift}"
         name_parts.concat names
         name_parts.join "::"
@@ -131,8 +132,13 @@ module Java2Ruby
       @field_name_mapping[name] || RJava.lower_name(name)
     end
     
-    def ruby_method_name(name)
-      RJava.ruby_method_name name
+    def ruby_method_name(name, call = true)
+      if call and @explicit_calls.include? name
+        @explicit_call_counter += 1
+        "#{RJava.ruby_method_name name}___#{@package.names.join '_'}_#{RJava.lower_name @basename}_#{@explicit_call_counter}"
+      else
+        RJava.ruby_method_name name
+      end
     end
     
     def input
@@ -159,7 +165,8 @@ module Java2Ruby
         @elements = [parse_tree]
         @next_element_index = 0
         @next_element = @elements.first
-        compilation_unit = CompilationUnit.new self, @basename 
+        @explicit_call_counter = -1
+        compilation_unit = CompilationUnit.new self
         generate_indented_output "", compilation_unit.output_parts.first, 0
       end
     end
@@ -331,14 +338,13 @@ module Java2Ruby
   end
   
   class CompilationUnit < OutputGenerator
-    def initialize(converter, basename)
+    def initialize(converter)
       super converter
-      @basename = basename
     end
     
     def write_output
       @converter.match "<grammar Java>".to_sym do
-        @converter.match_compilationUnit @basename
+        @converter.match_compilationUnit
       end
     end
     

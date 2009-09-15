@@ -1,6 +1,6 @@
 class Vararg
   attr_reader :type
-
+  
   def initialize(type)
     @type = type
   end
@@ -12,7 +12,7 @@ class Module
   def can_be_nil?
     true
   end
-
+  
   def typesig(*sig, &block)
     sig << block if block
     @current_typesig = sig
@@ -22,58 +22,69 @@ class Module
     @method_variations ||= {}
   end
   
+  def specific_method_variations(name)
+    if name == :initialize
+      method_variations[name]
+    else
+      variations = []
+      ancestors.each do |ancestor|
+        ancestor_method_variations = ancestor.method_variations[name]
+        variations.concat ancestor_method_variations if ancestor_method_variations
+      end
+      variations
+    end
+  end
+  
+  def ranked_variations(name)
+    @ranked_variations_hash ||= {}
+    @ranked_variations_hash[name] ||= begin
+      variations = {}
+      specific_method_variations(name).reverse_each do |var|
+        var[0] = var[0].first.call if var[0].first.is_a?(Proc)
+        var[4] ||= begin
+          var_name = "#{name}_#{var[0].__id__.abs}".to_sym
+          var[2].define_method var_name, var[3]
+          var_name
+        end
+        var[5] ||= var[0].map { |t| t.is_a?(Vararg) ? t.type : t }
+        
+        vararg = !var[0].empty? && var[0].last.is_a?(Vararg)
+        specific_size_variations = (variations[vararg ? :varargs : var[0].size] ||= [])
+        specific_size_variations.reject! { |v| v[0] == var[0] }
+        specific_size_variations.unshift var
+      end
+      variations.each do |size, specific_size_variations|
+        specific_size_variations.each_index { |i| specific_size_variations[i][1] = i }
+        specific_size_variations.sort! { |a, b|
+          a[0] <=> b[0] || a[1] <=> b[1]
+        }
+      end
+      variations
+    end
+  end
+  
   def method_added(name)
     return if !defined?(@current_typesig) or @current_typesig.nil?
-    own_specific_method_variations = (method_variations[name] ||= [])
+    method_variations[name] ||= []
     data = [@current_typesig, 0, self, instance_method(name), nil, nil]
     if @current_typesig.first == :precedence
       @current_typesig.shift
-      own_specific_method_variations.unshift data
+      method_variations[name].unshift data
     else
-      own_specific_method_variations << data
+      method_variations[name] << data
     end
     @current_typesig = nil
     
-    specific_method_variations = []
-    if name == :initialize
-      specific_method_variations.concat own_specific_method_variations
-    else
-      ancestors.each do |ancestor|
-        ancestor_method_variations = ancestor.method_variations[name]
-        specific_method_variations.concat ancestor_method_variations if ancestor_method_variations
-      end
-    end
-    
-    if specific_method_variations.size > 1
+    if specific_method_variations(name).size > 1
       cls = self
+      
       define_method name do |*args|
-        size_hash = {}
-        specific_method_variations.reverse_each do |var|
-          var[0] = var[0].first.call if var[0].first.is_a?(Proc)
-          var[4] ||= begin
-            var_name = "#{name}_#{var[0].__id__.abs}".to_sym
-            var[2].define_method var_name, var[3]
-            var_name
-          end
-          var[5] ||= var[0].map { |t| t.is_a?(Vararg) ? t.type : t }
-
-          vararg = !var[0].empty? && var[0].last.is_a?(Vararg)
-          specific_size_variations = (size_hash[vararg ? :varargs : var[0].size] ||= [])
-          specific_size_variations.reject! { |v| v[0] == var[0] }
-          specific_size_variations.unshift var
-        end
-        if size_hash.inject(0) { |v, (size, specific_size_variations)| v + specific_size_variations.size } == 1
-          single_variation = size_hash.values.first.first
+        ranked_variations = cls.ranked_variations(name)
+        if ranked_variations.inject(0) { |v, (size, specific_size_variations)| v + specific_size_variations.size } == 1
+          single_variation = ranked_variations.values.first.first
           cls.alias_method name, single_variation[4]
           __send__ single_variation[4], *args
         else
-          size_hash.each do |size, specific_size_variations|
-            specific_size_variations.each_index { |i| specific_size_variations[i][1] = i }
-            specific_size_variations.sort! { |a, b|
-              a[0] <=> b[0] || a[1] <=> b[1]
-            }
-          end
-          
           cache = {}
           method = cls.define_method name do |*args|
             current_cache = cache
@@ -83,37 +94,40 @@ class Module
             var_name = current_cache[nil]
             
             if not var_name
-              arg_count = args.size
-              find_var = lambda { |hash|
-                hash && hash.find { |var|
-                  sig_classes = var[5]
-                  matching = true
-                  arg_count.times do |i|
-                    arg = args[i]
-                    sig_class = sig_classes[i] || sig_classes.last
-                    if not ((arg.nil? and sig_class.can_be_nil?) or arg.is_a?(sig_class))
-                      matching = false
-                      break
-                    end
-                  end
-                  matching
-                }
-              }
-
-              matching_var = find_var.call size_hash[arg_count]
-              matching_var ||= find_var.call size_hash[:varargs]
-              raise ArgumentError if not matching_var
-
-              var_name = matching_var[4]
+              var_name = Module.match_signature ranked_variations, args
               current_cache[nil] = var_name
             end
-#puts name
             __send__ var_name, *args
           end
           method.call(*args)
         end
       end
     end
+  end
+  
+  def self.match_signature(ranked_variations, args)
+    arg_count = args.size
+    find_var = lambda { |hash|
+      hash && hash.find { |var|
+        sig_classes = var[5]
+        matching = true
+        arg_count.times do |i|
+          arg = args[i]
+          sig_class = sig_classes[i] || sig_classes.last
+          if not ((arg.nil? and sig_class.can_be_nil?) or arg.is_a?(sig_class))
+            matching = false
+            break
+          end
+        end
+        matching
+      }
+    }
+    
+    matching_var = find_var.call ranked_variations[arg_count]
+    matching_var ||= find_var.call ranked_variations[:varargs]
+    raise ArgumentError if not matching_var
+    
+    matching_var[4]
   end
 end
 
@@ -123,9 +137,16 @@ class Object
   
   alias_method :method_really_missing, :method_missing
   def method_missing(name, *args, &block)
-    orig_name = name.to_s.split("___").first
-    return __send__ orig_name, *args, &block
-    method_really_missing name, *args
+    orig_name = name.to_s.split("___").first.to_sym
+    singleton_class = (class << self; self; end)
+    owner = singleton_class.ancestors.find { |ancestor| ancestor.instance_methods.include? orig_name }
+    if owner
+      var_name = Module.match_signature(owner.ranked_variations(orig_name), args)
+      owner.alias_method name, var_name
+      __send__ var_name, *args, &block
+    else
+      method_really_missing name, *args
+    end
   end
 end
 

@@ -36,9 +36,8 @@ module Kernel
     end
     
     if File.extname(file) == ".rb"
-      return false if $".include? file # "
-      puts "requiring: #{file}" if $rjava_verbose
-      original_require(file)
+      result = original_require(file)
+      puts "required: #{file}" if result and $rjava_verbose
       return true
     end
     

@@ -134,11 +134,10 @@ class Class
     parts = name.split(".")
     cls = Object
     RJava.ruby_class_name(parts).each do |ruby_name|
+      raise Java::Lang::ClassNotFoundException.new if not cls.const_defined? ruby_name
       cls = cls.const_get ruby_name
     end
     cls
-  rescue NameError
-    raise Java::Lang::ClassNotFoundException.new
   end
   
   alias_method :new_instance, :new
@@ -170,18 +169,13 @@ end
 
 class String
   include_const Java::Lang, :Character
+  UTF_8 = Encoding.find("UTF-8")
   
   def self.new(str = nil, offset = nil, length = nil, charset = nil)
     if not str
       ""
     elsif str.class == CharArray
-      if str.data
-        offset ? str.data[offset, length] : str.data
-      else
-        new_str = UnicodeString.new ""
-        new_str.chars.concat str.array[offset, length]
-        new_str
-      end
+      offset ? str.data[offset, length] : str.data
     elsif defined? ArrayJavaProxy and str.is_a? ArrayJavaProxy
       str = String.from_java_bytes str
       offset ? str[offset, length] : str
@@ -229,11 +223,7 @@ class String
   
   def get_chars(src_begin, src_end, dst, dst_begin)
     if dst.class == CharArray
-      if dst.data
-        dst.data[dst_begin, src_end - src_begin] = self[src_begin...src_end]
-      else
-        dst.array[dst_begin, src_end - src_begin] = self[src_begin...src_end].split("").map { |c| c.ord }
-      end
+      dst.data[dst_begin, src_end - src_begin] = self[src_begin...src_end]
     else
       dst[dst_begin, src_end - src_begin] = (src_begin...src_end).map { |i| Character.new self[i].ord }
     end
@@ -245,10 +235,6 @@ class String
   
   def index_of(t, offset = 0)
     index(t.to_s, offset) || -1
-  end
-  
-  def to_u
-    UnicodeString.new self
   end
   
   def hash_code
@@ -300,68 +286,170 @@ class String
 	    self[toffset, len] == other[ooffset, len]
     end
   end
-end
 
-class UnicodeString # TODO try to use normal binary encoded strings in ruby 1.9
-  include_const Java::Lang, :Character
-  attr_reader :chars
-  
-  def initialize(string)
-    @chars = []
-    0.upto(string.size - 1) do |i|
-      @chars << string[i].ord
-    end
+  def int_chars
+    chars.map { |c| c.ord }
   end
 
-  def is_a?(cls)
-    cls == String
-  end
-  
-  def size
-    @chars.size
-  end
-  
-  alias_method :length, :size
-  
-  def char_at(i)
-    Character.new @chars[i]
-  end
-  
   def to_char_array
     ca = CharArray.new 0
-    ca[0, 0] = @chars
+    ca[0, 0] = int_chars
     ca
   end
 
-  def get_chars(src_begin, src_end, dst, dst_begin)
-    if dst.is_a? CharArray
-      dst.use_array
-      dst.array[dst_begin, src_end - src_begin] = @chars[src_begin...src_end]
+  def get_int_chars(index, a2 = nil)
+    if a2
+      self[index, a2].chars.map { |c| c.ord }
+    elsif index.is_a? Range
+      self[index].chars.map { |c| c.ord }
     else
+      self[index].ord
+    end
+  end
+
+  def set_int_chars(index, a2, a3 = nil)
+    if a3
+      self[index, a2] = a3.map { |c| c.chr(UTF_8) }.join
+    elsif index.is_a? Range
+      self[index] = a2.map { |c| c.chr(UTF_8) }.join
+    else
+      self[index] = a2.chr(UTF_8)
+    end
+  end
+
+  def get_chars(src_begin, src_end, dst, dst_begin)
+    dst[dst_begin, src_end - src_begin] = get_int_chars(src_begin...src_end)
+  end
+
+  alias_method :string_push, :<<
+  def <<(other)
+    if encoding == String::UTF_8 and other.is_a? String and other.encoding != String::UTF_8
+      other.each_char do |c|
+        string_push c.ord
+      end
+    else
+      string_push other
+    end
+    self
+  end
+
+  if is_ruby_1_9?
+    def to_u
+      if encoding != String::UTF_8
+        source = self.dup
+        clear
+        force_encoding UTF_8
+        self << source
+      end
+      self
+    end
+  else
+    def to_u
+      @chars = int_chars
+      extend UnicodeString
+      self
+    end
+  end
+end
+
+if not is_ruby_1_9?
+  module UnicodeString
+    include_const Java::Lang, :Character
+    attr_accessor :chars
+
+    (String.instance_methods - Object.instance_methods).each do |method|
+      define_method(method) do
+        raise NotImplementedError
+      end
+    end
+
+    def dup
+      s = ""
+      s.extend UnicodeString
+      s.chars = @chars.dup
+      s
+    end
+    
+    def size
+      @chars.size
+    end
+    
+    alias_method :length, :size
+
+    def to_char_array
+      ca = CharArray.new 0
+      ca[0, 0] = @chars
+      ca
+    end
+
+    def get_chars(src_begin, src_end, dst, dst_begin)
       dst[dst_begin, src_end - src_begin] = @chars[src_begin...src_end]
     end
-  end
-  
-  def <<(other)
-    case other
-    when Numeric
-      @chars << other
-    when UnicodeString
-      @chars.concat other.chars
-    when String
-      self << UnicodeString.new(other)
-    else
-      raise ArgumentError
+
+    def [](index, a2 = nil)
+      s = ""
+      s.extend UnicodeString
+      s.chars = if a2
+        @chars[index, a2].map { |c| c.to_int }
+      elsif index.is_a? Range
+        @chars[index].map { |c| c.to_int }
+      else
+        [@chars[index].to_int]
+      end
+      s
     end
-    self
-  end
-  
-  def +(other)
-    self.dup << other
-  end
-  
-  def to_u
-    self
+
+    def char_at(i)
+      Character.new @chars[i]
+    end
+    
+    def <<(other)
+      case other
+      when Numeric
+        @chars << other
+      when String, UnicodeString
+        @chars.concat other.int_chars
+      else
+        raise ArgumentError
+      end
+      self
+    end
+
+    def []=(index, a2, a3 = nil)
+      if a3
+        @chars[index, a2] = a3.int_chars
+      elsif index.is_a? Range
+        @chars[index] = a2.int_chars
+      else
+        @chars[index] = a2.ord
+      end
+    end
+    
+    def +(other)
+      self.dup << other
+    end
+    
+    def to_u
+      self
+    end
+
+    def int_chars
+      @chars.dup
+    end
+
+    def set_int_chars(index, a2, a3 = nil)
+      if a3
+        @chars[index, a2] = a3
+      elsif index.is_a? Range
+        @chars[index] = a2
+      else
+        @chars[index] = a2
+      end
+    end
+
+    def ord
+      @chars[0]
+    end
   end
 end
 

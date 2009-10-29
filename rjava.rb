@@ -2,7 +2,19 @@ $rjava_verbose = $*.delete("--rjava-verbose")
 
 module RJava
   RUBY_KEYWORDS = %w{alias and begin break case class def defined do else elsif end ensure false for if in module next nil not or redo rescue retry return self super then true undef unless until when while yield}
-
+  
+  begin
+    cpu, os = RUBY_PLATFORM.split "-"
+    cpu = "x86_32" if cpu =~ /^i\d86$/
+    os = case os
+    when /^darwin(\d+)?$/ then "darwin"
+    else os
+    end
+    CPU = cpu
+    OS = os
+    PLATFORM = "#{os}-#{cpu}"
+  end
+  
   def self.create_java_proxy(constant_name, class_name, target)
     proxy_class = JavaUtilities.create_proxy_class(constant_name, JavaUtilities.get_java_class(class_name), target)
     if proxy_class.is_a? Class
@@ -122,7 +134,7 @@ module RJava
       ruby_constant_name name
     end
   end
-
+  
   def self.cast_to_string(v)
     v.nil? ? nil : v.to_s
   end
@@ -155,4 +167,4 @@ require "jre4ruby" # TODO should not be here
 require "rjava/java_base"
 require "rjava/char_array"
 require "rjava/jni/jni"
-require "rjava/jni/jni_structs_#{RUBY_PLATFORM}"
+require "rjava/jni/jni_structs_#{RJava::CPU}"

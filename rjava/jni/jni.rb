@@ -17,28 +17,28 @@ class NilClass
 end
 
 module JniArrayFunctions
-  def jni_get_elements(type, boolean)
+  def jni_get_elements(type, put_method_sym, boolean)
     @jni_ptr ||= begin
       @jni_ptr_ref_count = 0
       @jni_ptr_type = type
       FFI::MemoryPointer.new type, size
     end
     raise ArgumentError if type != @jni_ptr_type
-    @jni_ptr.__send__ "put_array_of_#{type}", 0, boolean ? self.map{ |b| b ? 1 : 0 } : self.to_a
+    @jni_ptr.__send__ put_method_sym, 0, boolean ? self.map{ |b| b ? 1 : 0 } : self.to_a
     @jni_ptr_ref_count += 1
     @jni_ptr
   end
     
-  def jni_release_elements(type, boolean, ref_ptr)
+  def jni_release_elements(type, get_method_sym, boolean, ref_ptr)
     raise ArgumentError if type != @jni_ptr_type
-    array = @jni_ptr.__send__ "get_array_of_#{type}", 0, size
+    array = @jni_ptr.__send__ get_method_sym, 0, size
     clear
     concat(boolean ? array.map{ |b| b != 0 } : array)
     @jni_ptr_ref_count -= 1
-    if @jni_ptr_ref_count == 0
-      @jni_ptr.free
-      @jni_ptr = nil
-    end
+    #if @jni_ptr_ref_count == 0 # TODO commented out to avoid much gc, but maybe a memory leak
+    #  @jni_ptr.free
+    #  @jni_ptr = nil
+    #end
   end
 end
 
@@ -67,12 +67,22 @@ end
 
 module JNI
   extend FFI::Library
+
+  class FieldID
+    attr_reader :reader_sym, :writer_sym
+
+    def initialize(name)
+      lower_name = RJava.lower_name name
+      @reader_sym = "attr_#{lower_name}".to_sym
+      @writer_sym = "attr_#{lower_name}=".to_sym
+    end
+  end
   
   class MethodID
-    attr_reader :name, :arg_types, :return_type
+    attr_reader :name_sym, :arg_types, :return_type
     
     def initialize(name, sig)
-      @name = RJava.ruby_method_name(name).to_sym
+      @name_sym = RJava.ruby_method_name(name).to_sym
       raise ArgumentError if not sig =~ /^\((.*?)\)(.)$/
       @return_type = parse_type $2
       @arg_types = $1.split("").map { |char| parse_type char }
@@ -137,7 +147,7 @@ module JNI
     end
     
     map_function :GetMethodID, [:long, :long, :string, :string], :long do |env, object_id, name, sig|
-      method_id = MethodID.new(name, sig)
+      method_id = MethodID.new name, sig
       @@global_refs << method_id
       method_id.jni_id
     end
@@ -152,35 +162,37 @@ module JNI
     type_map.each do |name, type|
       map_function "Call#{name}MethodV".to_sym, [:long, :long, :long, :long], type do |env, object_id, method_id, arg_list|
         method_id = ObjectSpace._id2ref method_id
-        ObjectSpace._id2ref(object_id).__send__ method_id.name, *JNI.process_va_arg(arg_list, method_id.arg_types)
+        JNI.call_with_va_arg ObjectSpace._id2ref(object_id), method_id.name_sym, arg_list, method_id.arg_types
       end
     end
     
     map_function :GetFieldID, [:long, :long, :string, :string], :long do |env, class_id, name, type|
-      RJava.lower_name(name).to_sym.__id__
+      field_id = FieldID.new name
+      @@global_refs << field_id
+      field_id.__id__
     end
 
     map_function "GetObjectField".to_sym, [:long, :long, :long], :long do |env, object_id, field_id|
-      ObjectSpace._id2ref(object_id).__send__("attr_#{ObjectSpace._id2ref(field_id)}").jni_id
+      ObjectSpace._id2ref(object_id).__send__(ObjectSpace._id2ref(field_id).reader_sym).jni_id
     end
     
     map_function "GetBooleanField".to_sym, [:long, :long, :long], :int8 do |env, object_id, field_id|
-      ObjectSpace._id2ref(object_id).__send__("attr_#{ObjectSpace._id2ref(field_id)}") ? 1 : 0
+      ObjectSpace._id2ref(object_id).__send__(ObjectSpace._id2ref(field_id).reader_sym) ? 1 : 0
     end
     
     type_map.each do |name, type|
       map_function "Get#{name}Field".to_sym, [:long, :long, :long], type do |env, object_id, field_id|
-        ObjectSpace._id2ref(object_id).__send__ "attr_#{ObjectSpace._id2ref(field_id)}"
+        ObjectSpace._id2ref(object_id).__send__ ObjectSpace._id2ref(field_id).reader_sym
       end
     end
     
     map_function "SetBooleanField".to_sym, [:long, :long, :long, :int8], :void do |env, object_id, field_id, value|
-      ObjectSpace._id2ref(object_id).__send__ "attr_#{ObjectSpace._id2ref(field_id)}=", value != 0
+      ObjectSpace._id2ref(object_id).__send__ ObjectSpace._id2ref(field_id).writer_sym, value != 0
     end
     
     type_map.each do |name, type|
       map_function "Set#{name}Field".to_sym, [:long, :long, :long, type], :void do |env, object_id, field_id, value|
-        ObjectSpace._id2ref(object_id).__send__ "attr_#{ObjectSpace._id2ref(field_id)}=", value
+        ObjectSpace._id2ref(object_id).__send__ ObjectSpace._id2ref(field_id).writer_sym, value
       end
     end
     
@@ -200,7 +212,7 @@ module JNI
     type_map.each do |name, type|
       map_function "CallStatic#{name}MethodV".to_sym, [:long, :long, :long, :long], type do |env, class_id, method_id, arg_list|
         method_id = ObjectSpace._id2ref method_id
-        ObjectSpace._id2ref(class_id).__send__ method_id.name, *JNI.process_va_arg(arg_list, method_id.arg_types)
+        JNI.call_with_va_arg ObjectSpace._id2ref(class_id), method_id.name_sym, arg_list, method_id.arg_types
       end
     end
     
@@ -221,34 +233,38 @@ module JNI
     end
     
     map_function "GetBooleanArrayElements".to_sym, [:long, :long, :long], :pointer do |env, array_id, flag|
-      ObjectSpace._id2ref(array_id).jni_get_elements(:int8, true)
+      ObjectSpace._id2ref(array_id).jni_get_elements(:int8, :put_array_of_int8, true)
     end
     
     type_map.each do |name, type|
+      put_method_sym = "put_array_of_#{type}".to_sym
       map_function "Get#{name}ArrayElements".to_sym, [:long, :long, :long], :pointer do |env, array_id, flag|
-        ObjectSpace._id2ref(array_id).jni_get_elements(type, false)
+        ObjectSpace._id2ref(array_id).jni_get_elements(type, put_method_sym, false)
       end
     end
     
     map_function "ReleaseBooleanArrayElements".to_sym, [:long, :long, :pointer, :long], :void do |env, array_id, ptr, flag|
-      ObjectSpace._id2ref(array_id).jni_release_elements(:int8, true, ptr)
+      ObjectSpace._id2ref(array_id).jni_release_elements(:int8, :get_array_of_int8, true, ptr)
     end
     
     type_map.each do |name, type|
+      get_method_sym = "get_array_of_#{type}".to_sym
       map_function "Release#{name}ArrayElements".to_sym, [:long, :long, :pointer, :long], :void do |env, array_id, ptr, flag|
-        ObjectSpace._id2ref(array_id).jni_release_elements(type, false, ptr)
+        ObjectSpace._id2ref(array_id).jni_release_elements(type, get_method_sym, false, ptr)
       end
     end
 
     type_map.each do |name, type|
+      put_method_sym = "put_array_of_#{type}".to_sym
       map_function "Get#{name}ArrayRegion".to_sym, [:long, :long, :int32, :int32, :pointer], :void do |env, array_id, start, length, ptr|
-        ptr.__send__ "put_array_of_#{type}", 0, ObjectSpace._id2ref(array_id)[start, length]
+        ptr.__send__ put_method_sym, 0, ObjectSpace._id2ref(array_id)[start, length]
       end
     end
     
     type_map.each do |name, type|
+      get_method_sym = "get_array_of_#{type}".to_sym
       map_function "Set#{name}ArrayRegion".to_sym, [:long, :long, :int32, :int32, :pointer], :void do |env, array_id, start, length, ptr|
-        ObjectSpace._id2ref(array_id)[start, length] = ptr.__send__ "get_array_of_#{type}", 0, length
+        ObjectSpace._id2ref(array_id)[start, length] = ptr.__send__ get_method_sym, 0, length
       end
     end
     
@@ -325,23 +341,32 @@ module JNI
     }
   end
   
-  load_library File.join(File.dirname(__FILE__), "jni_tools_#{RUBY_PLATFORM}.so")
-  
-  if RUBY_PLATFORM == "x86_64-linux"
-    attach_function :va_arg_int32_direct, [:long], :int32
-    attach_function :va_arg_int64_direct, [:long], :int64
+  module VaArgTools
+    extend FFI::Library
+    ffi_lib File.join(File.dirname(__FILE__), "jni_tools_#{RJava::PLATFORM}.so")
+  end
 
-    def self.process_va_arg(arg_list, arg_types)
-      arg_types.map { |arg_type| JNI.__send__("va_arg_#{arg_type}_direct", arg_list) }
+  @@va_arg_list = [] # TODO not thread safe
+  if RUBY_PLATFORM == "x86_64-linux"
+    VaArgTools.attach_function :int32, :va_arg_int32_direct, [:long], :int32
+    VaArgTools.attach_function :int64, :va_arg_int64_direct, [:long], :int64
+
+    method_names = {}
+    def self.call_with_va_arg(target, method, arg_list, arg_types)
+      @@va_arg_list.clear
+      arg_types.each { |arg_type| @@va_arg_list << VaArgTools.__send__(arg_type, arg_list) }
+      target.__send__ method, *@@va_arg_list
     end
   else
-    attach_function :va_arg_int32_pointer, [:pointer], :int32
-    attach_function :va_arg_int64_pointer, [:pointer], :int64
+    VaArgTools.attach_function :int32, :va_arg_int32_pointer, [:pointer], :int32
+    VaArgTools.attach_function :int64, :va_arg_int64_pointer, [:pointer], :int64
 
-    def self.process_va_arg(arg_list, arg_types)
-      arg_list_ptr = FFI::MemoryPointer.new :long, 1
-      arg_list_ptr.put_long 0, arg_list
-      arg_types.map { |arg_type| JNI.__send__("va_arg_#{arg_type}_pointer", arg_list_ptr) }
+    @@va_arg_list_ptr = FFI::MemoryPointer.new :long, 1
+    def self.call_with_va_arg(target, method, arg_list, arg_types)
+      @@va_arg_list_ptr.put_long 0, arg_list
+      @@va_arg_list.clear
+      arg_types.each { |arg_type| @@va_arg_list << VaArgTools.__send__(arg_type, @@va_arg_list_ptr) }
+      target.__send__ method, *@@va_arg_list
     end
   end
 end

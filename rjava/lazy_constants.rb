@@ -30,6 +30,11 @@ class Module
   def constants
     normal_constants + lazy_constants.keys.map { |key| key }
   end
+
+  alias_method :normal_const_defined?, :const_defined?
+  def const_defined?(name)
+    normal_const_defined?(name) || lazy_constants.has_key?(name.to_sym)
+  end
   
   def const_set_lazy(name, &block)
     lazy_constants[name] = lambda { const_set name, block.call }

@@ -1,53 +1,41 @@
 class CharArray < Array.typed(Java::Char)
   Character = Java::Lang::Character
+  UTF_8 = Encoding.find("UTF-8")
   
    (instance_methods - Object.instance_methods).each do |method|
-    undef_method method
+    define_method(method) do
+      raise NotImplementedError
+    end
   end
   
-  attr_accessor :data, :array
+  attr_accessor :data
   
   def initialize(size)
     @data = "\0" * size
-    @array = nil
-  end
-  
-  def use_array
-    return if @array
-    @array = @data.split("").map { |c| c.ord }
-    @data = nil
   end
   
   def []=(index, a2, a3 = nil)
     if a3
-      use_array if not @array and a3.any? { |c| c > 255 }
-      return @array[index, a2] = a3 if @array
-      @data[index, a2] = a3.map { |c| c.chr }.join
+      @data = @data.to_u if a3.any? { |c| c > 255 }
+      @data.set_int_chars index, a2, a3
+    elsif index.is_a? Range
+      @data = @data.to_u if a2.any? { |c| c > 255 }
+      @data.set_int_chars index, a2
     else
-      if index.is_a? Range
-        use_array if not @array and a2.any? { |c| c > 255 }
-        return @array[index] = a2 if @array
-        @data[index] = a2.map { |c| c.chr }.join
-      else
-        use_array if not @array and a2 > 255
-        return @array[index] = a2 if @array
-        @data[index] = a2.chr
-      end
+      @data = @data.to_u if a2 > 255
+      @data.set_int_chars index, a2
     end
   end
   
   def [](index, length = nil)
     if length
-      return @array[index, length].map { |c| Character.new c.ord } if @array
-      data[index, length].split("").map { |c| Character.new c.ord }
+      data[index, length].chars.map { |c| Character.new c.ord }
     else
-      return Character.new @array[index] if @array
       Character.new @data[index].ord
     end
   end
   
   def size
-    return @array.size if @array
     @data.size
   end
   
@@ -56,27 +44,15 @@ class CharArray < Array.typed(Java::Char)
   end
   
   def clear
-    if @array
-      @array.clear
-    else
-      @data = ""
-    end
+    @data = ""
   end
   
   def concat(other)
-    if @array
-      @array.concat other
-    else
-      self[size, 0] = other
-    end
+    self[size, 0] = other
   end
   
   def to_a
-    if @array
-      @array
-    else
-      @data.split("").map { |c| c.ord }
-    end
+    @data.int_chars
   end
   
   def inspect

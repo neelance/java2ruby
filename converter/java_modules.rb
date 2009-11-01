@@ -449,7 +449,7 @@ module Java2Ruby
                 puts_output "include ::#{names.join('::')}"
               end
             else
-              puts_output "include_const ::#{names[0..-2].join('::')}, :#{names.last}"
+              puts_output "include_const ::#{names[0..-2].join('::')}, :#{JavaClassType.new(@converter, nil, nil, nil, [names.last])}"
             end
           end
         end

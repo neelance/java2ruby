@@ -120,7 +120,7 @@ module Java2Ruby
       @parameters.each do |name, type, array_arg|
         arg_types << type.ffi_type
       end
-      puts_output_without_comments "JNI.native_method #{native_method_name}, [#{arg_types.join(", ")}], #{@return_type.ffi_type}"
+      puts_output_without_comments "JNI.load_native_method #{native_method_name}, [#{arg_types.join(", ")}], #{@return_type.ffi_type}"
     end
     
     def write_inner_output
@@ -128,7 +128,7 @@ module Java2Ruby
       @parameters.each do |name, type, array_arg|
         jni_parameters << type.ffi_parameter_cast(converter.statement_context.resolve([name]).output_parts.first)
       end
-      puts_output @return_type.ffi_return_cast("JNI.__send__(#{native_method_name}, #{jni_parameters.join(", ")})")
+      puts_output @return_type.ffi_return_cast("JNI.call_native_method(#{native_method_name}, #{jni_parameters.join(", ")})")
     end
   end
 end

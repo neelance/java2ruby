@@ -120,6 +120,7 @@ module JNI
     type_map = [["Byte", :uint8], ["Char", :uint16], ["Short", :int16], ["Int", :int32], ["Long", :int64], ["Float", :float], ["Double", :double]]
     
     @@global_refs = []
+    @@exception = nil
 
     map_function :GetVersion, [:long], :int do |env|
       0x00010006
@@ -161,8 +162,13 @@ module JNI
     
     type_map.each do |name, type|
       map_function "Call#{name}MethodV".to_sym, [:long, :long, :long, :long], type do |env, object_id, method_id, arg_list|
-        method_id = ObjectSpace._id2ref method_id
-        JNI.call_with_va_arg ObjectSpace._id2ref(object_id), method_id.name_sym, arg_list, method_id.arg_types
+        begin
+          method_id = ObjectSpace._id2ref method_id
+          JNI.call_with_va_arg ObjectSpace._id2ref(object_id), method_id.name_sym, arg_list, method_id.arg_types
+        rescue Exception => e
+          @@exception = e
+          0
+        end
       end
     end
     
@@ -211,8 +217,13 @@ module JNI
     
     type_map.each do |name, type|
       map_function "CallStatic#{name}MethodV".to_sym, [:long, :long, :long, :long], type do |env, class_id, method_id, arg_list|
-        method_id = ObjectSpace._id2ref method_id
-        JNI.call_with_va_arg ObjectSpace._id2ref(class_id), method_id.name_sym, arg_list, method_id.arg_types
+        begin
+          method_id = ObjectSpace._id2ref method_id
+          JNI.call_with_va_arg ObjectSpace._id2ref(class_id), method_id.name_sym, arg_list, method_id.arg_types
+        rescue Exception => e
+          @@exception = e
+          0
+        end
       end
     end
     
@@ -325,7 +336,7 @@ module JNI
     ffi_lib(*@@lib_files)
   end
 
-  def self.native_method(name, arg_types, return_type)
+  def self.load_native_method(name, arg_types, return_type)
    (class << self; self; end).define_method(name) { |*args|
       begin
         attach_function name, arg_types, return_type
@@ -339,6 +350,16 @@ module JNI
       end
       __send__ name, *args
     }
+  end
+
+  def self.call_native_method(name, *args)
+    result = __send__ name, *args
+    if @@exception
+      e = @@exception
+      @@exception = nil
+      raise e
+    end
+    result
   end
   
   module VaArgTools

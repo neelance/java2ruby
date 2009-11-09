@@ -8,6 +8,10 @@ class Module
   def jni_name
     @jni_name ||= get_name.gsub(".", "_")
   end
+
+  def jni_package_name
+    @jni_package_name ||= get_name.split(".")[0..-2].join("_")
+  end
 end
 
 class NilClass
@@ -67,6 +71,18 @@ end
 
 module JNI
   extend FFI::Library
+  
+  @@lib_files = []
+  @@exception = nil
+  @@exception_handler = nil
+
+  def self.on_exception(&block)
+    @@exception_handler = block
+  end
+
+  def self.current_exception
+    @@exception
+  end
 
   class FieldID
     attr_reader :reader_sym, :writer_sym
@@ -102,8 +118,6 @@ module JNI
     end
   end
   
-  @@lib_files = []
-  
   module EnvFunctions
     @@functions = %w{GetVersion DefineClass FindClass FromReflectedMethod FromReflectedField ToReflectedMethod GetSuperclass IsAssignableFrom ToReflectedField Throw ThrowNew ExceptionOccurred ExceptionDescribe ExceptionClear FatalError PushLocalFrame PopLocalFrame NewGlobalRef DeleteGlobalRef DeleteLocalRef IsSameObject NewLocalRef EnsureLocalCapacity AllocObject NewObject NewObjectV NewObjectA GetObjectClass IsInstanceOf GetMethodID CallObjectMethod CallObjectMethodV CallObjectMethodA CallBooleanMethod CallBooleanMethodV CallBooleanMethodA CallByteMethod CallByteMethodV CallByteMethodA CallCharMethod CallCharMethodV CallCharMethodA CallShortMethod CallShortMethodV CallShortMethodA CallIntMethod CallIntMethodV CallIntMethodA CallLongMethod CallLongMethodV CallLongMethodA CallFloatMethod CallFloatMethodV CallFloatMethodA CallDoubleMethod CallDoubleMethodV CallDoubleMethodA CallVoidMethod CallVoidMethodV CallVoidMethodA CallNonvirtualObjectMethod CallNonvirtualObjectMethodV CallNonvirtualObjectMethodA CallNonvirtualBooleanMethod CallNonvirtualBooleanMethodV CallNonvirtualBooleanMethodA CallNonvirtualByteMethod CallNonvirtualByteMethodV CallNonvirtualByteMethodA CallNonvirtualCharMethod CallNonvirtualCharMethodV CallNonvirtualCharMethodA CallNonvirtualShortMethod CallNonvirtualShortMethodV CallNonvirtualShortMethodA CallNonvirtualIntMethod CallNonvirtualIntMethodV CallNonvirtualIntMethodA CallNonvirtualLongMethod CallNonvirtualLongMethodV CallNonvirtualLongMethodA CallNonvirtualFloatMethod CallNonvirtualFloatMethodV CallNonvirtualFloatMethodA CallNonvirtualDoubleMethod CallNonvirtualDoubleMethodV CallNonvirtualDoubleMethodA CallNonvirtualVoidMethod CallNonvirtualVoidMethodV CallNonvirtualVoidMethodA GetFieldID GetObjectField GetBooleanField GetByteField GetCharField GetShortField GetIntField GetLongField GetFloatField GetDoubleField SetObjectField SetBooleanField SetByteField SetCharField SetShortField SetIntField SetLongField SetFloatField SetDoubleField GetStaticMethodID CallStaticObjectMethod CallStaticObjectMethodV CallStaticObjectMethodA CallStaticBooleanMethod CallStaticBooleanMethodV CallStaticBooleanMethodA CallStaticByteMethod CallStaticByteMethodV CallStaticByteMethodA CallStaticCharMethod CallStaticCharMethodV CallStaticCharMethodA CallStaticShortMethod CallStaticShortMethodV CallStaticShortMethodA CallStaticIntMethod CallStaticIntMethodV CallStaticIntMethodA CallStaticLongMethod CallStaticLongMethodV CallStaticLongMethodA CallStaticFloatMethod CallStaticFloatMethodV CallStaticFloatMethodA CallStaticDoubleMethod CallStaticDoubleMethodV CallStaticDoubleMethodA CallStaticVoidMethod CallStaticVoidMethodV CallStaticVoidMethodA GetStaticFieldID GetStaticObjectField GetStaticBooleanField GetStaticByteField GetStaticCharField GetStaticShortField GetStaticIntField GetStaticLongField GetStaticFloatField GetStaticDoubleField SetStaticObjectField SetStaticBooleanField SetStaticByteField SetStaticCharField SetStaticShortField SetStaticIntField SetStaticLongField SetStaticFloatField SetStaticDoubleField NewString GetStringLength GetStringChars ReleaseStringChars NewStringUTF GetStringUTFLength GetStringUTFChars ReleaseStringUTFChars GetArrayLength NewObjectArray GetObjectArrayElement SetObjectArrayElement NewBooleanArray NewByteArray NewCharArray NewShortArray NewIntArray NewLongArray NewFloatArray NewDoubleArray GetBooleanArrayElements GetByteArrayElements GetCharArrayElements GetShortArrayElements GetIntArrayElements GetLongArrayElements GetFloatArrayElements GetDoubleArrayElements ReleaseBooleanArrayElements ReleaseByteArrayElements ReleaseCharArrayElements ReleaseShortArrayElements ReleaseIntArrayElements ReleaseLongArrayElements ReleaseFloatArrayElements ReleaseDoubleArrayElements GetBooleanArrayRegion GetByteArrayRegion GetCharArrayRegion GetShortArrayRegion GetIntArrayRegion GetLongArrayRegion GetFloatArrayRegion GetDoubleArrayRegion SetBooleanArrayRegion SetByteArrayRegion SetCharArrayRegion SetShortArrayRegion SetIntArrayRegion SetLongArrayRegion SetFloatArrayRegion SetDoubleArrayRegion RegisterNatives UnregisterNatives MonitorEnter MonitorExit GetJavaVM GetStringRegion GetStringUTFRegion GetPrimitiveArrayCritical ReleasePrimitiveArrayCritical GetStringCritical ReleaseStringCritical NewWeakGlobalRef DeleteWeakGlobalRef ExceptionCheck NewDirectByteBuffer GetDirectBufferAddress GetDirectBufferCapacity GetObjectRefType}.map { |name| [name.to_sym, [], :void, lambda { raise NotImplementedError, name }] }
     
@@ -120,14 +134,13 @@ module JNI
     type_map = [["Byte", :uint8], ["Char", :uint16], ["Short", :int16], ["Int", :int32], ["Long", :int64], ["Float", :float], ["Double", :double]]
     
     @@global_refs = []
-    @@exception = nil
 
     map_function :GetVersion, [:long], :int do |env|
       0x00010006
     end
     
     map_function :ExceptionOccurred, [:long], :long do |env|
-      0
+      0 #JNI.current_exception ? JNI.current_exception.__id__ : 0
     end
     
     map_function :NewGlobalRef, [:long, :long], :long do |env, object_id|
@@ -155,20 +168,15 @@ module JNI
     
     type_map.each do |name, type|
       map_function "Call#{name}Method".to_sym, [:long, :long, :long], type do |env, object_id, method_id|
-        puts "Call#{name}Method"
-        exit
+        method_id = ObjectSpace._id2ref method_id
+        raise NotImplementedError, "Call#{name}Method: #{ObjectSpace._id2ref(object_id)} #{method_id.name_sym}"
       end
     end
     
     type_map.each do |name, type|
       map_function "Call#{name}MethodV".to_sym, [:long, :long, :long, :long], type do |env, object_id, method_id, arg_list|
-        begin
-          method_id = ObjectSpace._id2ref method_id
-          JNI.call_with_va_arg ObjectSpace._id2ref(object_id), method_id.name_sym, arg_list, method_id.arg_types
-        rescue Exception => e
-          @@exception = e
-          0
-        end
+        method_id = ObjectSpace._id2ref method_id
+        JNI.call_with_va_arg ObjectSpace._id2ref(object_id), method_id.name_sym, arg_list, method_id.arg_types
       end
     end
     
@@ -210,20 +218,15 @@ module JNI
     
     type_map.each do |name, type|
       map_function "CallStatic#{name}Method".to_sym, [:long, :long, :long], type do |env, class_id, method_id|
-        puts "CallStatic#{name}Method"
-        exit
+        method_id = ObjectSpace._id2ref method_id
+        raise NotImplementedError, "CallStatic#{name}Method: #{ObjectSpace._id2ref(class_id)} #{method_id.name_sym}"
       end
     end
     
     type_map.each do |name, type|
       map_function "CallStatic#{name}MethodV".to_sym, [:long, :long, :long, :long], type do |env, class_id, method_id, arg_list|
-        begin
-          method_id = ObjectSpace._id2ref method_id
-          JNI.call_with_va_arg ObjectSpace._id2ref(class_id), method_id.name_sym, arg_list, method_id.arg_types
-        rescue Exception => e
-          @@exception = e
-          0
-        end
+        method_id = ObjectSpace._id2ref method_id
+        JNI.call_with_va_arg ObjectSpace._id2ref(class_id), method_id.name_sym, arg_list, method_id.arg_types
       end
     end
     
@@ -377,6 +380,13 @@ module JNI
       @@va_arg_list.clear
       arg_types.each { |arg_type| @@va_arg_list << VaArgTools.__send__(arg_type, arg_list) }
       target.__send__ method, *@@va_arg_list
+    rescue Exception => e
+      if @@exception_handler
+        @@exception_handler[e]
+      else
+        @@exception = e
+      end
+      0
     end
   else
     VaArgTools.attach_function :int32, :va_arg_int32_pointer, [:pointer], :int32
@@ -388,6 +398,13 @@ module JNI
       @@va_arg_list.clear
       arg_types.each { |arg_type| @@va_arg_list << VaArgTools.__send__(arg_type, @@va_arg_list_ptr) }
       target.__send__ method, *@@va_arg_list
+    rescue Exception => e
+      if @@exception_handler
+        @@exception_handler[e]
+      else
+        @@exception = e
+      end
+      0
     end
   end
 end

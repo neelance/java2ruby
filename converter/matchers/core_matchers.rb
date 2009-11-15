@@ -106,14 +106,15 @@ module Java2Ruby
         names = []
         loop do
           name = match_name
-          package_names = false if name =~ /^[A-Z]/
+					is_last = !try_match(".")
+          package_names = false if name =~ /^[A-Z]/ or is_last
           if package_names
             package ||= JavaPackage.new
             package << name
           else
             names << name
           end
-          try_match "." or break
+          break if is_last
         end
         type = JavaClassType.new converter, current_module, current_method, package, names
         try_match :typeArguments do

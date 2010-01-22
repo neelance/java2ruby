@@ -1,6 +1,6 @@
 module JNI
   JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
-  	callback name, arg_types, return_type
+  	callback name, arg_types, return_type if arg_types
   end
   
   class EnvStruct < FFI::Struct
@@ -10,7 +10,7 @@ module JNI
       s.include "jni.h"
       
       JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
-        s.field name, name
+        s.field name, arg_types ? name : :long
       end
     end
     @@@

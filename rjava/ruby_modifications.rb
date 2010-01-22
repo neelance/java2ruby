@@ -237,7 +237,7 @@ module Tracing
     return_value = nil
     start_time = Time.new.to_f
     begin
-      puts(start_time.to_s + " " + ("  " * Tracing.call_level) + "Entering: #{mod}.#{name}")
+      puts(start_time.to_s + " " + ("  " * Tracing.call_level) + "Entering: #{label}")
       $stdout.flush
       Tracing.call_level += 1
       return_value = yield
@@ -245,10 +245,14 @@ module Tracing
       Tracing.call_level -= 1
       end_time = Time.new.to_f
       duration = end_time - start_time
-      puts(end_time.to_s + " " + ("  " * Tracing.call_level) + "Leaving: #{mod}.#{name} (#{duration}#{duration > 0.1 ? ' !!!' : ''})")
+      puts(end_time.to_s + " " + ("  " * Tracing.call_level) + "Leaving: #{label} (#{duration}#{duration > 0.1 ? ' !!!' : ''})")
       $stdout.flush
     end
     return_value
+  end
+
+  def self.trace_calls(mod)
+    trace_all(mod) { |name, block| trace_call("#{mod}.#{name}", &block) }
   end
 
   $tracing = false

@@ -2,7 +2,7 @@
 
 module JNI
   JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
-  	callback name, arg_types, return_type
+  	callback name, arg_types, return_type if arg_types
   end
   
   class EnvStruct < FFI::Struct
@@ -122,25 +122,25 @@ module JNI
            :CallStaticBooleanMethod, :CallStaticBooleanMethod, 468,
            :CallStaticBooleanMethodV, :CallStaticBooleanMethodV, 472,
            :CallStaticBooleanMethodA, :CallStaticBooleanMethodA, 476,
-           :CallStaticByteMethod, :CallStaticByteMethod, 480,
+           :CallStaticByteMethod, :long, 480,
            :CallStaticByteMethodV, :CallStaticByteMethodV, 484,
            :CallStaticByteMethodA, :CallStaticByteMethodA, 488,
-           :CallStaticCharMethod, :CallStaticCharMethod, 492,
+           :CallStaticCharMethod, :long, 492,
            :CallStaticCharMethodV, :CallStaticCharMethodV, 496,
            :CallStaticCharMethodA, :CallStaticCharMethodA, 500,
-           :CallStaticShortMethod, :CallStaticShortMethod, 504,
+           :CallStaticShortMethod, :long, 504,
            :CallStaticShortMethodV, :CallStaticShortMethodV, 508,
            :CallStaticShortMethodA, :CallStaticShortMethodA, 512,
-           :CallStaticIntMethod, :CallStaticIntMethod, 516,
+           :CallStaticIntMethod, :long, 516,
            :CallStaticIntMethodV, :CallStaticIntMethodV, 520,
            :CallStaticIntMethodA, :CallStaticIntMethodA, 524,
-           :CallStaticLongMethod, :CallStaticLongMethod, 528,
+           :CallStaticLongMethod, :long, 528,
            :CallStaticLongMethodV, :CallStaticLongMethodV, 532,
            :CallStaticLongMethodA, :CallStaticLongMethodA, 536,
-           :CallStaticFloatMethod, :CallStaticFloatMethod, 540,
+           :CallStaticFloatMethod, :long, 540,
            :CallStaticFloatMethodV, :CallStaticFloatMethodV, 544,
            :CallStaticFloatMethodA, :CallStaticFloatMethodA, 548,
-           :CallStaticDoubleMethod, :CallStaticDoubleMethod, 552,
+           :CallStaticDoubleMethod, :long, 552,
            :CallStaticDoubleMethodV, :CallStaticDoubleMethodV, 556,
            :CallStaticDoubleMethodA, :CallStaticDoubleMethodA, 560,
            :CallStaticVoidMethod, :CallStaticVoidMethod, 564,

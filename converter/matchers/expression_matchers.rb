@@ -467,12 +467,11 @@ module Java2Ruby
     end
     
     def method_call(expression, method_name, arguments)
-      case method_name
-      when "equals"
+      if arguments.size == 1 and method_name == "equals"
         expression = Expression.new nil, "(", expression, " == ", arguments.first, ")"
-      when "compareTo"
+      elsif arguments.size == 1 and method_name == "compareTo"
         expression = Expression.new nil, "(", expression, " <=> ", arguments.first, ")"
-      when "split"
+      elsif arguments.size == 1 and method_name == "split"
         expression = Expression.new nil, expression, ".split(Regexp.new(", arguments.first, "))"
       else
         expression = Expression.new nil, expression, ".", ruby_method_name(method_name), *compose_arguments(arguments)

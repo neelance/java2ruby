@@ -5,7 +5,7 @@ class Vararg
     @type = type
   end
 end
-$typesig_time = 0
+
 class Module
   public :define_method, :alias_method
   
@@ -35,18 +35,20 @@ class Module
     end
   end
   
+  @@parameter_id_hash = Hash.new { |h, k| h[k] = h.size }
   def ranked_variations(name)
     @ranked_variations_hash ||= {}
     @ranked_variations_hash[name] ||= begin
       variations = {}
       specific_method_variations(name).reverse_each do |var|
         var[0] = var[0].first.call if var[0].first.is_a?(Proc)
-        var[4] ||= begin
-          var_name = "#{name}_#{var[0].__id__.abs}".to_sym
-          var[2].define_method var_name, var[3]
-          var_name
+        if var[4].nil?
+          var[4] = "#{name}_#{var[0].__id__.abs}".to_sym
+          var[2].define_method var[4], var[3]
+          var[5] = "#{name}__#{@@parameter_id_hash[var[0].map{ |c| c.__id__ }]}".to_sym
+          var[2].define_method var[5], var[3]
         end
-        var[5] ||= var[0].map { |t| t.is_a?(Vararg) ? t.type : t }
+        var[6] ||= var[0].map { |t| t.is_a?(Vararg) ? t.type : t }
         
         vararg = !var[0].empty? && var[0].last.is_a?(Vararg)
         specific_size_variations = (variations[vararg ? :varargs : var[0].size] ||= [])
@@ -66,7 +68,7 @@ class Module
   def method_added(name)
     return if !defined?(@current_typesig) or @current_typesig.nil?
     method_variations[name] ||= []
-    data = [@current_typesig, 0, self, instance_method(name), nil, nil]
+    data = [@current_typesig, 0, self, instance_method(name), nil, nil, nil]
     if @current_typesig.first == :precedence
       @current_typesig.shift
       method_variations[name].unshift data
@@ -109,7 +111,7 @@ class Module
     arg_count = args.size
     find_var = lambda { |hash|
       hash && hash.find { |var|
-        sig_classes = var[5]
+        sig_classes = var[6]
         matching = true
         arg_count.times do |i|
           arg = args[i]
@@ -134,7 +136,7 @@ end
 class Object
   typesig Object
   define_method :==, instance_method(:==)
-  
+
   alias_method :method_really_missing, :method_missing
   def method_missing(name, *args, &block)
     orig_name = name.to_s.split("___").first.to_sym
@@ -142,7 +144,7 @@ class Object
     owner = singleton_class.ancestors.find { |ancestor| ancestor.instance_methods(false).include? orig_name }
     if owner
       var_name = Module.match_signature(owner.ranked_variations(orig_name), args)
-      owner.alias_method name, var_name
+      singleton_class.alias_method name, var_name
       __send__ var_name, *args, &block
     else
       method_really_missing name, *args

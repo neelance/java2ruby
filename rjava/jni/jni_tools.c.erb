@@ -1,0 +1,42 @@
+#include <stdarg.h>
+#include "jni.h"
+
+JNIEXPORT int (JNICALL va_arg_int32_direct) (va_list list) {
+  return va_arg(list, int);
+}
+
+JNIEXPORT long (JNICALL va_arg_int64_direct) (va_list list) {
+  return va_arg(list, long);
+}
+
+JNIEXPORT int (JNICALL va_arg_int32_pointer) (va_list* list_ptr) {
+  return va_arg(*list_ptr, int);
+}
+
+JNIEXPORT long (JNICALL va_arg_int64_pointer) (va_list* list_ptr) {
+  return va_arg(*list_ptr, long);
+}
+
+<% [["Object", "jobject"], ["Boolean", "jboolean"], ["Byte", "jbyte"], ["Char", "jchar"], ["Short", "jshort"], ["Int", "jint"], ["Long", "jlong"], ["Float", "jfloat"], ["Double", "jdouble"]].each do |name, type| %>
+<%=type%> (JNICALL CallStatic<%=name%>Method) (JNIEnv *env, jclass clazz, jmethodID methodID, ...) {
+  va_list list;
+  <%=type%> value;
+  va_start(list, methodID);
+  value = (*env)->CallStatic<%=name%>MethodV(env, clazz, methodID, list);
+  va_end(list);
+  return value;
+}
+JNIEXPORT long (JNICALL CallStatic<%=name%>MethodAddress) () {
+  return (long) CallStatic<%=name%>Method;
+}
+<% end %>
+
+void (JNICALL CallStaticVoidMethod) (JNIEnv *env, jclass clazz, jmethodID methodID, ...) {
+  va_list list;
+  va_start(list, methodID);
+  (*env)->CallStaticVoidMethodV(env, clazz, methodID, list);
+  va_end(list);
+}
+JNIEXPORT long (JNICALL CallStaticVoidMethodAddress) () {
+  return (long) CallStaticVoidMethod;
+}

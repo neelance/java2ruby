@@ -164,7 +164,7 @@ module Java2Ruby
     end
     
     def jni_signature
-      "L\#{#{self}.jni_package_name}_#{@names.first}_2"
+      "L\#{#{self}.jni_package_name}_#{@names.first.gsub('_', '_1')}_2"
     end
     
     def ffi_type

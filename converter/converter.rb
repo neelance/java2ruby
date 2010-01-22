@@ -120,8 +120,8 @@ module Java2Ruby
       if @prefix_class_names.include?(names.first)
         name_parts = []
         name_parts << package.ruby_name unless package.nil? or package.root?
-        name_parts << "#{@prefix}#{names.shift}"
-        name_parts.concat names
+        name_parts << "#{@prefix}#{names.first}"
+        name_parts.concat names[1..-1]
         name_parts.join "::"
       else
         nil
@@ -129,7 +129,7 @@ module Java2Ruby
     end
     
     def ruby_field_name(name)
-      @field_name_mapping[name] || RJava.lower_name(name)
+      @field_name_mapping[name] || RJava.ruby_field_name(name)
     end
     
     def ruby_method_name(name, call = true)

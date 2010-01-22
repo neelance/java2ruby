@@ -127,6 +127,14 @@ class Module
     end
     parts.join "."
   end
+
+  def is_assignable_from(mod)
+    mod.ancestors.include? self
+  end
+
+  def is_instance(obj)
+    obj.is_a? self
+  end
 end
 
 class Class
@@ -148,14 +156,6 @@ class Class
   
   def get_declared_field(name)
     Java::Lang::Reflect::Field.new(self, name, nil, nil, nil, nil, nil)
-  end
-
-  def is_instance(obj)
-    obj.is_a? self
-  end
-
-  def is_assignable_from(cls)
-    cls.ancestors.include? self
   end
 
   def get_resource_as_stream(name)
@@ -247,11 +247,11 @@ class String
     end
   end
   
-  def last_index_of(str)
+  def last_index_of(str, from_index = size)
     if str.is_a? String
-      rindex(str) || -1
+      rindex(str, from_index) || -1
     else
-      rindex(str.to_int.chr) || -1
+      rindex(str.to_int.chr, from_index) || -1
     end
   end
 
@@ -264,13 +264,8 @@ class String
     end
   end
 
-  def starts_with(str)
-    self =~ /^#{str}/
-  end
-
-  def ends_with(str)
-    self =~ /#{str}$/
-  end
+  alias_method :starts_with, :start_with?
+  alias_method :ends_with, :end_with?
 
   def region_matches(*args)
     ignore_case, toffset, other, ooffset, len = false
@@ -308,10 +303,23 @@ class String
   end
 
   def set_int_chars(index, a2, a3 = nil)
+    to_u
     if a3
-      self[index, a2] = a3.map { |c| c.chr(UTF_8) }.join
+      tmp = "".to_u
+      got_zero = false
+      a3.each { |c|
+        got_zero ||= (c == 0)
+        tmp << (got_zero ? 0 : c)
+      }
+      self[index, a2] = tmp
     elsif index.is_a? Range
-      self[index] = a2.map { |c| c.chr(UTF_8) }.join
+      tmp = "".to_u
+      got_zero = false
+      a2.each { |c|
+        got_zero ||= (c == 0)
+        tmp << (got_zero ? 0 : c)
+      }
+      self[index] = tmp
     else
       self[index] = a2.chr(UTF_8)
     end

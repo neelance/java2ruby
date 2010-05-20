@@ -16,13 +16,10 @@ class CharArray < Array.typed(Java::Char)
   
   def []=(index, a2, a3 = nil)
     if a3
-      @data = @data.to_u if a3.any? { |c| c > 255 }
       @data.set_int_chars index, a2, a3
     elsif index.is_a? Range
-      @data = @data.to_u if a2.any? { |c| c > 255 }
       @data.set_int_chars index, a2
     else
-      @data = @data.to_u if a2 > 255
       @data.set_int_chars index, a2
     end
   end

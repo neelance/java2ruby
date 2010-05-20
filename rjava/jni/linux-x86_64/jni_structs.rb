@@ -2,7 +2,7 @@
 
 module JNI
   JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
-  	callback name, arg_types, return_type
+  	callback name, arg_types, return_type if arg_types
   end
   
   class EnvStruct < FFI::Struct
@@ -122,25 +122,25 @@ module JNI
            :CallStaticBooleanMethod, :CallStaticBooleanMethod, 936,
            :CallStaticBooleanMethodV, :CallStaticBooleanMethodV, 944,
            :CallStaticBooleanMethodA, :CallStaticBooleanMethodA, 952,
-           :CallStaticByteMethod, :CallStaticByteMethod, 960,
+           :CallStaticByteMethod, :long, 960,
            :CallStaticByteMethodV, :CallStaticByteMethodV, 968,
            :CallStaticByteMethodA, :CallStaticByteMethodA, 976,
-           :CallStaticCharMethod, :CallStaticCharMethod, 984,
+           :CallStaticCharMethod, :long, 984,
            :CallStaticCharMethodV, :CallStaticCharMethodV, 992,
            :CallStaticCharMethodA, :CallStaticCharMethodA, 1000,
-           :CallStaticShortMethod, :CallStaticShortMethod, 1008,
+           :CallStaticShortMethod, :long, 1008,
            :CallStaticShortMethodV, :CallStaticShortMethodV, 1016,
            :CallStaticShortMethodA, :CallStaticShortMethodA, 1024,
-           :CallStaticIntMethod, :CallStaticIntMethod, 1032,
+           :CallStaticIntMethod, :long, 1032,
            :CallStaticIntMethodV, :CallStaticIntMethodV, 1040,
            :CallStaticIntMethodA, :CallStaticIntMethodA, 1048,
-           :CallStaticLongMethod, :CallStaticLongMethod, 1056,
+           :CallStaticLongMethod, :long, 1056,
            :CallStaticLongMethodV, :CallStaticLongMethodV, 1064,
            :CallStaticLongMethodA, :CallStaticLongMethodA, 1072,
-           :CallStaticFloatMethod, :CallStaticFloatMethod, 1080,
+           :CallStaticFloatMethod, :long, 1080,
            :CallStaticFloatMethodV, :CallStaticFloatMethodV, 1088,
            :CallStaticFloatMethodA, :CallStaticFloatMethodA, 1096,
-           :CallStaticDoubleMethod, :CallStaticDoubleMethod, 1104,
+           :CallStaticDoubleMethod, :long, 1104,
            :CallStaticDoubleMethodV, :CallStaticDoubleMethodV, 1112,
            :CallStaticDoubleMethodA, :CallStaticDoubleMethodA, 1120,
            :CallStaticVoidMethod, :CallStaticVoidMethod, 1128,

@@ -303,9 +303,8 @@ class String
   end
 
   def set_int_chars(index, a2, a3 = nil)
-    to_u
     if a3
-      tmp = "".to_u
+      tmp = ""
       got_zero = false
       a3.each { |c|
         got_zero ||= (c == 0)
@@ -313,7 +312,7 @@ class String
       }
       self[index, a2] = tmp
     elsif index.is_a? Range
-      tmp = "".to_u
+      tmp = ""
       got_zero = false
       a2.each { |c|
         got_zero ||= (c == 0)
@@ -333,9 +332,12 @@ class String
   def <<(other)
     if encoding == String::UTF_8 and other.is_a? String and other.encoding != String::UTF_8
       other.each_char do |c|
+        to_u if other.ord > 255
         string_push c.ord
       end
     else
+			return self if other.is_a?(String) and other.empty?
+      to_u if other.ord > 255
       string_push other
     end
     self
@@ -370,6 +372,8 @@ if not is_ruby_1_9?
         raise NotImplementedError
       end
     end
+    
+    attr_reader :chars
 
     def dup
       s = ""
@@ -414,7 +418,7 @@ if not is_ruby_1_9?
     def <<(other)
       case other
       when Numeric
-        @chars << other
+        @chars << other.to_int
       when String, UnicodeString
         @chars.concat other.int_chars
       else
@@ -447,17 +451,37 @@ if not is_ruby_1_9?
 
     def set_int_chars(index, a2, a3 = nil)
       if a3
-        @chars[index, a2] = a3
+        @chars[index, a2] = a3.map { |c| c.to_int }
       elsif index.is_a? Range
-        @chars[index] = a2
+        @chars[index] = a2.map { |c| c.to_int }
       else
-        @chars[index] = a2
+        @chars[index] = a2.to_int
       end
     end
 
     def ord
       @chars[0]
     end
+
+    def each_byte(&block)
+      @chars.each(&block)
+    end
+    
+    def to_s
+			@chars.map{ |c| c.chr }.join
+    end
+    
+    alias_method :to_str, :to_s
+    
+    def inspect
+			'"' + to_s + '"'
+    end
+    
+    def ==(other)
+			other.to_u.chars == @chars
+    end
+    
+    alias_method :===, :==
   end
 end
 

@@ -6,7 +6,6 @@ require "rjava/lazy_constants"
 require "rjava/signature_matching"
 require "rjava/class_module"
 require "rjava/local_class"
-require "rjava/extended_require"
 require "rjava/class_loading"
 
 require "jre4ruby" # TODO should not be here

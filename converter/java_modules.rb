@@ -108,9 +108,9 @@ module Java2Ruby
     
     def write_output
       puts_output "attr_accessor :#{@ruby_name}"
-      puts_output "alias_method :attr_#{ruby_method_name @ruby_name}, :#{@ruby_name}"
+      puts_output "alias_method :attr_#{@ruby_name}, :#{@ruby_name}"
       puts_output "undef_method :#{@ruby_name}"
-      puts_output "alias_method :attr_#{ruby_method_name @ruby_name}=, :#{@ruby_name}="
+      puts_output "alias_method :attr_#{@ruby_name}=, :#{@ruby_name}="
       puts_output "undef_method :#{@ruby_name}="
     end
   end

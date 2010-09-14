@@ -133,23 +133,30 @@ class Module
   end
 end
 
-class Object
-  typesig Object
-  define_method :==, instance_method(:==)
+module RJava
+  module ObjectSignatureMatchingExtension
+    def method_missing(name, *args, &block)
+      if name.to_s.include?("___")
+        orig_name = name.to_s.split("___").first.to_sym
+        singleton_class = (class << self; self; end)
+        owner = singleton_class.ancestors.find { |ancestor| ancestor.instance_methods(false).include? orig_name }
+        if owner
+          var_name = Module.match_signature(owner.ranked_variations(orig_name), args)
+          singleton_class.alias_method name, var_name
+          return __send__(var_name, *args, &block)
+        end
+      end
 
-  alias_method :method_really_missing, :method_missing
-  def method_missing(name, *args, &block)
-    orig_name = name.to_s.split("___").first.to_sym
-    singleton_class = (class << self; self; end)
-    owner = singleton_class.ancestors.find { |ancestor| ancestor.instance_methods(false).include? orig_name }
-    if owner
-      var_name = Module.match_signature(owner.ranked_variations(orig_name), args)
-      singleton_class.alias_method name, var_name
-      __send__ var_name, *args, &block
-    else
-      method_really_missing name, *args
+      super name, *args
     end
   end
+end
+
+class Object
+  include RJava::ObjectSignatureMatchingExtension
+
+  typesig Object
+  define_method :==, instance_method(:==)
 end
 
 class Exception

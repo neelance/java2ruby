@@ -98,43 +98,32 @@ module RJava::ClassLoading
     result = true
     Module.collect_and_run_class_loaded_hooks do
       files.each do |file|
-        result &&= load_file file
-      end
-    end
-    return result
-  end
-    
-  def self.load_file(file)
-    if File.extname(file) == ""
-      $:.each do |dir|
-        if File.exist?("#{dir}/#{file}.rb")
-          file += ".rb"
-          break
+        if File.extname(file) == ""
+          $:.each do |dir|
+            if File.exist?("#{dir}/#{file}.rb")
+              file += ".rb"
+              break
+            end
+          end
         end
-      end
-    end
-    
-    if File.extname(file) == ".rb"
-      result = require(file)
-      puts "required: #{file}" if result and $rjava_verbose
-      return true
-    end
-    
-    if File.extname(file) == "" and is_jruby?
-      $:.each do |dir|
-        if File.exist?("#{dir}/#{file}.class")
-          class_name = File.basename(file)
-          full_dir = File.join dir, File.dirname(file)
-          puts "requiring class: #{class_name}" if $rjava_verbose
-          $CLASSPATH << full_dir
-          RJava.create_java_proxy class_name, class_name, Object
-          return true
+        
+        if File.extname(file) == "" and is_jruby?
+          $:.each do |dir|
+            if File.exist?("#{dir}/#{file}.class")
+              class_name = File.basename(file)
+              full_dir = File.join dir, File.dirname(file)
+              puts "requiring class: #{class_name}" if $rjava_verbose
+              $CLASSPATH << full_dir
+              RJava.create_java_proxy class_name, class_name, Object
+              next
+            end
+          end
         end
+        
+        puts "requiring: #{file}" if $rjava_verbose
+        require file
       end
     end
-    
-    puts "requiring: #{file}" if $rjava_verbose
-    return require file
   end
 end
 

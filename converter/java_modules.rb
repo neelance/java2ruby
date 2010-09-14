@@ -79,14 +79,14 @@ module Java2Ruby
     def write_output
       real_value = @value ? @value.call : @type.default
       puts_output ""
-      puts_output "def #{@ruby_name}"
+      puts_output "def #{ruby_method_name @ruby_name}"
       indent_output do
         puts_output "defined?(@@#{@ruby_name}) ? @@#{@ruby_name} : @@#{@ruby_name}= ", real_value
       end
       puts_output "end"
       puts_output "alias_method :attr_#{@ruby_name}, :#{@ruby_name}"
       puts_output ""
-      puts_output "def #{@ruby_name}=(value)"
+      puts_output "def #{ruby_method_name @ruby_name}=(value)"
       indent_output do
         puts_output "@@#{@ruby_name} = value"
       end
@@ -108,9 +108,9 @@ module Java2Ruby
     
     def write_output
       puts_output "attr_accessor :#{@ruby_name}"
-      puts_output "alias_method :attr_#{@ruby_name}, :#{@ruby_name}"
+      puts_output "alias_method :attr_#{ruby_method_name @ruby_name}, :#{@ruby_name}"
       puts_output "undef_method :#{@ruby_name}"
-      puts_output "alias_method :attr_#{@ruby_name}=, :#{@ruby_name}="
+      puts_output "alias_method :attr_#{ruby_method_name @ruby_name}=, :#{@ruby_name}="
       puts_output "undef_method :#{@ruby_name}="
     end
   end

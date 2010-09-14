@@ -107,12 +107,6 @@ module RJava
       ruby_name
     end
   end
-
-  def self.ruby_field_name(name)
-    ruby_name = lower_name name, false
-    ruby_name << "_" if RUBY_KEYWORDS.include?(ruby_name)
-    ruby_name
-  end
   
   def self.ruby_constant_name(name)
     return "Exception" if name == :ruby_exception

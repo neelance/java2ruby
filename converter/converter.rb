@@ -129,7 +129,7 @@ module Java2Ruby
     end
     
     def ruby_field_name(name)
-      @field_name_mapping[name] || RJava.ruby_field_name(name)
+      @field_name_mapping[name] || RJava.lower_name(name)
     end
     
     def ruby_method_name(name, call = true)

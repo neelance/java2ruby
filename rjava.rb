@@ -1,4 +1,4 @@
-$rjava_verbose = $*.delete("--rjava-verbose")
+$rjava_verbose = ARGV.delete("--rjava-verbose")
 
 require "rjava/rjava_module"
 require "rjava/ruby_modifications"

@@ -2,9 +2,10 @@ module RJava
   RUBY_KEYWORDS = %w{alias and begin break case class def defined do else elsif end ensure false for if in initialize module next nil not or redo rescue retry return self super then true undef unless until when while yield}
   
   begin
-    cpu, os = RUBY_PLATFORM.split "-"
+    cpu, os = RUBY_PLATFORM.split "-", 2
     cpu = "x86_32" if cpu =~ /^i\d86$/
     os = case os
+    when /^unknown-linux-gnu$/ then "linux"
     when /^darwin(\d+)?$/ then "darwin"
     else os
     end

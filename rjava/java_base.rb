@@ -213,11 +213,13 @@ class String
     other.is_a?(String) && casecmp(other) == 0
   end
   
-  def substring(start_offset, end_offset = nil)
-    if end_offset
-      self[start_offset...end_offset]
-    else
-      self[start_offset..-1]
+  unless method_defined? :substring
+    def substring(start_offset, end_offset = nil)
+      if end_offset
+        self[start_offset...end_offset]
+      else
+        self[start_offset..-1]
+      end
     end
   end
   

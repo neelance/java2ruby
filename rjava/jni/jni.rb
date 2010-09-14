@@ -14,11 +14,34 @@ module FFI::Library
     end
     raise NameError, lib
   end
+  
+  DEBUG = false
 
   alias_method :attach_function_orig, :attach_function
   def attach_function(*args)
+    ruby_name, basic_native_name, arg_types, return_type = case args.size
+    when 3 then [args[0], args[0], args[1], args[2]]
+    when 4 then args
+    else raise ArgumentError
+    end
+    
+    attach = lambda { |native_name|
+      if DEBUG
+        puts "attaching: #{basic_native_name}"
+        debug_name = "#{ruby_name}_inner".to_sym
+        attach_function_orig debug_name, native_name, arg_types, return_type
+        metaclass = (class << self; self; end)
+        metaclass.define_method(ruby_name) { |*args|
+          puts "calling: #{basic_native_name}"
+          __send__ debug_name, *args
+        }
+      else
+        attach_function_orig ruby_name, native_name, arg_types, return_type
+      end
+    }
+  
     begin
-      attach_function_orig *args
+      attach.call basic_native_name
     rescue FFI::NotFoundError
       arg_size = 0
       args[-2].each do |type|
@@ -26,9 +49,9 @@ module FFI::Library
         arg_size += type_size > 4 ? type_size : 4
       end
       begin
-        attach_function_orig args.first, "_#{args[-3]}@#{arg_size}", args[-2], args[-1]
+        attach.call "_#{args[-3]}@#{arg_size}"
       rescue FFI::NotFoundError
-        attach_function_orig args.first, "#{args[-3]}@#{arg_size}", args[-2], args[-1]
+        attach.call "#{args[-3]}@#{arg_size}"
       end
     end
   end
@@ -184,7 +207,7 @@ module JNI
   end
 
   class << VaArgTools
-    alias_method :array_pointer, "int#{FFI::Pointer.size * 8}"
+    alias_method :array_pointer, "int#{FFI.type_size(FFI.find_type(:pointer)) * 8}"
     def array(arg_list)
       ObjectSpace._id2ref array_pointer(arg_list)
     end

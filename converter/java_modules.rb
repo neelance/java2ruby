@@ -84,14 +84,14 @@ module Java2Ruby
         puts_output "defined?(@@#{@ruby_name}) ? @@#{@ruby_name} : @@#{@ruby_name}= ", real_value
       end
       puts_output "end"
-      puts_output "alias_method :attr_#{@ruby_name}, :#{@ruby_name}"
+      puts_output "alias_method :attr_#{@ruby_name}, :#{ruby_method_name @ruby_name}"
       puts_output ""
       puts_output "def #{ruby_method_name @ruby_name}=(value)"
       indent_output do
         puts_output "@@#{@ruby_name} = value"
       end
       puts_output "end"
-      puts_output "alias_method :attr_#{@ruby_name}=, :#{@ruby_name}="
+      puts_output "alias_method :attr_#{@ruby_name}=, :#{ruby_method_name @ruby_name}="
     end
   end
   

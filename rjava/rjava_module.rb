@@ -1,5 +1,5 @@
 module RJava
-  RUBY_KEYWORDS = %w{alias and begin break case class def defined do else elsif end ensure false for if in initialize module next nil not or redo rescue retry return self super then true undef unless until when while yield}
+  RUBY_KEYWORDS = %w{alias allocate and begin break case class def defined do else elsif end ensure false for if in initialize module next nil not or redo rescue retry return self super then true undef unless until when while yield}
   
   begin
     cpu, os = RUBY_PLATFORM.split "-", 2

@@ -1,17 +1,10 @@
 module Java2Ruby
-  class JavaType < OutputGenerator
-    attr_accessor :context_method
-
-    def initialize
-      super nil
-    end
-    
-    def output_parts
-      [to_s]
-    end
+  module JavaType
   end
   
-  class JavaVoidType < JavaType
+  class JavaVoidType
+    include JavaType
+    
     def ffi_type
       ":void"
     end
@@ -21,11 +14,8 @@ module Java2Ruby
     end
   end
   
-  class JavaType
-    VOID = JavaVoidType.new
-  end
-  
-  class JavaPrimitiveType < JavaType
+  class JavaPrimitiveType
+    include JavaType
     attr_reader :name
     
     def initialize(name)
@@ -108,8 +98,10 @@ module Java2Ruby
     end
   end
   
-  class JavaClassType < JavaType
+  class JavaClassType
+    include JavaType
     attr_reader :names, :package
+    attr_writer :context_method
     
     def initialize(converter, context_module, context_method, package, names)
       @converter = converter
@@ -213,7 +205,9 @@ module Java2Ruby
     end
   end
   
-  class JavaInnerClassType < JavaType
+  class JavaInnerClassType
+    include JavaType
+    
     def initialize(name)
       @name = name
     end
@@ -231,7 +225,8 @@ module Java2Ruby
     end
   end
   
-  class JavaType
+  module JavaType
+    VOID = JavaVoidType.new
     OBJECT = JavaClassType.new nil, nil, nil, nil, ["Object"]
     STRING = JavaClassType.new nil, nil, nil, nil, ["String"]
   end

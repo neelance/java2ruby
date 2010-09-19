@@ -139,7 +139,8 @@ module Java2Ruby
     end
   end
   
-  class CatchBlock < OutputGenerator
+  class CatchBlock
+    include OutputGenerator
     attr_reader :name, :current_module, :current_method
     
     def initialize(converter, name)

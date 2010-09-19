@@ -1,7 +1,8 @@
 require "set"
 
 module Java2Ruby  
-  class JavaMethod < JavaMember
+  class JavaMethod
+    include JavaMember
     attr_reader :name, :method_classes, :generic_classes
     
     def initialize(parent_module, static, name, parameters, return_type, body, generic_classes)
@@ -13,7 +14,7 @@ module Java2Ruby
       @body = body
       @generic_classes = generic_classes || []
       @method_classes = []
-      @parameters.each { |name, type, array_arg| type.context_method = self } if @parameters
+      @parameters.each { |name, type, array_arg| type.context_method = self if type.is_a? JavaClassType } if @parameters
     end
     
     def current_module

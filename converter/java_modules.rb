@@ -1,5 +1,6 @@
 module Java2Ruby
-  class JavaMember < OutputGenerator
+  module JavaMember
+    include OutputGenerator
     attr_reader :parent_module, :static
     
     def initialize(parent_module, static)
@@ -17,7 +18,8 @@ module Java2Ruby
     end
   end
   
-  class JavaConstant < JavaMember
+  class JavaConstant
+    include JavaMember
     attr_reader :name, :ruby_name, :type, :value
     
     def initialize(parent_module, name, type, value)
@@ -65,7 +67,8 @@ module Java2Ruby
     end
   end
   
-  class JavaStaticField < JavaMember
+  class JavaStaticField
+    include JavaMember
     attr_reader :name, :ruby_name, :type, :value
     
     def initialize(parent_module, name, type, value)
@@ -95,7 +98,8 @@ module Java2Ruby
     end
   end
   
-  class JavaField < JavaMember
+  class JavaField
+    include JavaMember
     attr_reader :name, :ruby_name, :type, :value
     
     def initialize(parent_module, name, type, value)
@@ -115,7 +119,8 @@ module Java2Ruby
     end
   end
   
-  class JavaModule < JavaMember
+  class JavaModule
+    include JavaMember
     attr_reader :context_module, :type, :name, :has_main
     attr_accessor :superclass, :interfaces
     attr_accessor :variable_declarators, :fields, :generic_classes
@@ -404,7 +409,9 @@ module Java2Ruby
     
   end
   
-  class JavaImportsModule < OutputGenerator
+  class JavaImportsModule
+    include OutputGenerator
+    
     def initialize(package, basename, converter)
       super converter
       @package = package

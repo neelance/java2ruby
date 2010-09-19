@@ -337,7 +337,9 @@ module Java2Ruby
     end
   end
   
-  class CompilationUnit < OutputGenerator
+  class CompilationUnit
+    include OutputGenerator
+    
     def initialize(converter)
       super converter
     end

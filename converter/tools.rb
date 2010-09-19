@@ -1,5 +1,5 @@
 module Java2Ruby
-  class OutputGenerator
+  module OutputGenerator
     attr_reader :converter, :comment_lines
     
     def initialize(converter)
@@ -73,9 +73,9 @@ module Java2Ruby
     def combine_output_parts(parts, lines)
       parts.each do |part|
         case part
-        when String
+        when String, JavaType
           lines << "" if lines.empty?
-          lines.last << part
+          lines.last << part.to_s
         when Array
           unless part.empty?
             part.first.insert 0, lines.pop unless lines.empty?
@@ -186,7 +186,8 @@ module Java2Ruby
     end
   end
   
-  class JavaPackage < OutputGenerator
+  class JavaPackage
+    include OutputGenerator
     attr_reader :names
     
     def initialize(names = [])

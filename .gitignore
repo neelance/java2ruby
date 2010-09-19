@@ -2,4 +2,5 @@
 .loadpath
 .project
 .DS_Store
+*.rbc
 *~

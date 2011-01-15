@@ -11,7 +11,7 @@ class CharArray < Array.typed(Java::Char)
   attr_accessor :data
   
   def initialize(size)
-    @data = "\0" * size
+    @data = ("\0" * size).force_encoding("ASCII-8BIT")
   end
   
   def []=(index, a2, a3 = nil)

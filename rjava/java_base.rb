@@ -238,12 +238,6 @@ module RJava
       end
     end
   
-    def to_char_array
-      ca = CharArray.new 0
-      ca.data = self.dup
-      ca
-    end
-  
     def equals_ignore_case(other)
       other.is_a?(String) && casecmp(other) == 0
     end

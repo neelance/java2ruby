@@ -182,7 +182,7 @@ module Java2Ruby
     
     def context_method=(method)
       super
-      @entry_type.context_method = method
+      @entry_type.context_method = method if @entry_type.is_a? JavaClassType
     end
 
     def jni_signature

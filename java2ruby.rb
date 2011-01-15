@@ -1,8 +1,10 @@
-$:.unshift File.dirname(__FILE__)
-$:.unshift "#{File.dirname(__FILE__)}/../jre4ruby"
-$:.unshift "#{File.dirname(__FILE__)}/../antlr4ruby"
+file_dir = File.absolute_path File.dirname(__FILE__)
 
-require "#{File.dirname(__FILE__)}/converter/converter"
+$:.unshift file_dir
+$:.unshift "#{file_dir}/../jre4ruby"
+$:.unshift "#{file_dir}/../antlr4ruby"
+
+require "#{file_dir}/converter/converter"
 
 show_parse_tree = $*.delete "--parse-tree"
 ruby_prof = $*.delete "--ruby-prof"

@@ -9,25 +9,26 @@ end
 
 require "#{file_dir}/converter/converter"
 
+show_log = $*.delete "--show-log"
 ruby_prof = $*.delete "--ruby-prof"
 perftools = $*.delete "--perftools"
-stdout = $*.delete "--stdout"
 converter = Java2Ruby::Converter.new $*.first
 
 if ruby_prof
   require "ruby-prof"
   RubyProf.start
 end
+
 if perftools
   require "perftools"
   PerfTools::CpuProfiler.start "perftools_profile"
 end
 
-if stdout
-  puts converter.output
-else
-  converter.convert
+if show_log
+  converter.log = {}
 end
+
+converter.convert
 
 if ruby_prof
   result = RubyProf.stop
@@ -36,6 +37,21 @@ if ruby_prof
     printer.print file
   end
 end
+
 if perftools
   PerfTools::CpuProfiler.stop
+end
+
+if show_log
+  require "tempfile"
+  file = Tempfile.new ["log", ".yaml"]
+  
+  converter.log.each do |header, content|
+    file.puts "--- #{header.upcase} ---"
+    file.puts content
+    file.puts
+  end
+  
+  file.close
+  system "geany #{file.path}"
 end

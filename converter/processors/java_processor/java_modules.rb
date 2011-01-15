@@ -495,12 +495,13 @@ module Java2Ruby
     class CompilationUnit
       include OutputGenerator
       
-      def initialize(converter)
+      def initialize(converter, element)
         super converter
+        @element = element
       end
       
       def write_output
-        @converter.match_compilationUnit
+        @converter.match_compilationUnit @element
       end
       
       def current_module

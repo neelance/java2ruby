@@ -15,14 +15,12 @@ module Java2Ruby
       @explicit_calls = conversion_rules["explicit_calls"] || {}
     end
     
-    def process(tree)
+    def process(element)
       @current_generator = nil
       @statement_context = nil
-      @elements = tree[:children]
-      @next_element_index = 0
-      @next_element = @elements.first
       @explicit_call_counter = -1
-      compilation_unit = CompilationUnit.new self
+      
+      compilation_unit = CompilationUnit.new self, element
       { :type => :output_tree, :children => compilation_unit.output_parts.first }
     end
     
@@ -96,7 +94,7 @@ module Java2Ruby
       @next_element_index = 0
       @next_element = @elements.first
       result = yield
-      raise ArgumentError, "Elements of #{element} not processed: #{@elements[@next_element_index..-1].join(", ")}" if not @next_element_index == @elements.size
+      raise ArgumentError, "Elements of #{element[:internal_name]} not processed: #{@elements[@next_element_index..-1].map{ |child| child[:internal_name] }.join(", ")}" if not @next_element_index == @elements.size
       
       @elements = parent_elements
       @next_element_index = parent_next_element_index

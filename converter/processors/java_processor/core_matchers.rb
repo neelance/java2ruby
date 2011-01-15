@@ -1,63 +1,35 @@
 module Java2Ruby
   class JavaProcessor
-    def match_compilationUnit
+    def match_compilationUnit(element)
       puts_output "require \"rjava\""
       puts_output ""
       
-      match :compilationUnit do
-        @package = JavaPackage.new
-        if try_match :packageDeclaration do
-            match "package"
-            match :qualifiedName do
-              loop do
-                @package << match_name
-                try_match "." or break
-              end
-            end
-            match ";"
-          end
-          puts_output "module #{@package.ruby_name}"
-          indent_output do
-            match_compilation_unit_content
-          end
-          puts_output "end"
-        else
-          match_compilation_unit_content
+      @package = JavaPackage.new element[:package]
+
+      if not element[:package].empty?
+        puts_output "module #{@package.ruby_name}"
+        indent_output do
+          match_compilation_unit_content element
         end
+        puts_output "end"
+      else
+        match_compilation_unit_content element
       end
     end
     
-    def match_compilation_unit_content
+    def match_compilation_unit_content(element)
       imports_module = JavaImportsModule.new @package, @basename, converter
 
-      loop_match :importDeclaration do
-        match "import"
-        static_import = try_match "static"
-        names = []
-        package_import = false
-        match :qualifiedName do
-          names << RJava.ruby_package_name(match_name)
-          while try_match "."
-            names << RJava.ruby_package_name(match_name)
-          end
-        end
-        if try_match "."
-          match "*"
-          package_import = true
-        end
-        imports_module.new_import names, package_import, static_import
-        match ";"
+      element[:imports].each do |import|
+        imports_module.new_import import[:names], import[:package_import], import[:static_import]
       end
       
       java_modules = []
       base_module = nil
-      loop_match :typeDeclaration do
-        try_match ";" \
-        or begin
-          java_module = match_classOrInterfaceDeclaration imports_module
-          java_modules << java_module
-          base_module = java_module if java_module.name == @basename
-        end
+      element[:declared_types].each do |type|
+        java_module = match_classDeclaration type, imports_module
+        java_modules << java_module
+        base_module = java_module if java_module.name == @basename
       end
       
       puts_output imports_module

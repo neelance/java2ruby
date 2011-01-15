@@ -466,5 +466,50 @@ module Java2Ruby
         puts_output "end"
       end
     end
+    
+    class JavaPackage
+      include OutputGenerator
+      attr_reader :names
+      
+      def initialize(names = [])
+        super nil
+        @names = names
+      end
+      
+      def <<(name)
+        @names << name
+        @ruby_names = nil
+      end
+      
+      def root?
+        @names.empty?
+      end
+      
+      def ruby_name
+        @ruby_names ||= @names.map{ |p| RJava.ruby_package_name p }.join('::')
+      end
+      
+      ROOT = self.new
+    end
+    
+    class CompilationUnit
+      include OutputGenerator
+      
+      def initialize(converter)
+        super converter
+      end
+      
+      def write_output
+        @converter.match_compilationUnit
+      end
+      
+      def current_module
+        nil
+      end
+      
+      def current_method
+        nil
+      end
+    end
   end
 end

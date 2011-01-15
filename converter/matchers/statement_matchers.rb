@@ -264,7 +264,7 @@ module Java2Ruby
                   open_case[1] << statement_buffer
                 end
               end
-              if last_statement.handle_case_end
+              if handle_case_end last_statement
                 open_cases.clear
               end
             end
@@ -497,6 +497,31 @@ module Java2Ruby
         end
       end
     end
+    
+      def handle_case_end(element)
+        case element[:internal_name]
+        when :block
+          handle_case_end element[:children][-2]
+        when :blockStatement
+          handle_case_end element[:children].first
+        when :statement
+          case element[:children].first[:internal_name]
+          when "break"
+            element[:children].first[:internal_name] = :disabled_break if element[:children][1][:internal_name] == ";"
+            true
+          when "return", "throw"
+            true
+          when "if"
+            handle_case_end(element[:children][2]) && (element[:children].size < 5 || handle_case_end(element[:children][4]))
+          when :block
+            handle_case_end element[:children].first
+          else
+            false
+          end
+        else
+          false
+        end
+      end
     
   end
 end

@@ -1,18 +1,10 @@
 require "rjava"
 require "antlr4ruby"
+require "yaml"
 
-non_verbose {
-  require "#{File.dirname(__FILE__)}/JavaLexer"
-  require "#{File.dirname(__FILE__)}/JavaParser"
-}
-
-class JavaLexer
-  M_TOKENS_LIST = [nil, :m_t__25, :m_t__26, :m_t__27, :m_t__28, :m_t__29, :m_t__30, :m_t__31, :m_t__32, :m_t__33, :m_t__34, :m_t__35, :m_t__36, :m_t__37, :m_t__38, :m_t__39, :m_t__40, :m_t__41, :m_t__42, :m_t__43, :m_t__44, :m_t__45, :m_t__46, :m_t__47, :m_t__48, :m_t__49, :m_t__50, :m_t__51, :m_t__52, :m_t__53, :m_t__54, :m_t__55, :m_t__56, :m_t__57, :m_t__58, :m_t__59, :m_t__60, :m_t__61, :m_t__62, :m_t__63, :m_t__64, :m_t__65, :m_t__66, :m_t__67, :m_t__68, :m_t__69, :m_t__70, :m_t__71, :m_t__72, :m_t__73, :m_t__74, :m_t__75, :m_t__76, :m_t__77, :m_t__78, :m_t__79, :m_t__80, :m_t__81, :m_t__82, :m_t__83, :m_t__84, :m_t__85, :m_t__86, :m_t__87, :m_t__88, :m_t__89, :m_t__90, :m_t__91, :m_t__92, :m_t__93, :m_t__94, :m_t__95, :m_t__96, :m_t__97, :m_t__98, :m_t__99, :m_t__100, :m_t__101, :m_t__102, :m_t__103, :m_t__104, :m_t__105, :m_t__106, :m_t__107, :m_t__108, :m_t__109, :m_t__110, :m_t__111, :m_t__112, :m_t__113, :m_hex_literal, :m_decimal_literal, :m_octal_literal, :m_floating_point_literal, :m_character_literal, :m_string_literal, :m_enum, :m_assert, :m_identifier, :m_ws, :m_comment, :m_line_comment]
-  undef_method :m_tokens
-  def m_tokens
-    __send__ M_TOKENS_LIST[@dfa29.predict(self.attr_input)]
-  end
-end
+require "#{File.dirname(__FILE__)}/tree_visitor"
+require "#{File.dirname(__FILE__)}/processors/java_code_parser"
+require "#{File.dirname(__FILE__)}/processors/output_indenter"
 
 require "#{File.dirname(__FILE__)}/conversion_controller"
 require "#{File.dirname(__FILE__)}/tools"
@@ -36,58 +28,13 @@ class Dir
   end
 end
 
-Org::Antlr::Runtime::Tree::ParseTree.class_eval do
-  attr_writer :internal_name
-  
-  def internal_name
-    @internal_name ||= if attr_payload.is_a? String
-      attr_payload.to_sym
-    else
-      attr_payload.get_text
-    end
-  end
-  
-  def handle_case_end
-    case internal_name
-    when :block
-      @children[-2].handle_case_end
-    when :blockStatement
-      @children.first.handle_case_end
-    when :statement
-      case @children.first.internal_name
-      when "break"
-        @children.first.internal_name = :disabled_break if @children[1].internal_name == ";"
-        true
-      when "return", "throw"
-        true
-      when "if"
-        @children[2].handle_case_end && (@children.size < 5 || @children[4].handle_case_end)
-      when :block
-        @children.first.handle_case_end
-      else
-        false
-      end
-    else
-      false
-    end
-  end
-end
-
-class NilClass
-  def internal_name
-    nil
-  end
-end
-
 module Java2Ruby
   class Converter
-    include Org::Antlr::Runtime
-    include Org::Antlr::Runtime::Debug
-    
     EPSILON = "<epsilon>".to_sym
     
     attr_accessor :java_file, :basename, :ruby_file, :controller, :converter_id, :size, :error
     attr_accessor :current_generator, :statement_context
+    attr_reader :input, :input_tree, :output
     
     def initialize(java_file, conversion_rules = {}, ruby_dir = nil, controller = nil, converter_id = nil, size = nil)
       @java_file = java_file
@@ -141,34 +88,15 @@ module Java2Ruby
       end
     end
     
-    def input
-      @input ||= File.read(java_file).force_encoding("ASCII-8BIT")
-    end
-    
-    def parse_tree
-      @parse_tree ||= begin
-        stream = ANTLRStringStream.new(input)
-        lexer = JavaLexer.new stream
-        tokens = CommonTokenStream.new
-        tokens.set_token_source lexer
-        builder = ParseTreeBuilder.new "Java"
-        parser = JavaParser.new tokens, builder
-        parser.compilation_unit
-        builder.get_tree
-      end
-    end
-    
-    def output
-      @output ||= begin
-        @current_generator = nil
-        @statement_context = nil
-        @elements = [parse_tree]
-        @next_element_index = 0
-        @next_element = @elements.first
-        @explicit_call_counter = -1
-        compilation_unit = CompilationUnit.new self
-        generate_indented_output "", compilation_unit.output_parts.first, 0
-      end
+    def generate_output(tree)
+      @current_generator = nil
+      @statement_context = nil
+      @elements = tree[:children]
+      @next_element_index = 0
+      @next_element = @elements.first
+      @explicit_call_counter = -1
+      compilation_unit = CompilationUnit.new self
+      { :type => :output_tree, :children => compilation_unit.output_parts.first }
     end
     
     def current_module
@@ -195,21 +123,13 @@ module Java2Ruby
         yield
       end
     end
-    
-    def generate_indented_output(output, array, indention)
-      array.each do |element|
-        if element.is_a? Array
-          generate_indented_output output, element, indention + 1
-        else
-          output << "#{'  ' * indention}#{element}\n"
-        end
-      end
-      output
-    end
-    
+        
     def convert
-      result = self.output # only write when no exception raised, so we use local variable first
-      File.open(ruby_file, "w") { |file| file.write result }
+      @input = File.read(java_file).force_encoding("ASCII-8BIT")
+      @input_tree = JavaCodeParser.new.parse_java @input
+      @output_tree = generate_output @input_tree
+      @output = OutputIndenter.new.process @output_tree
+      File.open(ruby_file, "w") { |file| file.write @output }
     end
     
     attr_reader :next_element
@@ -218,7 +138,7 @@ module Java2Ruby
       parent_elements = @elements
       parent_next_element_index = @next_element_index
       
-      @elements = element.attr_children || []
+      @elements = element[:children]
       @next_element_index = 0
       @next_element = @elements.first
       result = yield
@@ -232,21 +152,21 @@ module Java2Ruby
     end
     
     def next_is?(*names)
-      next_element && names.include?(next_element.internal_name)
+      next_element && names.include?(next_element[:internal_name])
     end
     
     def match(*names)
-      raise "Wrong match: #{next_element.internal_name.inspect} instead one of #{names.inspect}" if not names.include? next_element.internal_name
+      raise "Wrong match: #{next_element[:internal_name].inspect} instead one of #{names.inspect}" if not names.include? next_element[:internal_name]
       element = consume
       process_children element do
         yield if block_given?
       end
-      element.get_text
+      element[:text]
     end
     
     def match_name
-      raise "Wrong match: #{next_element.internal_name.inspect} instead one of name string" if not next_element.internal_name.is_a? String
-      consume.get_text # string elements have no children
+      raise "Wrong match: #{next_element[:internal_name].inspect} instead one of name string" if not next_element[:internal_name].is_a? String
+      consume[:text] # string elements have no children
     end
     
     def try_match(*names)
@@ -255,11 +175,11 @@ module Java2Ruby
       process_children element do
         yield if block_given?
       end
-      element.get_text
+      element[:text]
     end
     
     def buffer_match(*names)
-      raise "Wrong match: #{next_element.internal_name.inspect} instead one of #{names.inspect}" if not names.include? next_element.internal_name
+      raise "Wrong match: #{next_element[:internal_name].inspect} instead one of #{names.inspect}" if not names.include? next_element[:internal_name]
       element = consume
       lambda {
         process_children element do
@@ -296,13 +216,13 @@ module Java2Ruby
       current_element = next_element
       
       # handle comments
-      if current_element.attr_hidden_tokens
-        current_element.attr_hidden_tokens.each do |hidden_token|
-          if hidden_token.attr_type == JavaLexer::LINE_COMMENT
-            @current_generator.single_line_comment hidden_token.get_text[2..-1].strip
-          elsif hidden_token.attr_type == JavaLexer::COMMENT
+      if current_element[:hidden_tokens]
+        current_element[:hidden_tokens].each do |hidden_token|
+          if hidden_token[:type] == JavaLexer::LINE_COMMENT
+            @current_generator.single_line_comment hidden_token[:text][2..-1].strip
+          elsif hidden_token[:type] == JavaLexer::COMMENT
             lines = []
-            hidden_token.get_text.split("\n").each do |line|
+            hidden_token[:text].split("\n").each do |line|
               line.strip!
               line.gsub! /\*\/$/, ""
               line.gsub! /^\/?\*+/, ""
@@ -310,7 +230,7 @@ module Java2Ruby
               lines << line
             end
             @current_generator.multi_line_comment lines
-          elsif hidden_token.get_text == "\r" || hidden_token.get_text == "\n"
+          elsif hidden_token[:text] == "\r" || hidden_token[:text] == "\n"
             @current_generator.new_line
           end
         end
@@ -345,9 +265,7 @@ module Java2Ruby
     end
     
     def write_output
-      @converter.match "<grammar Java>".to_sym do
-        @converter.match_compilationUnit
-      end
+      @converter.match_compilationUnit
     end
     
     def current_module

@@ -38,7 +38,7 @@ module Java2Ruby
     
     def single_line_comment(line)
       if @current_line_comment and not @output_lines.empty?
-        @output_lines.last << " # #{line}"
+        @output_lines.last[:content] << " # #{line}"
       else
         @comment_lines << line
       end
@@ -51,10 +51,10 @@ module Java2Ruby
     end
     
     def write_comments
-      @comment_lines.shift while !@comment_lines.empty? and @comment_lines.first.empty?
-      @comment_lines.pop while !@comment_lines.empty? and @comment_lines.last.empty?
-      @comment_lines.map! { |comment| "# #{comment}" }
-      @output_lines.concat @comment_lines
+      # @comment_lines.shift while !@comment_lines.empty? and @comment_lines.first.empty?
+      # @comment_lines.pop while !@comment_lines.empty? and @comment_lines.last.empty?
+      # @comment_lines.map! { |comment| "# #{comment}" }
+      # @output_lines.concat @comment_lines
       @comment_lines.clear
     end
     
@@ -74,11 +74,11 @@ module Java2Ruby
       parts.each do |part|
         case part
         when String, JavaType
-          lines << "" if lines.empty?
-          lines.last << part.to_s
+          lines << { :type => :output_line, :content => "" } if lines.empty?
+          lines.last[:content] << part.to_s
         when Array
           unless part.empty?
-            part.first.insert 0, lines.pop unless lines.empty?
+            lines.last[:content] << part.shift[:content] unless lines.empty?
             lines.concat part
           end
         else
@@ -92,7 +92,7 @@ module Java2Ruby
       @output_lines = []
       yield
       write_comments
-      outer_array << @output_lines
+      outer_array << { :type => :output_block, :children => @output_lines }
       @output_lines = outer_array
     end
     

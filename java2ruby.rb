@@ -4,6 +4,9 @@ $:.unshift file_dir
 $:.unshift "#{file_dir}/../jre4ruby"
 $:.unshift "#{file_dir}/../antlr4ruby"
 
+module Java2Ruby
+end
+
 require "#{file_dir}/converter/converter"
 
 show_parse_tree = $*.delete "--parse-tree"

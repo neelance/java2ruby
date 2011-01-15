@@ -9,7 +9,6 @@ end
 
 require "#{file_dir}/converter/converter"
 
-show_parse_tree = $*.delete "--parse-tree"
 ruby_prof = $*.delete "--ruby-prof"
 perftools = $*.delete "--perftools"
 stdout = $*.delete "--stdout"
@@ -24,7 +23,6 @@ if perftools
   PerfTools::CpuProfiler.start "perftools_profile"
 end
 
-puts converter.parse_tree.to_string_tree if show_parse_tree
 if stdout
   puts converter.output
 else

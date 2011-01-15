@@ -1,5 +1,5 @@
 module Java2Ruby
-  class Converter
+  class JavaProcessor
     def match_localVariableDeclaration
       match :localVariableDeclaration do
         match_variableModifiers

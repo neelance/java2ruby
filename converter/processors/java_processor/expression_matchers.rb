@@ -1,5 +1,5 @@
 module Java2Ruby
-  class Converter
+  class JavaProcessor
     def match_combining_expression(name, *combiners)
       expression = nil
       match name do

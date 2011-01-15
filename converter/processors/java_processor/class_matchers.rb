@@ -1,5 +1,5 @@
 module Java2Ruby
-  class Converter
+  class JavaProcessor
     NOT_IMPLEMENTED = lambda { puts_output "raise NotImplementedError" }
     
     def match_classOrInterfaceDeclaration(context_module)

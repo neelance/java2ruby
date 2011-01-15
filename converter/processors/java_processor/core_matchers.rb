@@ -1,5 +1,5 @@
 module Java2Ruby
-  class Converter
+  class JavaProcessor
     def match_compilationUnit
       puts_output "require \"rjava\""
       puts_output ""

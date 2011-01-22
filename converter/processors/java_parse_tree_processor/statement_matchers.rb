@@ -1,184 +1,5 @@
 module Java2Ruby
-  class JavaProcessor
-
-    class StatementContext
-      attr_accessor :parent_context
-      
-      def initialize
-        @variables = {}
-        @ruby_variable_names = Set.new
-      end
-      
-      def converter
-        @parent_context.converter
-      end
-      
-      def current_java_break_context
-        @parent_context.current_java_break_context
-      end
-      
-      def current_java_next_context
-        @parent_context.current_java_next_context
-      end
-      
-      def find_block(block_name)
-        @parent_context.find_block block_name
-      end
-  
-      def current_ruby_break_context
-        @parent_context.current_ruby_break_context
-      end
-      
-      def new_variable(name, type)
-        var_name = RJava.lower_name name
-        while ruby_variable_name_used?(var_name) or RJava::RUBY_KEYWORDS.include?(var_name)
-          var_name << "_"
-        end
-        @variables[name] = [type, var_name]
-        @ruby_variable_names << var_name
-        var_name
-      end
-      
-      def resolve(identifiers)
-        if @variables.has_key?(identifiers.first)
-          var = @variables[identifiers.shift]
-          Expression.new var[0], var[1]
-        else
-          @parent_context && @parent_context.resolve(identifiers)
-        end
-      end
-      
-      def ruby_variable_name_used?(name)
-        @ruby_variable_names.include?(name) || (@parent_context && @parent_context.ruby_variable_name_used?(name))
-      end
-    end
-    
-    class MethodContext < StatementContext
-      def initialize(method)
-        super()
-        @method = method
-      end
-      
-      def converter
-        @method.converter
-      end
-      
-      def ruby_variable_name_used?(name)
-        @method.parent_module.has_ruby_method?(name) || super
-      end
-      
-      def current_java_break_context
-        nil
-      end
-      
-      def current_java_next_context
-        nil
-      end
-      
-      def find_block(name)
-        nil
-      end
-  
-      def current_ruby_break_context
-        nil
-      end
-    end
-    
-    class BlockContext < StatementContext
-      attr_reader :block_name, :break_catch
-      
-      def initialize(block_name, break_catch)
-        super()
-        @block_name = block_name
-        @break_catch = break_catch
-      end
-      
-      def find_block(block_name)
-        block_name == @block_name ? self : super
-      end
-    end
-    
-    class LoopContext < BlockContext
-      attr_reader :next_catch
-      
-      def initialize(block_name, break_catch, next_catch)
-        super block_name, break_catch
-        @next_catch = next_catch
-      end
-      
-      def current_java_break_context
-        self
-      end
-      
-      def current_java_next_context
-        self
-      end
-  
-      def current_ruby_break_context
-        self
-      end
-    end
-    
-    class ForContext < LoopContext
-      attr_reader :for_updates
-      
-      def initialize(block_name, break_catch, next_catch, for_updates)
-        super block_name, break_catch, next_catch
-        @for_updates = for_updates
-      end
-    end
-    
-    class SwitchContext < BlockContext
-      attr_reader :break_case_catch
-      
-      def initialize(block_name, break_catch, break_case_catch)
-        super block_name, break_catch
-        @break_case_catch = break_case_catch
-      end
-      
-      def current_java_break_context
-        self
-      end
-    end
-    
-    class CatchBlock
-      include OutputGenerator
-      attr_reader :name, :current_module, :current_method
-      
-      def initialize(converter, name)
-        super converter
-        @current_module = converter.current_module
-        @current_method = converter.current_method
-        @name = name
-        @buffer = yield self
-        @write_catch = false
-        
-        parts = self.output_parts # evaluates block and thus may modify @write_catch
-        
-        if @write_catch
-          @converter.puts_output "catch(:#{name}) do"
-          @converter.indent_output do
-            @converter.puts_output(*parts)
-          end
-          if @converter.statement_context.current_ruby_break_context
-            @converter.puts_output "end == :thrown or break"
-          else
-            @converter.puts_output "end"
-          end
-        else
-          @converter.puts_output(*parts)
-        end
-      end
-      
-      def write_output
-        @buffer.call
-      end
-      
-      def enable
-        @write_catch = true
-      end
-    end
-  
+  class JavaParseTreeProcessor
     def match_block
       match :block do
         match "{"
@@ -499,30 +320,30 @@ module Java2Ruby
       end
     end
     
-      def handle_case_end(element)
-        case element[:internal_name]
+    def handle_case_end(element)
+      case element[:internal_name]
+      when :block
+        handle_case_end element[:children][-2]
+      when :blockStatement
+        handle_case_end element[:children].first
+      when :statement
+        case element[:children].first[:internal_name]
+        when "break"
+          element[:children].first[:internal_name] = :disabled_break if element[:children][1][:internal_name] == ";"
+          true
+        when "return", "throw"
+          true
+        when "if"
+          handle_case_end(element[:children][2]) && (element[:children].size < 5 || handle_case_end(element[:children][4]))
         when :block
-          handle_case_end element[:children][-2]
-        when :blockStatement
           handle_case_end element[:children].first
-        when :statement
-          case element[:children].first[:internal_name]
-          when "break"
-            element[:children].first[:internal_name] = :disabled_break if element[:children][1][:internal_name] == ";"
-            true
-          when "return", "throw"
-            true
-          when "if"
-            handle_case_end(element[:children][2]) && (element[:children].size < 5 || handle_case_end(element[:children][4]))
-          when :block
-            handle_case_end element[:children].first
-          else
-            false
-          end
         else
           false
         end
+      else
+        false
       end
+    end
     
   end
 end

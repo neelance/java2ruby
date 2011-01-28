@@ -7,6 +7,7 @@ $:.unshift "#{file_dir}/../antlr4ruby"
 module Java2Ruby
 end
 
+require "ruby_modifications"
 require "#{file_dir}/converter/converter"
 
 show_log = $*.delete "--show-log"
@@ -28,7 +29,12 @@ if show_log
   converter.log = {}
 end
 
-converter.convert
+exception = nil
+begin
+  converter.convert
+rescue Exception => e
+  exception = e
+end
 
 if ruby_prof
   result = RubyProf.stop
@@ -55,3 +61,5 @@ if show_log
   file.close
   system "geany #{file.path}"
 end
+
+raise exception if exception

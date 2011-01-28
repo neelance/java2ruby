@@ -8,13 +8,13 @@ module Java2Ruby
       end
     end
     
-    def match_block_statements
+    def match_block_statements(element)
       loop_match :blockStatement do
-        match_block_statement_children
+        match_block_statement_children element
       end
     end
     
-    def match_block_statement_children
+    def match_block_statement_children(element)
       if try_match :localVariableDeclarationStatement do
           match_localVariableDeclaration
           match ";"
@@ -24,16 +24,16 @@ module Java2Ruby
         puts_output inner_module.java_type, " = ", inner_module
       else
         match :statement do
-          match_statement_children
+          element[:children] << match_statement_children
         end
       end
     end
     
     def match_statement_children(block_name = nil, break_catch = nil)
+      element = nil
       if try_match :statementExpression do
           expression = match_expression
-          expression.result_used = false
-          puts_output expression
+          element = { :type => :expression, :value => expression }
         end
         match ";"
       elsif try_match "if"
@@ -318,6 +318,9 @@ module Java2Ruby
           end
         end
       end
+      
+      raise ArumentError if element.nil?
+      element
     end
     
     def handle_case_end(element)

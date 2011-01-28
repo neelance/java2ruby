@@ -81,6 +81,10 @@ module Java2Ruby
               lines.last[:content] << part.shift[:content] unless lines.empty?
               lines.concat part
             end
+          when nil
+            raise ArgumentError, parts.inspect
+          when Hash
+            raise ArgumentError, part.inspect 
           else
             combine_output_parts part.output_parts, lines
           end

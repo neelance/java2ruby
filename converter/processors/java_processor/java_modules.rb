@@ -501,7 +501,7 @@ module Java2Ruby
       end
       
       def write_output
-        @converter.match_compilationUnit @element
+        @converter.visit_compilationUnit @element
       end
       
       def current_module

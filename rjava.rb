@@ -1,7 +1,9 @@
 $rjava_verbose = ARGV.delete("--rjava-verbose")
 
+require "ruby_modifications"
+require "ruby_naming"
+
 require "rjava/rjava_module"
-require "rjava/ruby_modifications"
 require "rjava/lazy_constants"
 require "rjava/signature_matching"
 require "rjava/class_module"

@@ -1,13 +1,7 @@
-require "rjava"
-require "antlr4ruby"
 require "yaml"
 
 require "#{File.dirname(__FILE__)}/conversion_controller"
 require "#{File.dirname(__FILE__)}/tree_visitor"
-require "#{File.dirname(__FILE__)}/processors/java_code_parser"
-require "#{File.dirname(__FILE__)}/processors/java_parse_tree_processor"
-require "#{File.dirname(__FILE__)}/processors/java_processor"
-require "#{File.dirname(__FILE__)}/processors/output_indenter"
 
 module Java2Ruby
   class Converter
@@ -25,21 +19,25 @@ module Java2Ruby
     def convert
       basename = File.basename @java_file, ".java"
 
-      code = File.read(@java_file).force_encoding("ASCII-8BIT")
-      @log["input code"] = code if @log
+      #code = File.read(@java_file).force_encoding("ASCII-8BIT")
+      #@log["input code"] = code if @log
       
-      tree = JavaCodeParser.new.parse_java code
-      @log["input tree"] = tree.to_yaml if @log
+      #require "#{File.dirname(__FILE__)}/processors/java_code_parser"
+      #tree = JavaCodeParser.new.parse_java code
+      #@log["input tree"] = tree.to_yaml if @log
       
-      #File.open("#{@output_dir}/#{basename}.step1.yaml~", "w") { |file| file.write tree.to_yaml }
-      #tree = YAML.load File.read("#{@output_dir}/#{basename}.step1.yaml~")
+      #File.open("#{@output_dir}/#{basename}.step1.yaml", "w") { |file| file.write tree.to_yaml }
+      tree = YAML.load File.read("#{@output_dir}/#{basename}.step1.yaml")
       
+      require "#{File.dirname(__FILE__)}/processors/java_parse_tree_processor"
       tree = JavaParseTreeProcessor.new.process tree
       @log["processed tree"] = tree.to_yaml if @log
       
+      require "#{File.dirname(__FILE__)}/processors/java_processor"
       java_processor = JavaProcessor.new @conversion_rules
       tree = java_processor.process tree
       
+      require "#{File.dirname(__FILE__)}/processors/output_indenter"
       output = OutputIndenter.new.process tree
       @log["output code"] = output if @log
       

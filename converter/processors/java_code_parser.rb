@@ -1,3 +1,6 @@
+require "rjava"
+require "antlr4ruby"
+
 non_verbose {
   require "#{File.dirname(__FILE__)}/java_code_parser/JavaLexer"
   require "#{File.dirname(__FILE__)}/java_code_parser/JavaParser"

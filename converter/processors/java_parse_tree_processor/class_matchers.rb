@@ -334,8 +334,7 @@ module Java2Ruby
                     method_body = { :type => :body, :children => [] }
                     match :block do
                       match "{"
-                      method_body[:children] << consume while next_is?(:blockStatement)
-                      # match_block_statements
+                      match_block_statements method_body
                       match "}"
                     end
                     element[:body_declarations] << { :type => :void_method_declaration, :static => static, :name => method_name, :parameters => method_parameters, :return_type => :void, :synchronized => synchronized, :body => method_body }

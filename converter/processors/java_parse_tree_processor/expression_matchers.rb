@@ -8,7 +8,7 @@ module Java2Ruby
           combiner_found = false
           combiners.each do |combiner|
             if try_match combiner
-              expression = expression.combine combiner, yield
+              expression = { :type => :dual, :operator => combiner, :left => expression, :right => yield }
               combiner_found = true
               break
             end
@@ -43,11 +43,7 @@ module Java2Ruby
             operator = ">>=" if operator == ">>>="
           end
           other_expression = match_expression
-          if operator == "=" and expression.is_a?(ConstantExpression)
-            expression = Expression.new nil, "const_set :#{expression.constant.ruby_name}, ", other_expression.typecast(expression.type)
-          else
-            expression = Expression.new nil, expression, " #{operator} ", other_expression.typecast(expression.type)
-          end
+          expression = { :type => :assignment, :operator => operator, :left => expression, :right => other_expression }
         end
       end
       raise ArgumentError if expression.nil?
@@ -68,18 +64,10 @@ module Java2Ruby
                     loop do
                       if try_match "=="
                         other_expression = match_instanceOfExpression
-                        if other_expression.type == :null
-                          expression = Expression.new nil, "(", expression, ").nil?"
-                        else
-                          expression = Expression.new nil, "(", expression, ").equal?(", other_expression, ")"
-                        end
+                        expression = { :type => :equal, :left => expression, :right => other_expression }
                       elsif try_match "!="
                         other_expression = match_instanceOfExpression
-                        if other_expression.type == :null
-                          expression = Expression.new nil, "!(", expression, ").nil?"
-                        else
-                          expression = Expression.new nil, "!(", expression, ").equal?(", other_expression, ")"
-                        end
+                        expression = { :type => :inequal, :left => expression, :right => other_expression }
                       else
                         break
                       end
@@ -95,7 +83,7 @@ module Java2Ruby
           true_expression = match_expression
           match ":"
           false_expression = match_expression
-          expression = Expression.new nil, expression, " ? ", true_expression, " : ", false_expression
+          expression = { :type => :one_line_if, :condition => expression, :true_value => true_expression, :false_value => false_expression }
         end
       end
       expression
@@ -115,7 +103,7 @@ module Java2Ruby
         end
         if try_match "instanceof"
           type = match_type
-          expression = Expression.new nil, expression, ".is_a?(#{type})"
+          expression = { :type => :typecheck, :value => expression, :type => type }
         end
       end
       raise ArgumentError if expression.nil?
@@ -133,7 +121,7 @@ module Java2Ruby
               operator = ">>" if operator == ">>>" # TODO may have side effects, check
             end
             other_expression = match_additiveExpression
-            expression = Expression.new nil, expression, " #{operator} ", other_expression
+            expression = { :type => :shift, :operator => operator, :left => expression, :right => other_expression }
           else
             break
           end
@@ -155,13 +143,13 @@ module Java2Ruby
       expression = nil
       match :unaryExpression do
         expression = if try_match "+"
-          Expression.new nil, "+", match_unaryExpression
+          { :type => :unary_plus, :value => match_unaryExpression }
         elsif try_match "-"
-          Expression.new nil, "-", match_unaryExpression
+          { :type => :unary_minus, :value => match_unaryExpression }
         elsif try_match "++"
-          Expression.new nil, "(", match_unaryExpression, " += 1)"
+          { :type => :pre_increment, :value => match_unaryExpression }
         elsif try_match "--"
-          Expression.new nil, "(", match_unaryExpression, " -= 1)"
+          { :type => :pre_decrement, :value => match_unaryExpression }
         else
           match_unaryExpressionNotPlusMinus
         end
@@ -186,25 +174,20 @@ module Java2Ruby
               match ")"
               expression = match_unaryExpressionNotPlusMinus
             end
-            case type
-            when "int", "short", "char"
-              expression = Expression.new nil, "RJava.cast_to_#{type}(", expression, ")"
-            when "float", "double"
-              expression = Expression.new nil, "(", expression, ").to_f"
-            end
+            expression = { :type => :cast, :value => expression, :type => type }
           end
         elsif try_match "!"
           expression = match_unaryExpression
-          expression = Expression.new nil, "!", expression
+          expression = { :type => :not, :value => expression }
         elsif try_match "~"
           expression = match_unaryExpression
-          expression = Expression.new nil, "~", expression
+          expression = { :type => :complement, :value => expression }
         else
           expression = match_primary
           if try_match "++"
-            expression = PostIncrementExpression.new expression
+            expression = { :type => :post_increment, :value => expression }
           elsif try_match "--"
-            expression = PostDecrementExpression.new expression
+            expression = { :type => :post_decrement, :value => expression }
           end
         end
       end
@@ -217,10 +200,10 @@ module Java2Ruby
       match :parExpression do
         if try_match "("
           expression = match_expression
-          expression = Expression.new nil, "(", expression, ")"
+          expression = { :type => :parentheses, :value => expression }
           match ")"
         else
-          expression = Expression.new nil # TODO why empty parExpression?
+          expression = nil # TODO why empty parExpression?
         end
       end
       raise ArgumentError if expression.nil?
@@ -252,17 +235,17 @@ module Java2Ruby
                   int = 0x100000000 - int
                   is_neg = !is_neg
                 end
-                expression = Expression.new(:Integer, (is_neg ? "-" : "") + (is_hex ? "0x" : "") + int.to_s(is_hex ? 16 : 10))
+                expression = { :type => :integer, :value => (is_neg ? "-" : "") + (is_hex ? "0x" : "") + int.to_s(is_hex ? 16 : 10) }
               end
             elsif try_match :booleanLiteral do
                 boolean = match_name
-                expression = Expression.new :Boolean, boolean
+                expression = { :type => :boolean, :value => boolean }
               end
             else
               literal = match_name
               expression = case
               when literal == "null"
-                Expression.new :null, "nil"
+                { :type => :nil }
               when literal[0..0] == "\""
                 content = literal[1..-2]
                 unicode = if is_ruby_1_8?
@@ -270,7 +253,7 @@ module Java2Ruby
                 else
                   content.gsub!(UNICODE_MATCHER, '".to_u << 0x\1 << "')
                 end
-                Expression.new(JavaType::STRING, unicode ? "(\"#{content}\")" : "\"#{content}\"")
+                { :type => :string, :value => unicode ? "(\"#{content}\")" : "\"#{content}\"" }
               when literal[0..0] == "'"
                 java_char = literal[1..-2]
                 char = if java_char == " "
@@ -280,11 +263,11 @@ module Java2Ruby
                 else
                   "?#{java_char}.ord"
                 end
-                Expression.new nil, "Character.new(#{char})"
+                { :type => :character, :value => char }
               else
                 literal.gsub!(/[fdFD]$/, "")
                 literal.gsub!(/^\./, "0.")
-                Expression.new :Float, literal
+                { :type => :float, :value => literal }
               end
             end
           end
@@ -324,20 +307,16 @@ module Java2Ruby
           end
           match "."
           match "class"
-          expression = Expression.new nil, "Array"
+          expression = { :type => :array_class }
         elsif try_match "super"
           match :superSuffix do
             match "."
             identifier = match_name
             if next_is? :arguments
               arguments = match_arguments
-              if identifier == current_method.name
-                expression = Expression.new nil, "super", *compose_arguments(arguments)
-              else
-                expression = Expression.new nil, current_module.superclass, ".instance_method(:", ruby_method_name(identifier), ").bind(self).call", *compose_arguments(arguments)
-              end
+              expression = { :type => :super_call, :method => identifier, :arguments => arguments }
             else
-              expression = Expression.new nil, "@#{ruby_field_name identifier}"
+              expression = { :type => :super_field, :method => identifier }
             end
           end
         else
@@ -366,7 +345,7 @@ module Java2Ruby
                   match "]"
                   if try_match "."
                     match "class"
-                    expression = Expression.new nil, "Array"
+                    expression = { :type => :array_class }
                   end
                 end
               elsif next_is? :arguments
@@ -415,16 +394,9 @@ module Java2Ruby
             else
               method_identifier = arguments ? identifiers.pop : nil
               
-              expression = nil
-              expression ||= @statement_context && @statement_context.resolve(identifiers)
-              expression ||= current_module && current_module.resolve(identifiers)
-              
-              identifiers.each do |identifier|
-                expression = Expression.new nil, expression, ".attr_", ruby_field_name(identifier)
-              end
+              expression = { :type => :field, :identifiers => identifiers }
               
               if method_identifier
-                current_module && current_module.method_used(method_identifier)
                 expression = method_call expression, method_identifier, arguments
               end
             end
@@ -463,19 +435,12 @@ module Java2Ruby
         end
       end
       
+      raise ArgumentError if expression.nil?
       expression
     end
     
     def method_call(expression, method_name, arguments)
-      if arguments.size == 1 and method_name == "equals"
-        expression = Expression.new nil, "(", expression, " == ", arguments.first, ")"
-      elsif arguments.size == 1 and method_name == "compareTo"
-        expression = Expression.new nil, "(", expression, " <=> ", arguments.first, ")"
-      elsif arguments.size == 1 and method_name == "split"
-        expression = Expression.new nil, expression, ".split(Regexp.new(", arguments.first, "))"
-      else
-        expression = Expression.new nil, expression, ".", ruby_method_name(method_name), *compose_arguments(arguments)
-      end
+      { :type => :call, :target => expression, :name => method_name, :arguments => arguments }
     end
     
     def match_classCreatorRest(type)
@@ -503,6 +468,7 @@ module Java2Ruby
           end
         end
       end
+      raise ArgumentError if expression.nil?
       expression
     end
     

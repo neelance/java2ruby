@@ -7,15 +7,14 @@ module Java2Ruby
     end
     
     def visit(element, data = {})
-      last_current_element = @current_element
-      @current_element = element
-      result = __send__ @@visit_methods[element[:type]], element, data
-      @current_element = last_current_element
+      type = element[:type]
+      raise ArgumentError, element.inspect if not type.is_a?(Symbol)
+      result = __send__ @@visit_methods[type], element, data
       result
     end
     
-    def visit_children(data = {})
-      @current_element[:children].each do |child|
+    def visit_children(element, data = {})
+      element[:children].each do |child|
         visit child, data
       end
     end

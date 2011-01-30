@@ -21,13 +21,13 @@ module Java2Ruby
       imports_module = JavaImportsModule.new @package, @basename, converter
 
       element[:imports].each do |import|
-        imports_module.new_import import[:names], import[:package_import], import[:static_import]
+        imports_module.new_import import[:names].map{ |name| RubyNaming.ruby_package_name(name) }, import[:package_import], import[:static_import]
       end
       
       java_modules = []
       base_module = nil
       element[:declared_types].each do |type|
-        java_module = visit_classDeclaration type, imports_module
+        java_module = visit type, :context_module => imports_module
         java_modules << java_module
         base_module = java_module if java_module.name == @basename
       end
@@ -51,6 +51,10 @@ module Java2Ruby
         end
       end
       list
+    end
+    
+    def visit_void_type(element, data)
+      JavaType::VOID
     end
     
     def visit_primitive_type(element, data)

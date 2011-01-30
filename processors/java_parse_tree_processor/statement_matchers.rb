@@ -1,35 +1,35 @@
 module Java2Ruby
   class JavaParseTreeProcessor
-    def match_block(element)
+    def match_block(children)
       match :block do
         match "{"
-        match_block_statements element
+        match_block_statements children
         match "}"
       end
     end
     
-    def match_block_statements(element)
+    def match_block_statements(children)
       loop_match :blockStatement do
-        match_block_statement_children element
+        match_block_statement_children children
       end
     end
     
-    def match_block_statement_children(element)
+    def match_block_statement_children(children)
       if try_match :localVariableDeclarationStatement do
-          element[:children].concat match_localVariableDeclaration
+          children.concat match_localVariableDeclaration
           match ";"
         end
       elsif next_is? :classOrInterfaceDeclaration
-        inner_module = match_classOrInterfaceDeclaration current_module
-        puts_output inner_module.java_type, " = ", inner_module
+        inner_module = match_classOrInterfaceDeclaration
+        children << { :type => :inner_module, :module => inner_module }
       else
         match :statement do
-          element[:children] << match_statement_children
+          children << match_statement_child
         end
       end
     end
     
-    def match_statement_children(block_name = nil, break_catch = nil)
+    def match_statement_child
       element = nil
       if try_match :statementExpression do
           expression = match_expression
@@ -37,21 +37,17 @@ module Java2Ruby
         end
         match ";"
       elsif try_match "if"
-        puts_output "if ", match_parExpression
-        indent_output do
-          match :statement do
-            match_statement_children
-          end
+        condition = match_parExpression
+        true_statement = false_statement = nil
+        match :statement do
+          true_statement = match_statement_child
         end
         if try_match "else"
-          puts_output "else"
-          indent_output do
-            match :statement do
-              match_statement_children
-            end
+          match :statement do
+            false_statement = match_statement_child
           end
         end
-        puts_output "end"
+        element = { :type => :if, :condition => condition, :true => true_statement, :false => false_statement }
       elsif try_match "switch"
         case_expression = match_parExpression
         match "{"
@@ -117,26 +113,21 @@ module Java2Ruby
           CatchBlock.new(self, "next_#{block_name}") do |next_catch|
             buffer_match :statement do
               switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
-                match_statement_children
+                match_statement_child
               end
             end
           end
         end
         puts_output "end"
       elsif try_match "do"
-        puts_output "begin"
-        indent_output do
-          CatchBlock.new(self, "next_#{block_name}") do |next_catch|
-            buffer_match :statement do
-              switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
-                match_statement_children
-              end
-            end
-          end
+        child = nil
+        match :statement do
+          child = match_statement_child
         end
         match "while"
-        puts_output "end while ", match_parExpression
+        condition = match_parExpression
         match ";"
+        element = { :type => :do_while, :condition => condition, :child => child }
       elsif try_match "for"
         for_each = false
         for_condition = for_each_variable = for_each_list = nil
@@ -173,9 +164,9 @@ module Java2Ruby
         match ")"
         match :statement do
           if for_each
-            element = { :type => :for_each, :child => match_statement_children }
+            element = { :type => :for_each, :child => match_statement_child }
           else
-            element = { :type => :for, :inits => for_inits, :condition => for_condition, :updates => for_updates, :child => match_statement_children }
+            element = { :type => :for, :inits => for_inits, :condition => for_condition, :updates => for_updates, :child => match_statement_child }
           end
         end
       elsif try_match "try"
@@ -214,23 +205,11 @@ module Java2Ruby
         puts_output "end"
       elsif try_match "break"
         if try_match ";"
-          break_context = @statement_context.current_java_break_context
-          if break_context.is_a?(SwitchContext)
-            puts_output "throw :break_case, :thrown"
-            break_context.break_case_catch.enable
-          else
-            puts_output "break"
-          end
+          element = { :type => :break }
         else
-          name = RJava.lower_name(match_name)
+          name = match_name
           match ";"
-          block_context = @statement_context.find_block name
-          if block_context == @statement_context.current_ruby_break_context
-            puts_output "break"
-          else
-            puts_output "throw :break_#{name}, :thrown"
-            block_context.break_catch.enable
-          end
+          element = { :type => :break, :name => name }
         end
       elsif try_match :disabled_break
         match ";"
@@ -252,11 +231,8 @@ module Java2Ruby
           end
         end
       elsif try_match "return"
-        if next_is? :expression
-          puts_output "return ", match_expression
-        else
-          puts_output "return"
-        end
+        expression = next_is?(:expression) ? match_expression : nil
+        element = { :type => :return, :value => expression }
         match ";"
       elsif try_match "throw"
         throw_expression = match_expression
@@ -278,18 +254,19 @@ module Java2Ruby
         assert_line.push " if not (", assert_expression, ")"
         puts_output(*assert_line)
       elsif next_is? :block
-        element = { :type => :block, :children => [] }
-        match_block element
+        children = []
+        match_block children
+        element = { :type => :block, :children => children }
       elsif try_match ";"
         # nothing
       else
-        block_name = RJava.lower_name(match_name)
+        name = match_name
+        child = nil
         match ":"
-        CatchBlock.new(self, "break_#{block_name}") do |break_catch|
-          buffer_match :statement do
-            match_statement_children block_name, break_catch
-          end
+        match :statement do
+          child = match_statement_child
         end
+        element = { :type => :label, :name => name, :child => child }
       end
       
       raise ArumentError if element.nil?

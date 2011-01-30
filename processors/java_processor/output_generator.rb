@@ -101,7 +101,7 @@ module Java2Ruby
       end
       
       def lower_name(name)
-        RJava.lower_name name
+        RubyNaming.lower_name name
       end
       
       def upper_name(name)

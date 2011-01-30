@@ -54,7 +54,7 @@ module Java2Ruby
     end
     
     def visit_typecheck(element, data)
-      Expression.new nil, visit(element[:value]), ".is_a?(#{visit element[:type]})"
+      Expression.new nil, visit(element[:value]), ".is_a?(#{visit element[:checked_type]})"
     end
     
     def visit_shift(element, data)
@@ -78,42 +78,34 @@ module Java2Ruby
     end
     
     def visit_cast(element, data)
-      match "("
-      type = nil
-      if try_match :primitiveType do
-          type = visit_name
+      type = visit element[:cast_type]
+      expression = visit element[:value]
+      if type.is_a?(JavaPrimitiveType)
+        case type
+        when "int", "short", "char"
+          Expression.new nil, "RJava.cast_to_#{type}(", expression, ")"
+        when "float", "double"
+          Expression.new nil, "(", expression, ").to_f"
         end
-        match ")"
-        expression = visit_unaryExpression
       else
-        visit_type
-        match ")"
-        expression = visit_unaryExpressionNotPlusMinus
-      end
-      case type
-      when "int", "short", "char"
-        expression = Expression.new nil, "RJava.cast_to_#{type}(", expression, ")"
-      when "float", "double"
-        expression = Expression.new nil, "(", expression, ").to_f"
+        expression
       end
     end
     
     def visit_not(element, data)
-      expression = visit_unaryExpression
-      expression = Expression.new nil, "!", expression
+      Expression.new nil, "!", visit(element[:value])
     end
     
     def visit_complement(element, data)
-      expression = visit_unaryExpression
-      expression = Expression.new nil, "~", expression
+      Expression.new nil, "~", visit(element[:value])
     end
     
     def visit_post_increment(element, data)
-      PostIncrementExpression.new visit(element[value])
+      PostIncrementExpression.new visit(element[:value])
     end
     
     def visit_post_decrement(element, data)
-      PostDecrementExpression.new visit(element[value])
+      PostDecrementExpression.new visit(element[:value])
     end
     
     def visit_parentheses(element, data)
@@ -197,11 +189,11 @@ module Java2Ruby
       current_module && current_module.method_used(element[:name])
       
       if element[:arguments].size == 1 and element[:name] == "equals"
-        Expression.new nil, "(", visit(element[:target]), " == ", element[:arguments].first, ")"
+        Expression.new nil, "(", visit(element[:target]), " == ", visit(element[:arguments].first), ")"
       elsif element[:arguments].size == 1 and element[:name] == "compareTo"
-        Expression.new nil, "(", visit(element[:target]), " <=> ", element[:arguments].first, ")"
+        Expression.new nil, "(", visit(element[:target]), " <=> ", visit(element[:arguments].first), ")"
       elsif element[:arguments].size == 1 and element[:name] == "split"
-        Expression.new nil, visit(element[:target]), ".split(Regexp.new(", element[:arguments].first, "))"
+        Expression.new nil, visit(element[:target]), ".split(Regexp.new(", visit(element[:arguments].first), "))"
       else
         Expression.new nil, visit(element[:target]), ".", ruby_method_name(element[:name]), *compose_arguments(element[:arguments])
       end
@@ -223,7 +215,7 @@ module Java2Ruby
     
     def visit_array_creator(element, data)
       type = visit element[:entry_type]
-      element[:initializer] ? visit_arrayInitializer(element[:initializer]) : type.default(element[:sizes].map{ |size| visit size })
+      element[:initializer] ? visit_arrayInitializer(element[:initializer], type) : type.default(element[:sizes].map{ |size| visit size })
     end
     
     def visit_array_access(element, data)
@@ -261,17 +253,7 @@ module Java2Ruby
               arguments = visit_arguments
             end
           elsif try_match "this"
-            if identifiers.first == current_module.name
-              expression = Expression.new nil, "self"
-            else
-              expression = Expression.new nil, "@local_class_parent"
-              target_module = current_module.context_module
-              
-              while identifiers.first != target_module.name
-                expression = Expression.new nil, expression, ".local_class_parent"
-                target_module = target_module.context_module
-              end
-            end
+
           elsif try_match "new"
             match :innerCreator do
               type = visit_name
@@ -282,15 +264,6 @@ module Java2Ruby
           else
             raise ArgumentError
           end
-        end
-      end
-      
-      if expression.nil?
-        if identifiers.size == 1 and arguments
-          current_module && current_module.method_used(identifiers.first)
-          expression = Expression.new nil, (identifiers.first == "equals" ? "self.==" : ruby_method_name(identifiers.first)), *compose_arguments(arguments)
-        else
-
         end
       end
       
@@ -331,32 +304,50 @@ module Java2Ruby
       Expression.new nil, visit(element[:target]), ".attr_", ruby_field_name(element[:name])
     end
         
-    def visit_classCreatorRest(type)
-      expression = nil
-      match :classCreatorRest do
-        arguments = visit_arguments
-        expression = if type.names.size == 1 && type.names.first == "Integer"
-          arguments.first
-        else
-          if next_is? :classBody
-            puts_output current_module.java_type, " = self.class" if current_module.type == :inner_class
-            java_module = JavaModule.new current_module, :inner_class, nil
-            java_module.superclass = type
-            visit_classBody java_module
-            arguments.unshift "self"
-            Expression.new nil, java_module, ".new_local", *compose_arguments(arguments)
-          else
-            local_module = current_module && current_module.find_local_module(type.names.first)
-            if local_module and local_module.type == :local_class
-              arguments.unshift "self"
-              Expression.new nil, type, ".new_local", *compose_arguments(arguments)
-            else
-              Expression.new nil, type, ".new", *compose_arguments(arguments)
-            end            
-          end
-        end
+    def visit_anonymous_class(element, data)
+      puts_output current_module.java_type, " = self.class" if current_module.type == :inner_class
+      java_module = JavaModule.new current_module, :inner_class, nil
+      java_module.superclass = type
+      visit_classBody java_module
+      arguments.unshift "self"
+      Expression.new nil, java_module, ".new_local", *compose_arguments(arguments)
+    end
+    
+    def visit_class_creator(element, data)
+      type = visit element[:class_type]
+      arguments = element[:arguments]
+      local_module = current_module && current_module.find_local_module(type.names.first)
+      if local_module and local_module.type == :local_class
+        arguments.unshift({ :type => :self })
+        Expression.new nil, type, ".new_local", *compose_arguments(arguments)
+      else
+        Expression.new nil, type, ".new", *compose_arguments(arguments)
       end
-      expression
+    end
+    
+    def visit_self(element, data)
+      Expression.new nil, "self"
+    end
+    
+    def visit_self_call(element, data)
+      current_module && current_module.method_used(element[:name])
+      expression = Expression.new nil, (element[:name] == "equals" ? "self.==" : ruby_method_name(element[:name])), *compose_arguments(element[:arguments])
+    end
+    
+    def visit_local_instance_access(element, data)
+      if element[:name] == current_module.name
+        Expression.new nil, "self"
+      else
+        expression = Expression.new nil, "@local_class_parent"
+        target_module = current_module.context_module
+        
+        while element[:name] != target_module.name
+          expression = Expression.new nil, expression, ".local_class_parent"
+          target_module = target_module.context_module
+        end
+        
+        expression
+      end
     end
     
   end

@@ -103,7 +103,7 @@ module Java2Ruby
         end
         if try_match "instanceof"
           type = match_type
-          expression = { :type => :typecheck, :value => expression, :type => type }
+          expression = { :type => :typecheck, :value => expression, :checked_type => type }
         end
       end
       raise ArgumentError if expression.nil?
@@ -165,16 +165,16 @@ module Java2Ruby
             match "("
             type = nil
             if try_match :primitiveType do
-                type = match_name
+                type = { :type => :primitive_type, :name => match_name }
               end
               match ")"
               expression = match_unaryExpression
             else
-              match_type
+              type = match_type
               match ")"
               expression = match_unaryExpressionNotPlusMinus
             end
-            expression = { :type => :cast, :value => expression, :type => type }
+            expression = { :type => :cast, :value => expression, :cast_type => type }
           end
         elsif try_match "!"
           expression = match_unaryExpression
@@ -363,17 +363,7 @@ module Java2Ruby
                     arguments = match_arguments
                   end
                 elsif try_match "this"
-                  if identifiers.first == current_module.name
-                    expression = Expression.new nil, "self"
-                  else
-                    expression = Expression.new nil, "@local_class_parent"
-                    target_module = current_module.context_module
-                    
-                    while identifiers.first != target_module.name
-                      expression = Expression.new nil, expression, ".local_class_parent"
-                      target_module = target_module.context_module
-                    end
-                  end
+                  expression = { :type => :local_instance_access, :name => identifiers.first }
                 elsif try_match "new"
                   match :innerCreator do
                     type = match_name
@@ -390,8 +380,7 @@ module Java2Ruby
           
           if expression.nil?
             if identifiers.size == 1 and arguments
-              current_module && current_module.method_used(identifiers.first)
-              expression = Expression.new nil, (identifiers.first == "equals" ? "self.==" : ruby_method_name(identifiers.first)), *compose_arguments(arguments)
+              expression = { :type => :self_call, :name => identifiers.first, :arguments => arguments }
             else
               method_identifier = arguments ? identifiers.pop : nil
               
@@ -451,24 +440,13 @@ module Java2Ruby
       expression = nil
       match :classCreatorRest do
         arguments = match_arguments
-        expression = if type.names.size == 1 && type.names.first == "Integer"
+        expression = if type[:names].size == 1 && type[:names].first == "Integer"
           arguments.first
         else
           if next_is? :classBody
-            puts_output current_module.java_type, " = self.class" if current_module.type == :inner_class
-            java_module = JavaModule.new current_module, :inner_class, nil
-            java_module.superclass = type
-            match_classBody java_module
-            arguments.unshift "self"
-            Expression.new nil, java_module, ".new_local", *compose_arguments(arguments)
+            { :type => :anonymous_class, :superclass => type, :arguments => arguments, :children => match_classBody(nil) }
           else
-            local_module = current_module && current_module.find_local_module(type.names.first)
-            if local_module and local_module.type == :local_class
-              arguments.unshift "self"
-              Expression.new nil, type, ".new_local", *compose_arguments(arguments)
-            else
-              Expression.new nil, type, ".new", *compose_arguments(arguments)
-            end            
+            { :type => :class_creator, :class_type => type, :arguments => arguments }           
           end
         end
       end

@@ -43,9 +43,9 @@ module Java2Ruby
           names = []
           package_import = false
           match :qualifiedName do
-            names << RJava.ruby_package_name(match_name)
+            names << match_name
             while try_match "."
-              names << RJava.ruby_package_name(match_name)
+              names << match_name
             end
           end
           if try_match "."

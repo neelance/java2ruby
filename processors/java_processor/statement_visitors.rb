@@ -171,7 +171,7 @@ module Java2Ruby
       end
       
       def write_output
-        @block.call
+        @block.call self
       end
       
       def enable
@@ -183,8 +183,8 @@ module Java2Ruby
       visit_localVariableDeclaration element
     end
     
-    def visit_class_or_interface_declaration(element, data)
-      inner_module = visit_classOrInterfaceDeclaration current_module
+    def visit_inner_module(element, data)
+      inner_module = visit element[:module], :context_module => current_module
       puts_output inner_module.java_type, " = ", inner_module
     end
     
@@ -195,19 +195,11 @@ module Java2Ruby
     end
     
     def visit_if(element, data)
-      puts_output "if ", visit_parExpression
-      indent_output do
-        match :statement do
-          visit_statement_children
-        end
-      end
-      if try_match "else"
+      puts_output "if ", visit(element[:condition])
+      indent_output { visit element[:true] }
+      if element[:false]
         puts_output "else"
-        indent_output do
-          match :statement do
-            visit_statement_children
-          end
-        end
+        indent_output { visit element[:false] }
       end
       puts_output "end"
     end
@@ -287,20 +279,16 @@ module Java2Ruby
       puts_output "end"
     end
     
-    def visit_do(element, data)
+    def visit_do_while(element, data)
       puts_output "begin"
       indent_output do
-        CatchBlock.new(self, "next_#{block_name}") do |next_catch|
-          buffer_match :statement do
-            switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
-              visit_statement_children
-            end
+        CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
+          switch_statement_context LoopContext.new(data[:block_name], data[:break_catch], next_catch) do
+            visit element[:child]
           end
         end
       end
-      match "while"
-      puts_output "end while ", visit_parExpression
-      match ";"
+      puts_output "end while ", visit(element[:condition])
     end
     
     def visit_for(element, data)
@@ -379,23 +367,22 @@ module Java2Ruby
     end
     
     def visit_break(element, data)
-      if try_match ";"
-        break_context = @statement_context.current_java_break_context
-        if break_context.is_a?(SwitchContext)
-          puts_output "throw :break_case, :thrown"
-          break_context.break_case_catch.enable
-        else
-          puts_output "break"
-        end
-      else
-        name = RubyNaming.lower_name(visit_name)
-        match ";"
+      if element[:name]
+        name = RubyNaming.lower_name(element[:name])
         block_context = @statement_context.find_block name
         if block_context == @statement_context.current_ruby_break_context
           puts_output "break"
         else
           puts_output "throw :break_#{name}, :thrown"
           block_context.break_catch.enable
+        end
+      else
+        break_context = @statement_context.current_java_break_context
+        if break_context.is_a?(SwitchContext)
+          puts_output "throw :break_case, :thrown"
+          break_context.break_case_catch.enable
+        else
+          puts_output "break"
         end
       end
     end
@@ -420,12 +407,11 @@ module Java2Ruby
     end
     
     def visit_return(element, data)
-      if next_is? :expression
-        puts_output "return ", visit
+      if element[:value]
+        puts_output "return ", visit(element[:value])
       else
         puts_output "return"
       end
-      match ";"
     end
     
     def visit_throw(element, data)
@@ -456,17 +442,14 @@ module Java2Ruby
     def visit_block(element, data)
       block_context = BlockContext.new data[:block_name], data[:break_catch]
       switch_statement_context block_context do
-        visit_children
+        visit_children element
       end
     end
     
-    def visit_soooooomething?
-      block_name = RubyNaming.lower_name(visit_name)
-      match ":"
+    def visit_label(element, data)
+      block_name = RubyNaming.lower_name(element[:name])
       CatchBlock.new(self, "break_#{block_name}") do |break_catch|
-        buffer_match :statement do
-          visit_statement_children nil, block_name, break_catch
-        end
+        visit element[:child], :block_name => block_name, :break_catch => break_catch
       end
     end
     

@@ -5,7 +5,7 @@ module Java2Ruby
       
       def initialize(type, *output_parts)
         @type = type
-        output_parts.each { |p| raise if p.is_a?(Hash) }
+        output_parts.each { |p| raise ArgumentError, p.inspect if p.nil? or p.is_a?(Hash) }
         @output_parts = output_parts
         @result_used = true
       end

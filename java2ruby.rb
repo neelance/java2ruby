@@ -28,6 +28,7 @@ if show_log
   converter.log = {}
 end
 
+$verbose = true
 exception = nil
 begin
   converter.convert

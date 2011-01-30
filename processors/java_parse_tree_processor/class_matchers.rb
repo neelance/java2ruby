@@ -234,7 +234,7 @@ module Java2Ruby
     end
 
     def loop_match_classBodyDeclaration(element)
-      element[:body_declarations] = []
+      element[:children] = []
       
       loop_match :classBodyDeclaration do
         if try_match ";"
@@ -337,7 +337,7 @@ module Java2Ruby
                       match_block_statements method_body
                       match "}"
                     end
-                    element[:body_declarations] << { :type => :void_method_declaration, :static => static, :name => method_name, :parameters => method_parameters, :return_type => :void, :synchronized => synchronized, :body => method_body }
+                    element[:children] << { :type => :void_method_declaration, :static => static, :name => method_name, :parameters => method_parameters, :return_type => :void, :synchronized => synchronized, :body => method_body }
                   end
                 end
               end
@@ -363,17 +363,6 @@ module Java2Ruby
       end
     end
     
-    def map_type(element)
-      case element[:type]
-      when :java_class_type
-        JavaClassType.new converter, current_module, current_method, element[:package], element[:names]
-      when :java_array_type
-        JavaArrayType.new(converter, map_type(element[:entry_type]))
-      else
-        raise element[:type].to_s
-      end
-    end
-
     def match_methodDeclaratorRest(java_module, static, native, synchronized, return_type, method_name, generic_classes = nil)
       match :methodDeclaratorRest do
         method_parameters = match_formalParameters

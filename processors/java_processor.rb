@@ -1,7 +1,7 @@
 require "ruby_naming"
 
 module Java2Ruby
-  class JavaProcessor
+  class JavaProcessor < TreeVisitor
     EPSILON = "<epsilon>".to_sym
 
     attr_accessor :current_generator, :statement_context
@@ -94,7 +94,7 @@ module Java2Ruby
         parts = ["("]
         arguments and arguments.each do |argument|
           parts << ", " if parts.size > 1
-          parts << visit_expression(argument)
+          parts << visit(argument)
         end
         parts << ")"
         parts

@@ -90,7 +90,7 @@ module Java2Ruby
         end
         while try_match "["
           match "]"
-          type = { :type => :java_array_type, :entry_type => type }
+          type = { :type => :array_type, :entry_type => type }
         end
       end
       type
@@ -114,7 +114,7 @@ module Java2Ruby
           end
           break if is_last
         end
-        type = { :type => :java_class_type, :package => package, :names => names }
+        type = { :type => :class_type, :package => package, :names => names }
         try_match :typeArguments do
           match "<"
           loop do

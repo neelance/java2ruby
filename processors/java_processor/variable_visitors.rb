@@ -1,8 +1,8 @@
 module Java2Ruby
   class JavaProcessor
     def visit_localVariableDeclaration(element)
-      type = visit_type(element[:var_type])
-      real_value = (element[:value] && visit_expression(element[:value])) || type.default
+      type = visit(element[:var_type])
+      real_value = (element[:value] && visit_variableInitializer(element[:value], type)) || type.default
       var_name = @statement_context.new_variable element[:name], type
       puts_output "#{var_name} = ", real_value
     end
@@ -19,25 +19,16 @@ module Java2Ruby
       end
     end
     
-    def buffer_visit_variableInitializer(type)
-      buffer_match :variableInitializer do
-       (type.is_a?(JavaArrayType) && try_visit_arrayInitializer(type)) || visit_expression
-      end
+    def visit_variableInitializer(element, type)
+      (element[:type] == :array_initializer) ? visit_arrayInitializer(element, type) : visit(element)
     end
     
-    def try_visit_arrayInitializer(type)
+    def visit_arrayInitializer(element, type)
       output_parts = [type, ".new(["]
-      try_match :arrayInitializer do
-        match "{"
-        loop do
-          try_match :variableInitializer do
-            output_parts << ((type.is_a?(JavaArrayType) && try_visit_arrayInitializer(type.entry_type)) || visit_expression)
-          end or break
-          try_match "," or break
-          output_parts << ", "
-        end
-        match "}"
-      end or return nil
+      element[:values].each_index do |i|
+        output_parts << ", " if i > 0
+        output_parts << visit_variableInitializer(element[:values][i], type.entry_type)
+      end
       output_parts << "])"
       Expression.new :Array, *output_parts
     end

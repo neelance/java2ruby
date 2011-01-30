@@ -50,7 +50,7 @@ module Java2Ruby
         last_output_timestamp = File.exist?(@output_file) ? File.mtime(@output_file) : Time.at(0)
         
         if input_timestamp > last_output_timestamp or includes_timestamp > last_output_timestamp
-          puts "Creating #{@output_file}"
+          puts "Creating #{@output_file}" if $verbose
           
           @includes.each do |include|
             require "#{File.dirname(__FILE__)}/processors/#{include}"
@@ -66,7 +66,7 @@ module Java2Ruby
             @next_step.run lambda { output }, last_output_timestamp if @next_step
           end
         else
-          puts "Skipping #{@output_file}"
+          puts "Skipping #{@output_file}" if $verbose
           FileUtils.touch @output_file
           @next_step.run last_output_provider, last_output_timestamp if @next_step
         end
@@ -110,7 +110,8 @@ module Java2Ruby
         tree
       end
       
-      step "#{@output_dir}/#{RubyNaming.ruby_constant_name(basename)}.rb", "java_parse_tree_processor", "java_processor", "output_indenter" do |tree|
+      @ruby_file = "#{@output_dir}/#{RubyNaming.ruby_constant_name(basename)}.rb"
+      step @ruby_file, "java_parse_tree_processor", "java_processor", "output_indenter" do |tree|
         tree = JavaParseTreeProcessor.new.process tree
         log "processed tree", tree
         

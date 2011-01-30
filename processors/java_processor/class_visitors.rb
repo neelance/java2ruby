@@ -133,7 +133,7 @@ module Java2Ruby
         java_module.interfaces = element[:interfaces]
         
         java_module.in_context do
-          visit_classBody java_module, element
+          visit element, :java_module => java_module
         end
       else
         match "enum"
@@ -207,141 +207,131 @@ module Java2Ruby
       names
     end
 
-    def visit_classBody(java_module, element)
-      loop_visit_classBodyDeclaration java_module, element
+    def visit_class_declaration(element, data)
+      visit_children data
     end
 
-    def loop_visit_classBodyDeclaration(java_module, element)
-      element[:body_declarations].each do |decl|
-        
-        case decl[:type]
-        when :static_block
-          block_body = buffer_match :block do
-            match "{"
-            visit_block_statements
-            match "}"
-          end
-          java_module.new_static_block block_body
+    def visit_static_block(element, data)
+      block_body = buffer_match :block do
+        match "{"
+        visit_block_statements
+        match "}"
+      end
+      java_module.new_static_block block_body
+    end
 
-        when :constructor
-          match :constructorDeclaratorRest do
-            constructor_parameters = visit_formalParameters
-            try_visit_throws
-            constructor_body = buffer_match :constructorBody do
-              body = nil
-              explicit_invocation_type = nil
-              explicit_invocation_arguments = nil
+    def visit_constructor(element, data)
+      match :constructorDeclaratorRest do
+        constructor_parameters = visit_formalParameters
+        try_visit_throws
+        constructor_body = buffer_match :constructorBody do
+          body = nil
+          explicit_invocation_type = nil
+          explicit_invocation_arguments = nil
 
-              match "{"
-              try_match :explicitConstructorInvocation do
-                if try_match "super"
-                explicit_invocation_type = :super
-                else
-                  try_match "this"
-                explicit_invocation_type = :this
-                end
-                explicit_invocation_arguments = visit_arguments
-                match ";"
-              end
-
-              if explicit_invocation_type == :this
-                puts_output current_module.explicit_constructor_name, *compose_arguments(explicit_invocation_arguments, true)
-              else
-                if current_module.superclass
-                  arguments = (explicit_invocation_type == :super) ? explicit_invocation_arguments : []
-                  current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = #{field.type.default}" }
-                  puts_output "super", *compose_arguments(arguments, true)
-                  current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value.call if field.value }
-                else
-                  current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value ? field.value.call : field.type.default }
-                end
-              end
-
-              visit_block_statements
-              match "}"
-            end
-            java_module.new_constructor constructor_parameters, constructor_body
-          end
-          
-        when :member_declaration
-          visit_methodDeclaratorRest java_module, static, native, synchronized, type, method_name
-        when :field_declaration
-          visit_variableDeclarators(type) do |name, var_type, value|
-            if static
-              if final
-                java_module.new_constant name, var_type, value
-              else
-                java_module.new_static_field name, var_type, value
-              end
+          match "{"
+          try_match :explicitConstructorInvocation do
+            if try_match "super"
+            explicit_invocation_type = :super
             else
-              java_module.new_field name, var_type, value
+              try_match "this"
+            explicit_invocation_type = :this
             end
+            explicit_invocation_arguments = visit_arguments
+            match ";"
           end
-          
-        when :void_method_declaration
-          method_parameters = decl[:parameters].map do |parameter_name, type, array_arg|
-            [parameter_name, map_type(type), array_arg]
-          end
-          
-          if false #try_match ";"
-            if native
-              java_module.new_native_method(static, decl[:name], method_parameters, JavaType::VOID)
-            else
-              java_module.new_abstract_method(static, decl[:name], method_parameters, JavaType::VOID)
-            end
+
+          if explicit_invocation_type == :this
+            puts_output current_module.explicit_constructor_name, *compose_arguments(explicit_invocation_arguments, true)
           else
-            method_body = lambda {
-              if decl[:synchronized]
-                puts_output "synchronized(self) do"
-                indent_output do
-                  visit_block_statements decl[:body]
-                end
-                puts_output "end"
-              else
-                visit_block_statements decl[:body]
-              end
-            }
-            
-            java_module.new_method(decl[:static], decl[:name], method_parameters, JavaType::VOID, method_body)
-          end
-          
-        when :class_declaration
-          java_module.add_local_module visit_classDeclaration(modifiers, java_module)
-          
-        when :interface_declaration
-          java_module.add_local_module visit_interfaceDeclaration(java_module)
-          
-        when :generic_method_or_constructor_decl
-          generic_classes = visit_typeParameters
-          match :genericMethodOrConstructorRest do
-            return_type = if try_match "void"
-              JavaType::VOID
+            if current_module.superclass
+              arguments = (explicit_invocation_type == :super) ? explicit_invocation_arguments : []
+              current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = #{field.type.default}" }
+              puts_output "super", *compose_arguments(arguments, true)
+              current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value.call if field.value }
             else
-              visit_type
+              current_module.fields.each { |name, field| puts_output "@#{field.ruby_name} = ", field.value ? field.value.call : field.type.default }
             end
-            method_name = visit_name
-            visit_methodDeclaratorRest java_module, static, native, synchronized, return_type, method_name, generic_classes
           end
-        
-        else
-          raise
-          
+
+          visit_block_statements
+          match "}"
         end
+        java_module.new_constructor constructor_parameters, constructor_body
+      end
+    end
+          
+    def visit_member_declaration(element, data)
+      visit_methodDeclaratorRest java_module, static, native, synchronized, type, method_name
+    end
+    
+    def visit_field_declaration(element, data)
+      visit_variableDeclarators(type) do |name, var_type, value|
+        if static
+          if final
+            java_module.new_constant name, var_type, value
+          else
+            java_module.new_static_field name, var_type, value
+          end
+        else
+          java_module.new_field name, var_type, value
+        end
+      end
+    end
+          
+    def visit_void_method_declaration(element, data)
+      method_parameters = element[:parameters].map do |parameter_name, type, array_arg|
+        [parameter_name, visit(type), array_arg]
+      end
+      
+      if false #try_match ";"
+        if native
+          data[:java_module].new_native_method(static, decl[:name], method_parameters, JavaType::VOID)
+        else
+          data[:java_module].new_abstract_method(static, decl[:name], method_parameters, JavaType::VOID)
+        end
+      else
+        method_body = lambda {
+          if element[:synchronized]
+            puts_output "synchronized(self) do"
+            indent_output do
+              visit element[:body]
+            end
+            puts_output "end"
+          else
+            visit element[:body]
+          end
+        }
         
+        data[:java_module].new_method(element[:static], element[:name], method_parameters, JavaType::VOID, method_body)
+      end
+    end
+
+    def visit_local_class_declaration(element, data)
+      java_module.add_local_module visit_classDeclaration(modifiers, java_module)
+    end
+    
+    def visit_interface_declaration(element, data)
+      java_module.add_local_module visit_interfaceDeclaration(java_module)
+    end
+    
+    def visit_generic_method_or_constructor_decl(element, data)
+      generic_classes = visit_typeParameters
+      match :genericMethodOrConstructorRest do
+        return_type = if try_match "void"
+          JavaType::VOID
+        else
+          visit_type
+        end
+        method_name = visit_name
+        visit_methodDeclaratorRest java_module, static, native, synchronized, return_type, method_name, generic_classes
       end
     end
     
-    def map_type(element)
-      case element[:type]
-      when :java_class_type
-        JavaClassType.new converter, current_module, current_method, element[:package], element[:names]
-      when :java_array_type
-        JavaArrayType.new(converter, map_type(element[:entry_type]))
-      else
-        raise element[:type].to_s
-      end
+    def visit_body(element, data)
+      visit_children
     end
-
+    
     def visit_methodDeclaratorRest(java_module, static, native, synchronized, return_type, method_name, generic_classes = nil)
       match :methodDeclaratorRest do
         method_parameters = visit_formalParameters
@@ -431,7 +421,7 @@ module Java2Ruby
         match "("
         try_match :expressionList do
           loop do
-            arguments << visit_expression
+            arguments << visit
             try_match "," or break
           end
         end

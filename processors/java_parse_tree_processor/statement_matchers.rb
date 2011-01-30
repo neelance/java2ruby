@@ -1,9 +1,9 @@
 module Java2Ruby
   class JavaParseTreeProcessor
-    def match_block
+    def match_block(element)
       match :block do
         match "{"
-        match_block_statements
+        match_block_statements element
         match "}"
       end
     end
@@ -16,7 +16,7 @@ module Java2Ruby
     
     def match_block_statement_children(element)
       if try_match :localVariableDeclarationStatement do
-          match_localVariableDeclaration element
+          element[:children].concat match_localVariableDeclaration
           match ";"
         end
       elsif next_is? :classOrInterfaceDeclaration
@@ -155,9 +155,9 @@ module Java2Ruby
           else
             try_match :forInit do
               if next_is? :localVariableDeclaration
-                match_localVariableDeclaration
+                for_inits.concat match_localVariableDeclaration
               else
-                for_inits = match_expression_list
+                for_inits.concat match_expression_list
               end
             end
             match ";"
@@ -171,37 +171,12 @@ module Java2Ruby
           end
         end
         match ")"
-        if not for_each
-          for_inits.each { |e| puts_output e }
-          if for_condition
-            puts_output "while ", for_condition
+        match :statement do
+          if for_each
+            element = { :type => :for_each, :child => match_statement_children }
           else
-            puts_output "loop do"
+            element = { :type => :for, :inits => for_inits, :condition => for_condition, :updates => for_updates, :child => match_statement_children }
           end
-          indent_output do
-            CatchBlock.new(self, "next_#{block_name}") do |next_catch|
-              buffer_match :statement do
-                switch_statement_context ForContext.new(block_name, break_catch, next_catch, for_updates) do
-                  match_statement_children
-                end
-              end
-            end
-            for_updates.each { |e| puts_output e }
-          end
-          puts_output "end"
-        else
-          puts_output for_each_list, ".each do |#{for_each_variable[0]}|"
-          indent_output do
-            CatchBlock.new(self, "next_#{block_name}") do |next_catch|
-              buffer_match :statement do
-                switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
-                  @statement_context.new_variable *for_each_variable
-                  match_statement_children
-                end
-              end
-            end
-          end
-          puts_output "end"
         end
       elsif try_match "try"
         puts_output "begin"
@@ -303,10 +278,8 @@ module Java2Ruby
         assert_line.push " if not (", assert_expression, ")"
         puts_output(*assert_line)
       elsif next_is? :block
-        block_context = BlockContext.new block_name, break_catch
-        switch_statement_context block_context do
-          match_block
-        end
+        element = { :type => :block, :children => [] }
+        match_block element
       elsif try_match ";"
         # nothing
       else

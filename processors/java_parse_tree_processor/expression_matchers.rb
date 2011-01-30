@@ -25,7 +25,7 @@ module Java2Ruby
       loop_match :expressionList do
         loop do
           expression = match_expression
-          expression.result_used = false
+          expression[:result_unused] = true
           expressions << expression
           try_match "," or break
         end
@@ -98,7 +98,7 @@ module Java2Ruby
           if try_match :relationalOp do
               operator = multi_match ["<"], ["<", "="], [">", "="], [">"]
             end
-            expression = expression.combine operator, match_shiftExpression
+            expression = { :type => :relation, :operator => operator, :left => expression, :right => match_shiftExpression }
           end
         end
         if try_match "instanceof"
@@ -276,7 +276,7 @@ module Java2Ruby
           match :creator do
             match :createdName do
               if try_match :primitiveType do
-                  type = JavaPrimitiveType.new match_name
+                  type = { :type => :primitive_type, :name => match_name }
                 end
               elsif next_is? :classOrInterfaceType
                 type = match_classOrInterfaceType
@@ -289,9 +289,10 @@ module Java2Ruby
                     sizes << match_expression
                   end
                   match "]"
-                  type = JavaArrayType.new self, type
+                  type = { :type => :array_type, :entry_type => type }
                 end
-                expression = try_match_arrayInitializer(type) || type.default(sizes) 
+                initializer = try_match_arrayInitializer type
+                expression = { :type => :array_creator, :entry_type => type, :sizes => sizes, :initializer => initializer }
               end
             elsif next_is? :classCreatorRest
               expression = match_classCreatorRest type
@@ -322,7 +323,7 @@ module Java2Ruby
         else
           identifiers = []
           arguments = nil
-          suffix = []
+          array_access = []
           
           identifiers << match_name
           loop do
@@ -338,9 +339,9 @@ module Java2Ruby
                   try_match "[" or break
                   if next_is? :expression
                     sub_expression = match_expression
-                    suffix.push "[", sub_expression, "]"
+                    array_access << sub_expression
                   else
-                    suffix << "[]"
+                    array_access << nil
                   end
                   match "]"
                   if try_match "."
@@ -401,7 +402,10 @@ module Java2Ruby
               end
             end
           end
-          expression = Expression.new nil, expression, *suffix unless suffix.empty?
+          
+          array_access.each do |index|
+            expression = { :type => :array_access, :array => expression, :index => index }
+          end
         end
       end
       
@@ -424,7 +428,7 @@ module Java2Ruby
               arguments = match_arguments
               expression = method_call expression, selector, arguments
             else
-              expression = Expression.new nil, expression, ".attr_", ruby_field_name(selector)
+              expression = { :type => :field_access, :target => expression, :name => selector }
             end
           end
         else

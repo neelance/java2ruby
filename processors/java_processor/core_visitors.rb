@@ -53,13 +53,16 @@ module Java2Ruby
       list
     end
     
-    def visit_type(element)
-      case element[:type]
-      when :primitive_type
-        JavaPrimitiveType.new(element[:name])
-      else
-        raise ArgumentError, element[:type].inspect
-      end
+    def visit_primitive_type(element, data)
+      JavaPrimitiveType.new element[:name]
+    end
+    
+    def visit_class_type(element, data)
+      JavaClassType.new converter, current_module, current_method, element[:package], element[:names]
+    end
+    
+    def visit_array_type(element, data)
+      JavaArrayType.new converter, visit(element[:entry_type])
     end
     
     def visit_classOrInterfaceType

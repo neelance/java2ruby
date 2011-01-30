@@ -1,8 +1,10 @@
 require "yaml"
 require "fileutils"
 
-require "#{File.dirname(__FILE__)}/conversion_controller"
-require "#{File.dirname(__FILE__)}/tree_visitor"
+require "ruby_modifications"
+require "ruby_naming"
+require "conversion_controller"
+require "processors/tree_visitor"
 
 module Java2Ruby
   class Converter

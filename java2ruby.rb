@@ -1,15 +1,13 @@
 file_dir = File.absolute_path File.dirname(__FILE__)
 
-$:.unshift file_dir
-$:.unshift "#{file_dir}/../jre4ruby"
-$:.unshift "#{file_dir}/../antlr4ruby"
+$: << file_dir
+$: << "#{file_dir}/../jre4ruby"
+$: << "#{file_dir}/../antlr4ruby"
 
 module Java2Ruby
 end
 
-require "ruby_modifications"
-require "ruby_naming"
-require "#{file_dir}/converter/converter"
+require "converter"
 
 show_log = $*.delete "--show-log"
 ruby_prof = $*.delete "--ruby-prof"

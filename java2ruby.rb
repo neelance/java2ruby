@@ -8,6 +8,7 @@ module Java2Ruby
 end
 
 require "ruby_modifications"
+require "ruby_naming"
 require "#{file_dir}/converter/converter"
 
 show_log = $*.delete "--show-log"

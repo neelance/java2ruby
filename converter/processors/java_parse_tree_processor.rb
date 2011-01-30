@@ -55,16 +55,6 @@ module Java2Ruby
       element[:text]
     end
 
-    def buffer_match(*names)
-      raise "Wrong match: #{next_element[:internal_name].inspect} instead one of #{names.inspect}" if not names.include? next_element[:internal_name]
-      element = consume
-      lambda {
-        process_children element do
-          yield
-        end
-      }
-    end
-
     def loop_match(name)
       loop do
         try_match(name) do

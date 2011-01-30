@@ -28,7 +28,7 @@ module Java2Ruby
         if element[:operator] == "=" and expression.is_a?(ConstantExpression)
           Expression.new nil, "const_set :#{expression.constant.ruby_name}, ", other_expression.typecast(expression.type)
         else
-          Expression.new nil, expression, " #{operator} ", other_expression.typecast(expression.type)
+          Expression.new nil, expression, " #{element[:operator]} ", other_expression.typecast(expression.type)
         end
       else
         visit_conditionalExpression element
@@ -157,28 +157,17 @@ module Java2Ruby
       expression = nil
       case element[:type]
       when :integer
-        expression = Expression.new(:Integer, element[:value])
+        expression = Expression.new :Integer, element[:value]
       when :boolean
-        boolean = visit_name
-        expression = Expression.new :Boolean, boolean
+        expression = Expression.new :Boolean, element[:value]
       when :nil
         expression = Expression.new :null, "nil"
       when :string
-        expression = Expression.new(JavaType::STRING, element[:value])
+        expression = Expression.new JavaType::STRING, element[:value]
       when :character
-        java_char = literal[1..-2]
-        char = if java_char == " "
-          "?\\s.ord"
-        elsif java_char =~ /^\\u/
-          "0x#{java_char[2..-1]}"
-        else
-          "?#{java_char}.ord"
-        end
-        Expression.new nil, "Character.new(#{char})"
+        expression = Expression.new nil, "Character.new(#{element[:value]})"
       when :float
-        literal.gsub!(/[fdFD]$/, "")
-        literal.gsub!(/^\./, "0.")
-        Expression.new :Float, literal
+        expression = Expression.new :Float, element[:value]
       when :new
         type = nil
         match :creator do

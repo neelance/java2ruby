@@ -1,13 +1,11 @@
 module Java2Ruby
   class JavaParseTreeProcessor
-    def match_localVariableDeclaration
+    def match_localVariableDeclaration(element)
       match :localVariableDeclaration do
         match_variableModifiers
         type = match_type
         match_variableDeclarators(type) do |name, var_type, value|
-          real_value = (value && value.call) || type.default
-          var_name = @statement_context.new_variable name, var_type
-          puts_output "#{var_name} = ", real_value
+          element[:children] << { :type => :variable_declaration, :name => name, :var_type => var_type, :value => value }
         end
       end
     end
@@ -39,7 +37,7 @@ module Java2Ruby
             end
             value = nil
             if try_match "="
-              value = buffer_match_variableInitializer type
+              value = match_variableInitializer type
             end
             yield name, type, value
           end
@@ -48,10 +46,12 @@ module Java2Ruby
       end
     end
     
-    def buffer_match_variableInitializer(type)
-      buffer_match :variableInitializer do
-       (type.is_a?(JavaArrayType) && try_match_arrayInitializer(type)) || match_expression
+    def match_variableInitializer(type_element)
+      value = nil
+      match :variableInitializer do
+        value = (type_element[:type] == :array_type && try_match_arrayInitializer(type_element)) || match_expression
       end
+      value
     end
     
     def try_match_arrayInitializer(type)

@@ -16,7 +16,7 @@ module Java2Ruby
     
     def match_block_statement_children(element)
       if try_match :localVariableDeclarationStatement do
-          match_localVariableDeclaration
+          match_localVariableDeclaration element
           match ";"
         end
       elsif next_is? :classOrInterfaceDeclaration

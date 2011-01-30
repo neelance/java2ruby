@@ -194,7 +194,7 @@ module Java2Ruby
     end
     
     def visit_block_statement_children(element)
-      if element[:type] == :local_variable_declaration
+      if element[:type] == :variable_declaration
         visit_localVariableDeclaration element
       elsif element[:type] == :class_or_interface
         inner_module = visit_classOrInterfaceDeclaration current_module
@@ -482,7 +482,7 @@ module Java2Ruby
           visit_block
         end
       else
-        raise ArgumentError, element[:type]
+        raise ArgumentError, element[:type].inspect
       #  block_name = RubyNaming.lower_name(visit_name)
       #  match ":"
       #  CatchBlock.new(self, "break_#{block_name}") do |break_catch|

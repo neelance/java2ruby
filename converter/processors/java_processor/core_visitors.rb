@@ -53,21 +53,13 @@ module Java2Ruby
       list
     end
     
-    def visit_type
-      type = nil
-      match :type do
-        if try_match :primitiveType do
-            type = JavaPrimitiveType.new visit_name
-          end
-        elsif next_is? :classOrInterfaceType
-          type = visit_classOrInterfaceType
-        end
-        while try_match "["
-          match "]"
-          type = JavaArrayType.new converter, type
-        end
+    def visit_type(element)
+      case element[:type]
+      when :primitive_type
+        JavaPrimitiveType.new(element[:name])
+      else
+        raise ArgumentError, element[:type].inspect
       end
-      type
     end
     
     def visit_classOrInterfaceType

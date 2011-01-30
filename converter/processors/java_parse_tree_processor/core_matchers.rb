@@ -83,7 +83,7 @@ module Java2Ruby
       type = nil
       match :type do
         if try_match :primitiveType do
-            type = JavaPrimitiveType.new match_name
+            type = { :type => :primitive_type, :name => match_name }
           end
         elsif next_is? :classOrInterfaceType
           type = match_classOrInterfaceType

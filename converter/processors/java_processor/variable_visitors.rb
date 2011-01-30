@@ -1,15 +1,10 @@
 module Java2Ruby
   class JavaProcessor
-    def visit_localVariableDeclaration
-      match :localVariableDeclaration do
-        visit_variableModifiers
-        type = visit_type
-        visit_variableDeclarators(type) do |name, var_type, value|
-          real_value = (value && value.call) || type.default
-          var_name = @statement_context.new_variable name, var_type
-          puts_output "#{var_name} = ", real_value
-        end
-      end
+    def visit_localVariableDeclaration(element)
+      type = visit_type(element[:var_type])
+      real_value = (element[:value] && visit_expression(element[:value])) || type.default
+      var_name = @statement_context.new_variable element[:name], type
+      puts_output "#{var_name} = ", real_value
     end
     
     def visit_variableModifiers
@@ -20,30 +15,6 @@ module Java2Ruby
           end
         else
           match EPSILON
-        end
-      end
-    end
-    
-    def visit_variableDeclarators(type)
-      match :variableDeclarators do
-        loop do
-          match :variableDeclarator do
-            name = nil
-            match :variableDeclaratorId do
-              name = visit_name
-              loop do
-                try_match "[" or break
-                match "]"
-                type = JavaArrayType.new self, type
-              end
-            end
-            value = nil
-            if try_match "="
-              value = buffer_visit_variableInitializer type
-            end
-            yield name, type, value
-          end
-          try_match "," or break
         end
       end
     end

@@ -50,75 +50,51 @@ module Java2Ruby
         element = { :type => :if, :condition => condition, :true => true_statement, :false => false_statement }
       elsif try_match "switch"
         case_expression = match_parExpression
+        cases = []
+        open_cases = []
+        default_case = nil
         match "{"
-        CatchBlock.new(self, "break_case") do |break_case_catch|
-          buffer_match :switchBlockStatementGroups do
-            puts_output "case ", case_expression
-            cases = []
-            open_cases = []
-            default_case = nil
-            loop_match :switchBlockStatementGroup do
-              current_case = [[], []]
-              cases << current_case
-              open_cases << current_case
-              loop_match :switchLabel do
-                if try_match "case"
-                  match :constantExpression do
-                    current_case[0] << match_expression
-                  end
-                else
-                  match "default"
-                  default_case = current_case
+        match :switchBlockStatementGroups do
+          loop_match :switchBlockStatementGroup do
+            current_case = { :type => :case_branch, :values => [], :children => [] }
+            cases << current_case
+            open_cases << current_case
+            loop_match :switchLabel do
+              if try_match "case"
+                match :constantExpression do
+                  current_case[:values] << match_expression
                 end
-                match ":"
+              else
+                match "default"
+                default_case = current_case
               end
-              last_statement = nil
-              while next_is? :blockStatement
-                last_statement = next_element
-                statement_buffer = buffer_match(:blockStatement) do
-                  match_block_statement_children
-                end
-                open_cases.each do |open_case|
-                  open_case[1] << statement_buffer
-                end
+              match ":"
+            end
+            last_statement = nil
+            while next_is? :blockStatement
+              last_statement = next_element
+              when_children = []
+              match(:blockStatement) do
+                match_block_statement_children when_children
               end
-              if handle_case_end last_statement
-                open_cases.clear
+              open_cases.each do |open_case|
+                open_case[:children].concat when_children
               end
             end
-            cases.each do |the_case|
-              next if the_case[0].empty?
-              puts_output "when ", *the_case[0].insert_seperators(", ")
-              indent_output do
-                switch_statement_context SwitchContext.new(block_name, break_catch, break_case_catch) do
-                  the_case[1].each { |buffer| buffer.call }
-                end
-              end
+            if handle_case_end last_statement
+              open_cases.clear
             end
-            if default_case
-              puts_output "else"
-              indent_output do
-                switch_statement_context SwitchContext.new(block_name, break_catch, break_case_catch) do
-                  default_case[1].each { |buffer| buffer.call }
-                end
-              end
-            end
-            puts_output "end"
           end
         end
         match "}"
+        element = { :type => :case, :value => case_expression, :branches => cases, :default_branch => default_case }
       elsif try_match "while"
-        puts_output "while ", match_parExpression
-        indent_output do
-          CatchBlock.new(self, "next_#{block_name}") do |next_catch|
-            buffer_match :statement do
-              switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
-                match_statement_child
-              end
-            end
-          end
+        condition = match_parExpression
+        child = nil
+        match :statement do
+          child = match_statement_child
         end
-        puts_output "end"
+        element = { :type => :while, :condition => condition, :child => child }
       elsif try_match "do"
         child = nil
         match :statement do
@@ -130,7 +106,7 @@ module Java2Ruby
         element = { :type => :do_while, :condition => condition, :child => child }
       elsif try_match "for"
         for_each = false
-        for_condition = for_each_variable = for_each_list = nil
+        for_condition = for_each_variable = for_each_entry_type = for_each_list = nil
         for_inits = []
         for_updates = []
         match "("
@@ -138,8 +114,8 @@ module Java2Ruby
           if try_match :enhancedForControl do
               for_each = true
               match_variableModifiers
-              type = match_type
-              for_each_variable = [match_name, type]
+              for_each_entry_type = match_type
+              for_each_variable = match_name
               match ":"
               for_each_list = match_expression
             end
@@ -164,7 +140,7 @@ module Java2Ruby
         match ")"
         match :statement do
           if for_each
-            element = { :type => :for_each, :child => match_statement_child }
+            element = { :type => :for_each, :iterable => for_each_list, :variable => for_each_variable, :entry_type => for_each_entry_type, :child => match_statement_child }
           else
             element = { :type => :for, :inits => for_inits, :condition => for_condition, :updates => for_updates, :child => match_statement_child }
           end

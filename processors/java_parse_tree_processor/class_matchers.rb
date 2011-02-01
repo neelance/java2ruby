@@ -85,7 +85,7 @@ module Java2Ruby
                     member_name = match_name
                     match :interfaceMethodOrFieldRest do
                       if next_is? :interfaceMethodDeclaratorRest
-                        match_interfaceMethodDeclaratorRest java_module, type, member_name
+                        interface_children << match_interfaceMethodDeclaratorRest(type, member_name)
                       else
                         match :constantDeclaratorsRest do
                           match :constantDeclaratorRest do
@@ -98,6 +98,14 @@ module Java2Ruby
                       end
                     end
                   end
+                elsif try_match "void"
+                  method_name = match_name
+                  match :voidInterfaceMethodDeclaratorRest do
+                    method_parameters = match_formalParameters
+                    try_match_throws
+                    match ";"
+                    interface_children << { :type => :method_declaration, :static => false, :name => method_name, :parameters => method_parameters, :return_type => { :type => :void_type } }
+                  end
                 elsif next_is? :classDeclaration
                   java_module.add_local_module match_classDeclaration(modifiers, java_module)
                 elsif next_is? :interfaceDeclaration
@@ -106,10 +114,10 @@ module Java2Ruby
                     generic_classes = match_typeParameters
                     return_type = match_type
                     member_name = match_name
-                    match_interfaceMethodDeclaratorRest java_module, return_type, member_name, generic_classes
+                    interface_children << match_interfaceMethodDeclaratorRest(return_type, member_name, generic_classes)
                   end
                 else
-                  try_match_normalInterfaceDeclaration java_module
+                  try_match_normalInterfaceDeclaration
                 end
               end
             end
@@ -121,13 +129,14 @@ module Java2Ruby
       { :type => :interface_declaration, :name => name, :interfaces => interfaces, :generic_classes => generic_classes, :children => interface_children }
     end
 
-    def match_interfaceMethodDeclaratorRest(java_module, return_type, method_name, generic_classes = nil)
+    def match_interfaceMethodDeclaratorRest(return_type, method_name, generic_classes = nil)
+      method_parameters = nil
       match :interfaceMethodDeclaratorRest do
         method_parameters = match_formalParameters
         try_match_throws
         match ";"
-        java_module.new_abstract_method(false, method_name, method_parameters, return_type, generic_classes)
       end
+      { :type => :method_declaration, :static => false, :name => method_name, :parameters => method_parameters, :return_type => return_type }
     end
 
     def match_classDeclaration(class_modifiers)
@@ -164,23 +173,16 @@ module Java2Ruby
             match :enumConstants do
               loop do
                 match :enumConstant do
+                  enum_constant_children = nil
                   enum_constant_name = match_name
                   arguments = nil
                   if next_is? :arguments
                     arguments = match_arguments
                   end
-                  enum_constant_module = java_module
                   if next_is? :classBody
-                    enum_constant_module = JavaModule.new java_module, :inner_class, enum_constant_name
-                    enum_constant_module.superclass = java_module.java_type
-                    enum_constant_module.new_constructor [], lambda { puts_output "super \"#{enum_constant_name}\"" }
-                    match_classBody enum_constant_module
+                    enum_constant_children = match_classBody name
                   end
-                  expression_parts = [enum_constant_module.java_type, ".new"]
-                  expression_parts.concat compose_arguments(arguments)
-                  expression_parts << ".set_value_name(\"#{enum_constant_name}\")"
-                  ruby_name = java_module.new_constant enum_constant_name, nil, Expression.new(nil, *expression_parts)
-                  context_module.new_constant enum_constant_name, nil, Expression.new(nil, "#{java_module.java_type}::#{ruby_name}") if context_module.is_a? JavaModule
+                  enum_children << { :type => :enum_constant, :name => enum_constant_name, :arguments => arguments, :children => enum_constant_children }
                 end
                 try_match "," or break
               end
@@ -188,7 +190,7 @@ module Java2Ruby
             try_match ","
             try_match :enumBodyDeclarations do
               match ";"
-              loop_match_classBodyDeclaration java_module
+              enum_children.concat loop_match_classBodyDeclaration(name)
             end
             match "}"
           end

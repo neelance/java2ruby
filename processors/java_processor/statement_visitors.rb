@@ -204,75 +204,35 @@ module Java2Ruby
       puts_output "end"
     end
     
-    def visit_switch(element, data)
-      case_expression = visit_parExpression
-      match "{"
+    def visit_case(element, data)
       CatchBlock.new(self, "break_case") do |break_case_catch|
-        buffer_match :switchBlockStatementGroups do
-          puts_output "case ", case_expression
-          cases = []
-          open_cases = []
-          default_case = nil
-          loop_match :switchBlockStatementGroup do
-            current_case = [[], []]
-            cases << current_case
-            open_cases << current_case
-            loop_match :switchLabel do
-              if try_match "case"
-                match :constantExpression do
-                  current_case[0] << visit
-                end
-              else
-                match "default"
-                default_case = current_case
-              end
-              match ":"
-            end
-            last_statement = nil
-            while next_is? :blockStatement
-              last_statement = next_element
-              statement_buffer = buffer_match(:blockStatement) do
-                visit_block_statement_children
-              end
-              open_cases.each do |open_case|
-                open_case[1] << statement_buffer
-              end
-            end
-            if handle_case_end last_statement
-              open_cases.clear
+        puts_output "case ", visit(element[:value])
+        element[:branches].each do |branch|
+          puts_output "when ", *branch[:values].map{ |v| visit v }.insert_seperators(", ")
+          indent_output do
+            switch_statement_context SwitchContext.new(data[:block_name], data[:break_catch], break_case_catch) do
+              visit_children branch
             end
           end
-          cases.each do |the_case|
-            next if the_case[0].empty?
-            puts_output "when ", *the_case[0].insert_seperators(", ")
-            indent_output do
-              switch_statement_context SwitchContext.new(block_name, break_catch, break_case_catch) do
-                the_case[1].each { |buffer| buffer.call }
-              end
-            end
-          end
-          if default_case
-            puts_output "else"
-            indent_output do
-              switch_statement_context SwitchContext.new(block_name, break_catch, break_case_catch) do
-                default_case[1].each { |buffer| buffer.call }
-              end
-            end
-          end
-          puts_output "end"
         end
+        if element[:default_branch]
+          puts_output "else"
+          indent_output do
+            switch_statement_context SwitchContext.new(data[:block_name], data[:break_catch], break_case_catch) do
+              visit_children element[:default_branch]
+            end
+          end
+        end
+        puts_output "end"
       end
-      match "}"
     end
     
     def visit_while(element, data)
-      puts_output "while ", visit_parExpression
+      puts_output "while ", visit(element[:condition])
       indent_output do
-        CatchBlock.new(self, "next_#{block_name}") do |next_catch|
-          buffer_match :statement do
-            switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
-              visit_statement_children
-            end
+        CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
+          switch_statement_context LoopContext.new(data[:block_name], data[:break_catch], next_catch) do
+            visit element[:child]
           end
         end
       end
@@ -316,14 +276,12 @@ module Java2Ruby
     end
     
     def visit_for_each(element, data)
-      puts_output for_each_list, ".each do |#{for_each_variable[0]}|"
+      puts_output visit(element[:iterable]), ".each do |#{element[:variable]}|"
       indent_output do
-        CatchBlock.new(self, "next_#{block_name}") do |next_catch|
-          buffer_match :statement do
-            switch_statement_context LoopContext.new(block_name, break_catch, next_catch) do
-              @statement_context.new_variable *for_each_variable
-              visit_statement_children
-            end
+        CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
+          switch_statement_context LoopContext.new(data[:block_name], data[:break_catch], next_catch) do
+            @statement_context.new_variable element[:variable], element[:entry_type]
+            visit element[:child]
           end
         end
       end

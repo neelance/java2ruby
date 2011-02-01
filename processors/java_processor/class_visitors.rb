@@ -103,44 +103,10 @@ module Java2Ruby
     end
     
     def visit_enum_declaration(element, data)
-      match "enum"
-      java_module = JavaModule.new context_module, :class, visit_name
+      java_module = JavaModule.new data[:context_module], :class, element[:name]
       constant_names = []
       java_module.in_context do
-        match :enumBody do
-          match "{"
-          match :enumConstants do
-            loop do
-              match :enumConstant do
-                enum_constant_name = visit_name
-                arguments = nil
-                if next_is? :arguments
-                  arguments = visit_arguments
-                end
-                enum_constant_module = java_module
-                if next_is? :classBody
-                  enum_constant_module = JavaModule.new java_module, :inner_class, enum_constant_name
-                  enum_constant_module.superclass = java_module.java_type
-                  enum_constant_module.new_constructor [], lambda { puts_output "super \"#{enum_constant_name}\"" }
-                  visit_classBody enum_constant_module
-                end
-                expression_parts = [enum_constant_module.java_type, ".new"]
-                expression_parts.concat compose_arguments(arguments)
-                expression_parts << ".set_value_name(\"#{enum_constant_name}\")"
-                ruby_name = java_module.new_constant enum_constant_name, nil, Expression.new(nil, *expression_parts)
-                constant_names << ruby_name
-                context_module.new_constant enum_constant_name, nil, Expression.new(nil, "#{java_module.java_type}::#{ruby_name}") if context_module.is_a? JavaModule
-              end
-              try_match "," or break
-            end
-          end
-          try_match ","
-          try_match :enumBodyDeclarations do
-            match ";"
-            loop_visit_classBodyDeclaration java_module
-          end
-          match "}"
-        end
+        visit_children element, :context_module => data[:context_module], :java_module => java_module, :constant_names => constant_names
       end
 
       java_module.new_method(false, "set_value_name", [["name", JavaClassType::STRING, false]], nil, lambda { puts_output "@value_name = name"; puts_output "self" })
@@ -148,6 +114,22 @@ module Java2Ruby
       java_module.new_method(true, "values", [], nil, lambda { puts_output "[#{constant_names.join(', ')}]" })
       
       java_module
+    end
+    
+    def visit_enum_constant(element, data)
+      enum_constant_module = data[:java_module]
+      if element[:children]
+        enum_constant_module = JavaModule.new java_module, :inner_class, element[:name]
+        enum_constant_module.superclass = java_module.java_type
+        enum_constant_module.new_constructor [], lambda { puts_output "super \"#{element[name]}\"" }
+        visit_children element, :java_module => enum_constant_module
+      end
+      expression_parts = [enum_constant_module.java_type, ".new"]
+      expression_parts.concat compose_arguments(element[:arguments])
+      expression_parts << ".set_value_name(\"#{element[:name]}\")"
+      ruby_name = data[:java_module].new_constant element[:name], nil, Expression.new(nil, *expression_parts)
+      data[:constant_names] << ruby_name
+      data[:context_module].new_constant element[:name], nil, Expression.new(nil, "#{data[:java_module].java_type}::#{ruby_name}") if data[:context_module].is_a? JavaModule
     end
 
     def visit_typeParameters

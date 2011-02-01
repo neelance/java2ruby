@@ -57,7 +57,7 @@ module Java2Ruby
     end
     
     def try_match_arrayInitializer(type_element)
-      element = { :type => :array_initializer, :values => [] }
+      element = { :type => :array_initializer, :value_type => type_element, :values => [] }
       try_match :arrayInitializer do
         match "{"
         loop do

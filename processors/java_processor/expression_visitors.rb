@@ -73,7 +73,7 @@ module Java2Ruby
       Expression.new nil, "(", visit(element[:value]), " += 1)"
     end
     
-    def visit_pre_drecrement(element, data)
+    def visit_pre_decrement(element, data)
       Expression.new nil, "(", visit(element[:value]), " -= 1)"
     end
     
@@ -215,7 +215,7 @@ module Java2Ruby
     
     def visit_array_creator(element, data)
       type = visit element[:entry_type]
-      element[:initializer] ? visit_arrayInitializer(element[:initializer], type) : type.default(element[:sizes].map{ |size| visit size })
+      element[:initializer] ? visit(element[:initializer]) : type.default(element[:sizes].map{ |size| visit size })
     end
     
     def visit_array_access(element, data)
@@ -307,10 +307,9 @@ module Java2Ruby
     def visit_anonymous_class(element, data)
       puts_output current_module.java_type, " = self.class" if current_module.type == :inner_class
       java_module = JavaModule.new current_module, :inner_class, nil
-      java_module.superclass = type
-      visit_classBody java_module
-      arguments.unshift "self"
-      Expression.new nil, java_module, ".new_local", *compose_arguments(arguments)
+      java_module.superclass = visit element[:superclass]
+      visit_children element, :java_module => java_module
+      Expression.new nil, java_module, ".new_local", *compose_arguments([{ :type => :self }] + element[:arguments])
     end
     
     def visit_class_creator(element, data)

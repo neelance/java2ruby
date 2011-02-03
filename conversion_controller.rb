@@ -11,22 +11,23 @@ module Java2Ruby
       @converted_amount = 0
     end
     
-    def add_files(files, src_dir, lib_dir, conversion_rules)
+    def add_files(files, src_dir, lib_dir, tmp_dir, conversion_rules)
       files.each do |file|
         src_file = "#{src_dir}/#{file}"  
         next if File.directory? src_file
         
         if File.extname(file) == ".java"
           lib_file_dir = "#{lib_dir}/#{File.dirname(file)}"
+          tmp_file_dir = "#{tmp_dir}/#{File.dirname(file)}"
           mkdir_p lib_file_dir unless File.exist? lib_file_dir
+          mkdir_p tmp_file_dir unless File.exist? tmp_file_dir
           
           size = File.size src_file
           @amount_to_convert += size
-          converter = Java2Ruby::Converter.new src_file, conversion_rules, lib_file_dir, self, @current_converter_id, size
-          if File.exist? converter.ruby_file
+          converter = Java2Ruby::Converter.new src_file, lib_file_dir, tmp_file_dir, conversion_rules, @current_converter_id, size
+          if converter.nothing_to_do?
             @converted_amount += size
           else
-            converter.controller = nil
             @current_converter_id += 1
             @pending_converters[converter.converter_id] = converter
             @queued_converters << converter
@@ -42,7 +43,7 @@ module Java2Ruby
     
     def run(process_count)
       if process_count.nil?
-        ConversionController.client_convert_loop self, self, true
+        ConversionController.client_convert_loop self, true
       else
         File.delete "drburi" if File.exist? "drburi"
         process_count.to_i.times do
@@ -50,7 +51,7 @@ module Java2Ruby
             DRb.start_service
             sleep 0.1 until File.exist? "drburi"
             controller = DRbObject.new nil, File.read("drburi")
-            ConversionController.client_convert_loop controller, self
+            ConversionController.client_convert_loop controller, false
           end
         end
         DRb.start_service nil, self
@@ -89,12 +90,11 @@ module Java2Ruby
       nil
     end
     
-    def self.client_convert_loop(remote_controller, local_controller, fail_on_error = false)
+    def self.client_convert_loop(remote_controller, fail_on_error)
       loop do
         converter = remote_controller.fetch_converter
         break if converter.nil?
         begin
-          converter.controller = local_controller
           converter.convert
           remote_controller.converter_complete converter.converter_id
         rescue Interrupt

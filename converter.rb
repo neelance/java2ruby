@@ -3,7 +3,6 @@ require "fileutils"
 
 require "ruby_modifications"
 require "ruby_naming"
-require "conversion_controller"
 require "processors/tree_visitor"
 
 module Java2Ruby
@@ -40,6 +39,11 @@ module Java2Ruby
         timestamp
       end
       
+      def nothing_to_do?(input_timestamp)
+        last_output_timestamp = File.exist?(@output_file) ? File.mtime(@output_file) : Time.at(0)
+        input_timestamp < last_output_timestamp && includes_timestamp < last_output_timestamp && (@next_step.nil? || @next_step.nothing_to_do?(last_output_timestamp)) 
+      end
+      
       def run(input_provider, input_timestamp)
         last_output_provider = lambda {
           last_output = File.read @output_file
@@ -74,16 +78,43 @@ module Java2Ruby
 
     end
     
-    attr_accessor :converter_id, :size, :error, :log, :ruby_file
+    attr_reader :java_file, :ruby_file, :converter_id, :size
+    attr_accessor :log, :error
     
-    def initialize(java_file, conversion_rules = {}, output_dir = nil, controller = nil, converter_id = nil, size = nil)
+    def initialize(java_file, output_dir = nil, temp_dir = nil, conversion_rules = {}, converter_id = nil, size = nil)
       @java_file = java_file
       @conversion_rules = conversion_rules
-      @output_dir = output_dir || File.dirname(@java_file)
       @converter_id = converter_id
       @size = size
       @log = nil
       @steps = []
+      
+      output_dir ||= File.dirname @java_file
+      temp_dir ||= File.dirname @java_file
+      basename = File.basename @java_file, ".java"
+      
+      step "#{temp_dir}/#{basename}.step1.yaml", "java_code_parser" do |code|
+        log "input code", code
+        
+        tree = JavaCodeParser.new.parse_java code
+        log "input tree", tree
+        
+        tree
+      end
+      
+      @ruby_file = "#{output_dir}/#{RubyNaming.ruby_constant_name(basename)}.rb"
+      step @ruby_file, "java_parse_tree_processor", "java_processor", "output_indenter" do |tree|
+        tree = JavaParseTreeProcessor.new.process tree
+        log "processed tree", tree
+        
+        java_processor = JavaProcessor.new @conversion_rules
+        tree = java_processor.process tree
+        
+        output = OutputIndenter.new.process tree
+        log "output code", output
+        
+        output
+      end
     end
     
     def step(output_file, *includes, &block)
@@ -99,32 +130,11 @@ module Java2Ruby
     end
     
     def convert
-      basename = File.basename @java_file, ".java"
-      
-      step "#{@output_dir}/#{basename}.step1.yaml", "java_code_parser" do |code|
-        log "input code", code
-        
-        tree = JavaCodeParser.new.parse_java code
-        log "input tree", tree
-        
-        tree
-      end
-      
-      @ruby_file = "#{@output_dir}/#{RubyNaming.ruby_constant_name(basename)}.rb"
-      step @ruby_file, "java_parse_tree_processor", "java_processor", "output_indenter" do |tree|
-        tree = JavaParseTreeProcessor.new.process tree
-        log "processed tree", tree
-        
-        java_processor = JavaProcessor.new @conversion_rules
-        tree = java_processor.process tree
-        
-        output = OutputIndenter.new.process tree
-        log "output code", output
-        
-        output
-      end
-
       @steps.first.run lambda { File.read(@java_file).force_encoding("ASCII-8BIT").gsub("\r\n", "\n") }, File.mtime(@java_file)
+    end
+    
+    def nothing_to_do?
+      @steps.first.nothing_to_do?(File.mtime(@java_file))
     end
   end
 end

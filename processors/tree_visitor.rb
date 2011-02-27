@@ -2,6 +2,10 @@ module Java2Ruby
   class TreeVisitor
     @@visit_methods = Hash.new { |h, k| h[k] = "visit_#{k}".to_sym }
     
+    def auto_process_missing
+      false
+    end
+    
     def process(element)
       visit element
     end
@@ -9,14 +13,26 @@ module Java2Ruby
     def visit(element, data = {})
       type = element[:type]
       raise ArgumentError, element.inspect if not type.is_a?(Symbol)
-      result = __send__ @@visit_methods[type], element, data
-      result
+      if auto_process_missing and not respond_to?(@@visit_methods[type])
+        if element[:children]
+          element.merge({ :children => visit_children(element) })
+        else
+          element
+        end
+      else
+        __send__ @@visit_methods[type], element, data
+      end
     end
     
     def visit_children(element, data = {})
-      element[:children].each do |child|
+    	return [] if element[:children].nil?
+      element[:children].map do |child|
         visit child, data
-      end
+      end.flatten.compact
+    end
+    
+    def find_child(element, type)
+      element[:children].find { |child| child[:type] == type }
     end
   end
 end

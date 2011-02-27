@@ -1,132 +1,123 @@
 module Java2Ruby
   class JavaParseTreeProcessor
-    NOT_IMPLEMENTED = lambda { puts_output "raise NotImplementedError" }
-
     def match_classOrInterfaceDeclaration
-      element = nil
       match :classOrInterfaceDeclaration do
         match :classOrInterfaceModifiers do
           if try_match EPSILON
             #nothing
-            else
+          else
             loop_match :classOrInterfaceModifier do
               try_match "public", "abstract", "final" or match_annotation
             end
           end
         end
-        element = if next_is? :classDeclaration
+        if next_is? :classDeclaration
           match_classDeclaration []
         else
           match_interfaceDeclaration
         end
       end
-      element
     end
 
     def match_interfaceDeclaration
-      element = nil
       match :interfaceDeclaration do
-        element = try_match_normalInterfaceDeclaration
-        if not element
-          match :annotationTypeDeclaration do
-            match "@"
-            match "interface"
-            java_module = JavaModule.new context_module, :interface, match_name
-            match :annotationTypeBody do
-              match "{"
-              loop_match :annotationTypeElementDeclaration do
-                match_modifiers
-                match :annotationTypeElementRest do
-                  match_type
-                  match :annotationMethodOrConstantRest do
-                    match :annotationMethodRest do
-                      match_name
-                      match "("
-                      match ")"
-                    end
+        try_match_normalInterfaceDeclaration
+        try_match :annotationTypeDeclaration do
+          match "@"
+          match "interface"
+          java_module = JavaModule.new context_module, :interface, match_name
+          match :annotationTypeBody do
+            match "{"
+            loop_match :annotationTypeElementDeclaration do
+              match_modifiers
+              match :annotationTypeElementRest do
+                match_type
+                match :annotationMethodOrConstantRest do
+                  match :annotationMethodRest do
+                    match_name
+                    match "("
+                    match ")"
                   end
-                  match ";"
                 end
+                match ";"
               end
-              match "}"
             end
+            match "}"
           end
         end
       end
-      element
     end
 
     def try_match_normalInterfaceDeclaration
-      name = nil
-      generic_classes = []
-      interfaces = []
-      interface_children = []
-      
-      try_match :normalInterfaceDeclaration do
-        match "interface"
-        name = match_name
-        
-        if next_is? :typeParameters
-          generic_classes = match_typeParameters
-        end
-        if try_match "extends"
-          interfaces = match_typeList
-        end
-        
-        match :interfaceBody do
-          match "{"
-          loop_match :interfaceBodyDeclaration do
-            if try_match ";"
-            else
-              modifiers = match_modifiers
-              try_match :interfaceMemberDecl do
-                if try_match :interfaceMethodOrFieldDecl do
-                    type = match_type
-                    member_name = match_name
-                    match :interfaceMethodOrFieldRest do
-                      if next_is? :interfaceMethodDeclaratorRest
-                        interface_children << match_interfaceMethodDeclaratorRest(type, member_name)
-                      else
-                        match :constantDeclaratorsRest do
-                          match :constantDeclaratorRest do
-                            match "="
-                            value = match_variableInitializer type
-                            interface_children << { :type => :constant_declaration, :name => member_name, :constant_type => type, :value => value }
+      create_element :interface_declaration do
+        interface_children = []
+
+        try_match :normalInterfaceDeclaration do
+          match "interface"
+          set_attribute :name, match_name
+          
+          if next_is? :typeParameters
+            set_attribute :generic_classes, match_typeParameters
+          end
+          if try_match "extends"
+            set_attribute :interfaces, match_typeList
+          end
+          
+          match :interfaceBody do
+            match "{"
+            loop_match :interfaceBodyDeclaration do
+              if try_match ";"
+              else
+                modifiers = match_modifiers
+                try_match :interfaceMemberDecl do
+                  if try_match :interfaceMethodOrFieldDecl do
+                      type = match_type
+                      member_name = match_name
+                      match :interfaceMethodOrFieldRest do
+                        if next_is? :interfaceMethodDeclaratorRest
+                          interface_children << match_interfaceMethodDeclaratorRest(type, member_name)
+                        else
+                          match :constantDeclaratorsRest do
+                            match :constantDeclaratorRest do
+                              match "="
+                              value = match_variableInitializer type
+                              interface_children << { :type => :constant_declaration, :name => member_name, :constant_type => type, :value => value }
+                            end
                           end
+                          match ";"
                         end
-                        match ";"
                       end
                     end
+                  elsif try_match "void"
+                    method_name = match_name
+                    match :voidInterfaceMethodDeclaratorRest do
+                      method_parameters = match_formalParameters
+                      try_match_throws
+                      match ";"
+                      interface_children << { :type => :method_declaration, :static => false, :name => method_name, :parameters => method_parameters, :return_type => { :type => :void_type } }
+                    end
+                  elsif next_is? :classDeclaration
+                    java_module.add_local_module match_classDeclaration(modifiers, java_module)
+                  elsif next_is? :interfaceDeclaration
+                    java_module.add_local_module match_interfaceDeclaration(java_module)
+                  elsif try_match :interfaceGenericMethodDecl do
+                      generic_classes = match_typeParameters
+                      return_type = match_type
+                      member_name = match_name
+                      interface_children << match_interfaceMethodDeclaratorRest(return_type, member_name, generic_classes)
+                    end
+                  else
+                    try_match_normalInterfaceDeclaration
                   end
-                elsif try_match "void"
-                  method_name = match_name
-                  match :voidInterfaceMethodDeclaratorRest do
-                    method_parameters = match_formalParameters
-                    try_match_throws
-                    match ";"
-                    interface_children << { :type => :method_declaration, :static => false, :name => method_name, :parameters => method_parameters, :return_type => { :type => :void_type } }
-                  end
-                elsif next_is? :classDeclaration
-                  java_module.add_local_module match_classDeclaration(modifiers, java_module)
-                elsif next_is? :interfaceDeclaration
-                  java_module.add_local_module match_interfaceDeclaration(java_module)
-                elsif try_match :interfaceGenericMethodDecl do
-                    generic_classes = match_typeParameters
-                    return_type = match_type
-                    member_name = match_name
-                    interface_children << match_interfaceMethodDeclaratorRest(return_type, member_name, generic_classes)
-                  end
-                else
-                  try_match_normalInterfaceDeclaration
                 end
               end
             end
+            match "}"
           end
-          match "}"
         end
-      end
       
-      { :type => :interface_declaration, :name => name, :interfaces => interfaces, :generic_classes => generic_classes, :children => interface_children }
+        set_attribute :children, interface_children
+      end
     end
 
     def match_interfaceMethodDeclaratorRest(return_type, method_name, generic_classes = nil)
@@ -140,66 +131,62 @@ module Java2Ruby
     end
 
     def match_classDeclaration(class_modifiers)
-      element = nil
-      
       match :classDeclaration do
         try_match :normalClassDeclaration do
-          generic_classes = []
-          superclass = nil
-          interfaces = []
-          
-          match "class"
-          name = match_name
-
-          if next_is? :typeParameters
-            generic_classes = match_typeParameters
+          create_element :class_declaration, :class_modifiers => class_modifiers do
+            match "class"
+            set_attribute :name, name = match_name
+  
+            if next_is? :typeParameters
+              set_attribute :generic_classes, match_typeParameters
+            end
+            if try_match "extends"
+              set_attribute :superclass, match_type
+            end
+            if try_match "implements"
+              set_attribute :interfaces, match_typeList
+            end
+            
+            match_classBody(name)
           end
-          if try_match "extends"
-            superclass = match_type
-          end
-          if try_match "implements"
-            interfaces = match_typeList
-          end
-          class_children = match_classBody(name)
-          
-          element = { :type => :class_declaration, :name => name, :class_modifiers => class_modifiers, :generic_classes => generic_classes, :superclass => superclass, :interfaces => interfaces, :children => class_children }
         end \
         or match :enumDeclaration do
-          match "enum"
-          name = match_name
-          enum_children = []
-          match :enumBody do
-            match "{"
-            match :enumConstants do
-              loop do
-                match :enumConstant do
-                  enum_constant_children = nil
-                  enum_constant_name = match_name
-                  arguments = nil
-                  if next_is? :arguments
-                    arguments = match_arguments
+          create_element :enum_declaration do
+            match "enum"
+            set_attribute :name, match_name
+
+            enum_children = []
+            match :enumBody do
+              match "{"
+              match :enumConstants do
+                loop do
+                  match :enumConstant do
+                    enum_constant_children = nil
+                    enum_constant_name = match_name
+                    arguments = nil
+                    if next_is? :arguments
+                      arguments = match_arguments
+                    end
+                    if next_is? :classBody
+                      enum_constant_children = match_classBody name
+                    end
+                    enum_children << { :type => :enum_constant, :name => enum_constant_name, :arguments => arguments, :children => enum_constant_children }
                   end
-                  if next_is? :classBody
-                    enum_constant_children = match_classBody name
-                  end
-                  enum_children << { :type => :enum_constant, :name => enum_constant_name, :arguments => arguments, :children => enum_constant_children }
+                  try_match "," or break
                 end
-                try_match "," or break
               end
+              try_match ","
+              try_match :enumBodyDeclarations do
+                match ";"
+                enum_children.concat loop_match_classBodyDeclaration(name)
+              end
+              match "}"
             end
-            try_match ","
-            try_match :enumBodyDeclarations do
-              match ";"
-              enum_children.concat loop_match_classBodyDeclaration(name)
-            end
-            match "}"
-          end
           
-          element = { :type => :enum_declaration, :name => name, :children => enum_children }
+            set_attribute :children, enum_children
+          end
         end
       end
-      
-      element
     end
 
     def match_typeParameters
@@ -226,18 +213,14 @@ module Java2Ruby
     end
 
     def match_classBody(class_name)
-      children = nil
       match :classBody do
         match "{"
-        children = loop_match_classBodyDeclaration(class_name)
+        loop_match_classBodyDeclaration(class_name)
         match "}"
       end
-      children
     end
 
     def loop_match_classBodyDeclaration(class_name)
-      children = []
-      
       loop_match :classBodyDeclaration do
         if try_match ";"
           next
@@ -262,42 +245,38 @@ module Java2Ruby
           match :memberDecl do
             if class_name and try_match class_name
               match :constructorDeclaratorRest do
-                constructor_parameters = match_formalParameters
-                explicit_invocation_type = nil
-                explicit_invocation_arguments = nil
-                constructor_children = []
+                create_element :constructor do
+                  set_attribute :parameters, match_formalParameters
+  
+                  try_match_throws
+                  match :constructorBody do
+                    match "{"
 
-                try_match_throws
-                match :constructorBody do
-                  body = nil
-
-                  match "{"
-                  try_match :explicitConstructorInvocation do
-                    if try_match "super"
-                    explicit_invocation_type = :super
-                    else
-                      try_match "this"
-                    explicit_invocation_type = :this
+                    try_match :explicitConstructorInvocation do
+                      if try_match "super"
+                        set_attribute :explicit_invocation_type, :super
+                      else
+                        match "this"
+                        set_attribute :explicit_invocation_type, :this
+                      end
+                      set_attribute :explicit_invocation_arguments, match_arguments
+                      match ";"
                     end
-                    explicit_invocation_arguments = match_arguments
-                    match ";"
+  
+                    match_block_statements
+                    match "}"
                   end
-
-                  match_block_statements constructor_children
-                  match "}"
                 end
-                
-                children << { :type => :constructor, :parameters => constructor_parameters, :explicit_invocation_type => explicit_invocation_type, :explicit_invocation_arguments => explicit_invocation_arguments, :children => constructor_children }
               end
             elsif try_match :memberDeclaration do
                 type = match_type
                 try_match :methodDeclaration do
                   method_name = match_name
-                  children << match_methodDeclaratorRest(static, native, synchronized, type, method_name)
+                  match_methodDeclaratorRest(static, native, synchronized, type, method_name)
                 end \
                 or try_match :fieldDeclaration do
                   match_variableDeclarators(type) do |name, var_type, value|
-                    children << { :type => :field_declaration, :static => static, :final => final, :name => name, :field_type => var_type, :value => value }
+                    create_element :field_declaration, :static => static, :final => final, :name => name, :field_type => var_type, :value => value
                   end
                   match ";"
                 end
@@ -305,27 +284,27 @@ module Java2Ruby
             elsif try_match "void"
               method_name = match_name
               match :voidMethodDeclaratorRest do
-                method_parameters = match_formalParameters
-                method_children = nil
-                try_match_throws
-                if try_match ";"
-                  # nothing
-                else
-                  match :methodBody do
-                    method_children = []
-                    match :block do
-                      match "{"
-                      match_block_statements method_children
-                      match "}"
+                create_element :method_declaration, :static => static, :name => method_name, :return_type => { :type => :void_type }, :synchronized => synchronized do
+                  set_attribute :parameters, match_formalParameters
+                  try_match_throws
+                  if try_match ";"
+                    # nothing
+                  else
+                    match :methodBody do
+                      method_children = []
+                      match :block do
+                        match "{"
+                        match_block_statements
+                        match "}"
+                      end
                     end
                   end
                 end
-                children << { :type => :method_declaration, :static => static, :name => method_name, :parameters => method_parameters, :return_type => { :type => :void_type }, :synchronized => synchronized, :children => method_children }
               end
             elsif next_is? :classDeclaration
-              children << { :type => :local_class_declaration, :class => match_classDeclaration(modifiers) }
+              match_classDeclaration(modifiers)
             elsif next_is? :interfaceDeclaration
-              children << { :type => :local_interface_declaration, :interface => match_interfaceDeclaration }
+              match_interfaceDeclaration
             elsif try_match :genericMethodOrConstructorDecl do
                 generic_classes = match_typeParameters
                 match :genericMethodOrConstructorRest do
@@ -342,35 +321,29 @@ module Java2Ruby
           end
         end
       end
-      
-      children
     end
     
     def match_methodDeclaratorRest(static, native, synchronized, return_type, method_name, generic_classes = nil)
-      method_parameters = nil
-      method_children = nil
-      
-      match :methodDeclaratorRest do
-        method_parameters = match_formalParameters
-        if try_match "["
-          match "]"
-        end
-        try_match_throws
-        if try_match ";"
-          # nothing
-        else
-          method_children = []
-          match :methodBody do
-            match :block do
-              match "{"
-              match_block_statements method_children
-              match "}"
+      create_element :method_declaration, :static => static, :native => native, :name => method_name, :return_type => return_type, :generic_classes => generic_classes do
+        match :methodDeclaratorRest do
+          set_attribute :parameters, match_formalParameters
+          if try_match "["
+            match "]"
+          end
+          try_match_throws
+          if try_match ";"
+            set_attribute :abstract, true
+          else
+            match :methodBody do
+              match :block do
+                match "{"
+                match_block_statements
+                match "}"
+              end
             end
           end
         end
       end
-      
-      { :type => :method_declaration, :static => static, :native => native, :name => method_name, :parameters => method_parameters, :return_type => return_type, :generic_classes => generic_classes, :children => method_children }
     end
 
     def match_modifiers

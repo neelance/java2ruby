@@ -93,11 +93,12 @@ module Java2Ruby
       temp_dir ||= File.dirname @java_file
       basename = File.basename @java_file, ".java"
       
-      step "#{temp_dir}/#{basename}.step1.yaml", "java_code_parser" do |code|
-        log "input code", code
+      step "#{temp_dir}/#{basename}.step1.yaml", "java_code_parser", "comment_simplifier" do |code|
+        write_log "input code", code
         
         tree = JavaCodeParser.new.parse_java code
-        log "input tree", tree
+        tree = CommentSimplifier.new.process tree
+        write_log "input tree", tree
         
         tree
       end
@@ -105,13 +106,13 @@ module Java2Ruby
       @ruby_file = "#{output_dir}/#{RubyNaming.ruby_constant_name(basename)}.rb"
       step @ruby_file, "java_parse_tree_processor", "java_processor", "output_indenter" do |tree|
         tree = JavaParseTreeProcessor.new.process tree
-        log "processed tree", tree
+        write_log "processed tree", tree
         
         java_processor = JavaProcessor.new @conversion_rules
         tree = java_processor.process tree
         
         output = OutputIndenter.new.process tree
-        log "output code", output
+        write_log "output code", output
         
         output
       end
@@ -123,7 +124,7 @@ module Java2Ruby
       @steps << new_step
     end
     
-    def log(name, content)
+    def write_log(name, content)
       return if not @log
       content = content.to_yaml if not content.is_a?(String)
       @log[name] = content

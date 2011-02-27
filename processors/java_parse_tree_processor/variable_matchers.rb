@@ -1,15 +1,13 @@
 module Java2Ruby
   class JavaParseTreeProcessor
     def match_localVariableDeclaration
-      declarations = []
       match :localVariableDeclaration do
         match_variableModifiers
         type = match_type
         match_variableDeclarators(type) do |name, var_type, value|
-          declarations << { :type => :variable_declaration, :name => name, :var_type => var_type, :value => value }
+          create_element :variable_declaration, :name => name, :var_type => var_type, :value => value
         end
       end
-      declarations
     end
     
     def match_variableModifiers

@@ -2,34 +2,57 @@ module Java2Ruby
   class JavaParseTreeProcessor
     EPSILON = "<epsilon>".to_sym
 
-    attr_reader :next_element
-    def process(tree)
-      @elements = tree[:children]
-      @next_element_index = 0
-      @next_element = @elements.first
+    attr_reader :next_element, :next_element_index
 
-      match_compilationUnit
+    def process(tree)
+      @current_new_element = {}
+      @comments_target = nil
+      self.elements = []
+
+      process_children(tree) do
+        match_compilationUnit
+      end
+      
+      @current_new_element[:children].first
     end
 
     def process_children(element)
-      parent_elements = @elements
-      parent_next_element_index = @next_element_index
+      if element[:children]
+        parent_elements = @elements
+        parent_next_element_index = @next_element_index
 
-      @elements = element[:children]
-      @next_element_index = 0
-      @next_element = @elements.first
-      result = yield
-      raise ArgumentError, "Elements of #{element[:internal_name]} not processed: #{@elements[@next_element_index..-1].map{ |child| child[:internal_name] }.join(", ")}" if not @next_element_index == @elements.size
-
-      @elements = parent_elements
-      @next_element_index = parent_next_element_index
-      @next_element = @elements && @elements[@next_element_index]
+        self.elements = element[:children]
+        process_comments
+        result = yield
+        raise ArgumentError, "Elements of #{element[:internal_name]} not processed: #{@elements[@next_element_index..-1].map{ |child| child[:internal_name] }.join(", ")}" if not @next_element_index == @elements.size
+  
+        self.elements = parent_elements
+        self.next_element_index = parent_next_element_index
+      end
 
       result
     end
-
+    
+    def elements=(list)
+      @elements = list
+      self.next_element_index = 0
+      @next_element = @elements.first
+    end
+    
+    def next_element_index=(value)
+      @next_element_index = value
+      @next_element = @elements[@next_element_index]
+    end
+    
     def next_is?(*names)
       next_element && names.include?(next_element[:internal_name])
+    end
+    
+    def consume
+      current_element = next_element
+      self.next_element_index += 1
+      process_comments
+      current_element
     end
 
     def match(*names)
@@ -78,35 +101,40 @@ module Java2Ruby
       end
       result
     end
-
-    def consume
-      current_element = next_element
-
-      # handle comments
-      # if current_element[:hidden_tokens]
-      #   current_element[:hidden_tokens].each do |hidden_token|
-      #     if hidden_token[:type] == JavaLexer::LINE_COMMENT
-      #     @current_generator.single_line_comment hidden_token[:text][2..-1].strip
-      #     elsif hidden_token[:type] == JavaLexer::COMMENT
-      #       lines = []
-      #       hidden_token[:text].split("\n").each do |line|
-      #         line.strip!
-      #         line.gsub! /\*\/$/, ""
-      #         line.gsub! /^\/?\*+/, ""
-      #         line.strip!
-      #         lines << line
-      #       end
-      #     @current_generator.multi_line_comment lines
-      #     elsif hidden_token[:text] == "\r" || hidden_token[:text] == "\n"
-      #     @current_generator.new_line
-      #     end
-      #   end
-      # end
-
-      @next_element_index += 1
-      @next_element = @elements[@next_element_index]
-
-      current_element
+    
+    def process_comments
+      while next_element && next_element[:type] == :line_comment
+        #@comments_target << next_element
+        consume
+      end
+    end
+    
+    def create_element(type, attributes = {})
+      last_new_element = @current_new_element
+      @current_new_element = { :type => type }.merge(attributes)
+      
+      yield if block_given?
+      
+      (last_new_element[:children] ||= []) << @current_new_element
+      @current_new_element = last_new_element
+    end
+    
+    def collect_children
+      last_new_element = @current_new_element
+      list = @current_new_element = {}
+      
+      yield if block_given?
+      
+      @current_new_element = last_new_element
+      list[:children]
+    end
+    
+    def set_attribute(name, value)
+      @current_new_element[name] = value
+    end
+    
+    def add_child(child)
+      (@current_new_element[:children] ||= []) << child
     end
   end
 end

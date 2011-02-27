@@ -6,7 +6,6 @@ module Java2Ruby
       def initialize(converter)
         @converter = converter
         @comment_lines = []
-        @current_line_comment = false
         if converter && converter.current_generator
           @generator_comments = converter.current_generator.comment_lines.dup
           converter.current_generator.comment_lines.clear
@@ -32,28 +31,16 @@ module Java2Ruby
         end
         [@output_lines]
       end
-      
-      def new_line
-        @current_line_comment = false
-      end
-      
-      def single_line_comment(line)
-        if @current_line_comment and not @output_lines.empty?
-          @output_lines.last[:content] << " # #{line}"
+            
+      def comment(text, same_line)
+        if same_line and not @output_lines.empty?
+          @output_lines.last[:content] << " ##{text}"
         else
-          @comment_lines << line
+          @comment_lines << text
         end
-        @current_line_comment = false
-      end
-      
-      def multi_line_comment(lines)
-        @comment_lines.concat lines
-        @current_line_comment = false
       end
       
       def write_comments
-        @comment_lines.shift while not @comment_lines.empty? and @comment_lines.first.empty?
-        @comment_lines.pop while not @comment_lines.empty? and @comment_lines.last.empty?
         @output_lines.concat(@comment_lines.map { |comment| { :type => :output_line, :content => "# #{comment}" } })
         @comment_lines.clear
       end
@@ -61,7 +48,6 @@ module Java2Ruby
       def puts_output(*parts)
         write_comments
         puts_output_without_comments(*parts)
-        @current_line_comment = true
       end
       
       def puts_output_without_comments(*parts)

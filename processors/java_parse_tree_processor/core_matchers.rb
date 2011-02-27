@@ -1,71 +1,52 @@
 module Java2Ruby
   class JavaParseTreeProcessor
-    def match_compilationUnit(element)
-      puts_output "require \"rjava\""
-      puts_output ""
-      
-      package = JavaPackage.new element[:package]
-
-      if not element[:package].empty?
-        puts_output "module #{package.ruby_name}"
-        indent_output do
-          match_compilation_unit_content element
-        end
-        puts_output "end"
-      else
-        match_compilation_unit_content element
-      end
-    end
-    
     def match_compilationUnit
-      element = {
-        :type => :compilation_unit,
-        :package => [],
-        :imports => [],
-        :declared_types => []
-      }
-
-      match :compilationUnit do
-        try_match :packageDeclaration do
-          match "package"
-          match :qualifiedName do
-            loop do
-              element[:package] << match_name
-              try_match "." or break
+      create_element :compilation_unit do
+        match :compilationUnit do
+          
+          package = []
+          try_match :packageDeclaration do
+            match "package"
+            match :qualifiedName do
+              loop do
+                package << match_name
+                try_match "." or break
+              end
             end
+            match ";"
           end
-          match ";"
-        end
-
-        loop_match :importDeclaration do
-          match "import"
-          static_import = !try_match("static").nil?
-          names = []
-          package_import = false
-          match :qualifiedName do
-            names << match_name
-            while try_match "."
+          set_attribute :package, package
+  
+          imports = []
+          loop_match :importDeclaration do
+            match "import"
+            static_import = !try_match("static").nil?
+            names = []
+            package_import = false
+            match :qualifiedName do
               names << match_name
+              while try_match "."
+                names << match_name
+              end
             end
+            if try_match "."
+              match "*"
+            package_import = true
+            end
+            match ";"
+  
+            imports << { :type => :import, :names => names, :package_import => package_import, :static_import => static_import }
           end
-          if try_match "."
-            match "*"
-          package_import = true
-          end
-          match ";"
+          set_attribute :imports, imports
 
-          element[:imports] << { :type => :import, :names => names, :package_import => package_import, :static_import => static_import }
-        end
-
-        loop_match :typeDeclaration do
-          try_match ";" \
-          or begin
-            element[:declared_types] << match_classOrInterfaceDeclaration
+          loop_match :typeDeclaration do
+            try_match ";" \
+            or begin
+              match_classOrInterfaceDeclaration
+            end
           end
         end
       end
-
-      element
     end
     
     def match_typeList
@@ -107,7 +88,7 @@ module Java2Ruby
           is_last = !try_match(".")
           package_names = false if name =~ /^[A-Z]/ or is_last
           if package_names
-            package ||= JavaPackage.new
+            package ||= []
             package << name
           else
             names << name

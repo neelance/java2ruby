@@ -167,7 +167,7 @@ module Java2Ruby
         end
       end
       
-      def add_local_module(mod)
+      def add_module(mod)
         @local_modules[mod.name] = mod
         @members << mod
       end
@@ -313,7 +313,7 @@ module Java2Ruby
         case @type
         when :class
           superclas_part = if @superclass
-            " < " + if @context_module.is_a? JavaImportsModule and not @superclass.package
+            " < " + if @context_module.is_a? JavaCompilationUnit and not @superclass.package
               "#{@context_module.java_type}.const_get :#{@superclass}"
             else
               @superclass.to_s
@@ -410,7 +410,7 @@ module Java2Ruby
       
     end
     
-    class JavaImportsModule
+    class JavaCompilationUnit
       include OutputGenerator
       
       def initialize(package, basename, converter)
@@ -418,6 +418,7 @@ module Java2Ruby
         @package = package
         @basename = basename
         @imports = []
+        @modules = []
       end
       
       def package
@@ -438,6 +439,10 @@ module Java2Ruby
       
       def find_constant(name)
         nil
+      end
+      
+      def add_module(java_module)
+        @modules << java_module
       end
       
       def write_output
@@ -464,7 +469,16 @@ module Java2Ruby
           puts_output "}"
         end
         puts_output "end"
-      end
+        puts_output ""
+      
+        @modules.each do |java_module|
+          puts_output java_module
+          puts_output ""
+        end
+        
+        base_module = @modules.find { |java_module| java_module.name == converter.basename }
+        puts_output "#{base_module.name}.main($*) if $0 == __FILE__" if base_module and base_module.has_main
+        end
     end
     
     class JavaPackage
@@ -486,7 +500,7 @@ module Java2Ruby
       end
       
       def ruby_name
-        @ruby_names ||= @names.map{ |p| RJava.ruby_package_name p }.join('::')
+        @ruby_names ||= @names.map{ |p| RubyNaming.ruby_package_name p }.join('::')
       end
       
       ROOT = self.new

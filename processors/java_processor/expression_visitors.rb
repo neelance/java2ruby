@@ -4,17 +4,8 @@ module Java2Ruby
       visit(element[:left]).combine element[:operator], visit(element[:right])
     end
     
-    def visit_list
-      expressions = []
-      loop_match :expressionList do
-        loop do
-          expression = visit
-          expression.result_used = false
-          expressions << expression
-          try_match "," or break
-        end
-      end
-      expressions
+    def visit_expression_list(element, data)
+      element[:children].each { |child| puts_output visit(child) }
     end
     
     def visit_assignment(element, data)
@@ -200,7 +191,7 @@ module Java2Ruby
     end
     
     def visit_field(element, data)
-      identifiers = element[:identifiers]
+      identifiers = element[:identifiers].dup
       
       expression = nil
       expression ||= @statement_context && @statement_context.resolve(identifiers)
@@ -308,7 +299,7 @@ module Java2Ruby
       puts_output current_module.java_type, " = self.class" if current_module.type == :inner_class
       java_module = JavaModule.new current_module, :inner_class, nil
       java_module.superclass = visit element[:superclass]
-      visit_children element, :java_module => java_module
+      visit_children element, :java_module => java_module, :context_module => java_module
       Expression.new nil, java_module, ".new_local", *compose_arguments([{ :type => :self }] + element[:arguments])
     end
     

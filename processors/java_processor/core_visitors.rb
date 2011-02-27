@@ -18,28 +18,15 @@ module Java2Ruby
     end
     
     def visit_compilation_unit_content(element)
-      imports_module = JavaImportsModule.new @package, @basename, converter
+      compilation_unit = JavaCompilationUnit.new @package, @basename, converter
 
       element[:imports].each do |import|
-        imports_module.new_import import[:names].map{ |name| RubyNaming.ruby_package_name(name) }, import[:package_import], import[:static_import]
+        compilation_unit.new_import import[:names].map{ |name| RubyNaming.ruby_package_name(name) }, import[:package_import], import[:static_import]
       end
       
-      java_modules = []
-      base_module = nil
-      element[:declared_types].each do |type|
-        java_module = visit type, :context_module => imports_module
-        java_modules << java_module
-        base_module = java_module if java_module.name == @basename
-      end
+      visit_children(element, :java_module => compilation_unit, :context_module => compilation_unit)
       
-      puts_output imports_module
-      puts_output ""
-      
-      java_modules.each do |java_module|
-        puts_output java_module
-        puts_output ""
-      end
-      puts_output "#{base_module.name}.main($*) if $0 == __FILE__" if base_module and base_module.has_main
+      puts_output compilation_unit
     end
     
     def visit_typeList
@@ -62,7 +49,7 @@ module Java2Ruby
     end
     
     def visit_class_type(element, data)
-      JavaClassType.new converter, current_module, current_method, element[:package], element[:names]
+      JavaClassType.new converter, current_module, current_method, element[:package] && JavaPackage.new(element[:package]), element[:names]
     end
     
     def visit_array_type(element, data)
@@ -131,6 +118,11 @@ module Java2Ruby
           match ")"
         end
       end
+    end
+    
+    def visit_line_comment(element, data)
+      @current_generator.comment element[:text], element[:same_line]
+      nil
     end
     
   end

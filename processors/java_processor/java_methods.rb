@@ -15,7 +15,7 @@ module Java2Ruby
         @body = body
         @generic_classes = generic_classes || []
         @method_classes = []
-        @parameters.each { |name, type, array_arg| type.context_method = self if type.is_a? JavaClassType } if @parameters
+        @parameters.each { |param_name, type, array_arg| type.context_method = self if type.is_a? JavaClassType } if @parameters
       end
       
       def current_module

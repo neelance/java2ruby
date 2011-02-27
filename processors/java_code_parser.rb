@@ -28,18 +28,47 @@ module Java2Ruby
       
       parser = JavaParser.new tokens, builder
       parser.compilation_unit
-      
-      process_parse_tree builder.get_tree
+
+      process_parse_tree(builder.get_tree).first
     end
     
     def process_parse_tree(parse_tree)
-      {
-        :type => :java_parse_tree,
-        :internal_name => (parse_tree.attr_payload.is_a?(String) ? parse_tree.attr_payload.to_sym : parse_tree.attr_payload.get_text),
-        :text => parse_tree.get_text,
-        :hidden_tokens => (parse_tree.attr_hidden_tokens || []).map { |token| { :type => token.attr_type, :text => token.get_text } },
-        :children => (parse_tree.attr_children || []).map { |child| process_parse_tree child }
+      hidden_tokens = parse_tree.attr_hidden_tokens || []
+      
+      comments, _ = hidden_tokens.inject([[], true]) { |(result, comment_on_same_line), token|
+        case token.attr_type
+        when JavaLexer::LINE_COMMENT
+          comment_element = {
+              type: :line_comment,
+              same_line: comment_on_same_line,
+              text: token.get_text[2..-2]
+            }
+          new_result = result + [comment_element]
+          [new_result, false]
+        when JavaLexer::COMMENT
+          comment_element = {
+              type: :block_comment,
+              text: token.get_text[2..-3].gsub(/\n *\*/, "\n")
+            }
+          new_result = result + [comment_element]
+          [new_result, false]
+        when JavaLexer::WS
+          [result, comment_on_same_line && token.get_text != "\n"]
+        else
+          [result, comment_on_same_line]
+        end
       }
+      
+      children_entry = parse_tree.attr_children && { children: parse_tree.attr_children.map{ |child| process_parse_tree child }.flatten }
+      
+      comments + [
+        {
+          type: :java_parse_tree,
+          internal_name: (parse_tree.attr_payload.is_a?(String) ? parse_tree.attr_payload.to_sym : parse_tree.attr_payload.get_text),
+          text: parse_tree.get_text,
+        }
+        .merge(children_entry || {})
+      ]
     end
   end
 end

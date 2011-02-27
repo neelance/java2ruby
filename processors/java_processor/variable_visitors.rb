@@ -1,6 +1,6 @@
 module Java2Ruby
   class JavaProcessor
-    def visit_localVariableDeclaration(element)
+    def visit_variable_declaration(element, data)
       type = visit(element[:var_type])
       real_value = (element[:value] && visit(element[:value])) || type.default
       var_name = @statement_context.new_variable element[:name], type

@@ -4,7 +4,7 @@ module Java2Ruby
   class JavaProcessor < TreeVisitor
     EPSILON = "<epsilon>".to_sym
 
-    attr_accessor :current_generator, :statement_context
+    attr_accessor :current_generator, :statement_context, :basename
 
     def initialize(conversion_rules)
       @prefix = conversion_rules["prefix"] || "Java"
@@ -45,7 +45,7 @@ module Java2Ruby
     end
     
     def puts_output(*parts)
-      @current_generator.puts_output *parts
+      @current_generator.puts_output(*parts)
     end
     
     def indent_output

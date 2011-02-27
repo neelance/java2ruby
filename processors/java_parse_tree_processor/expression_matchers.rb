@@ -30,7 +30,7 @@ module Java2Ruby
           try_match "," or break
         end
       end
-      expressions
+      create_element :expression_list, :children => expressions
     end
     
     def match_expression
@@ -444,7 +444,8 @@ module Java2Ruby
           arguments.first
         else
           if next_is? :classBody
-            { :type => :anonymous_class, :superclass => type, :arguments => arguments, :children => match_classBody(nil) }
+            children = collect_children { match_classBody nil }
+            { :type => :anonymous_class, :superclass => type, :arguments => arguments, :children => children }
           else
             { :type => :class_creator, :class_type => type, :arguments => arguments }           
           end

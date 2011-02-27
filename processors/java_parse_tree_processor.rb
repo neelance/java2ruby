@@ -6,7 +6,6 @@ module Java2Ruby
 
     def process(tree)
       @current_new_element = {}
-      @comments_target = nil
       self.elements = []
 
       process_children(tree) do
@@ -22,7 +21,6 @@ module Java2Ruby
         parent_next_element_index = @next_element_index
 
         self.elements = element[:children]
-        process_comments
         result = yield
         raise ArgumentError, "Elements of #{element[:internal_name]} not processed: #{@elements[@next_element_index..-1].map{ |child| child[:internal_name] }.join(", ")}" if not @next_element_index == @elements.size
   
@@ -44,6 +42,15 @@ module Java2Ruby
       @next_element = @elements[@next_element_index]
     end
     
+    def next_element
+    	while @next_element && @next_element[:type] == :line_comment
+        add_child @next_element
+        self.next_element_index += 1
+      end
+      
+    	@next_element
+    end
+    
     def next_is?(*names)
       next_element && names.include?(next_element[:internal_name])
     end
@@ -51,7 +58,6 @@ module Java2Ruby
     def consume
       current_element = next_element
       self.next_element_index += 1
-      process_comments
       current_element
     end
 
@@ -100,13 +106,6 @@ module Java2Ruby
         index += 1
       end
       result
-    end
-    
-    def process_comments
-      while next_element && next_element[:type] == :line_comment
-        #@comments_target << next_element
-        consume
-      end
     end
     
     def create_element(type, attributes = {})

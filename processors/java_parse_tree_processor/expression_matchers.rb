@@ -25,7 +25,6 @@ module Java2Ruby
       loop_match :expressionList do
         loop do
           expression = match_expression
-          expression[:result_unused] = true
           expressions << expression
           try_match "," or break
         end
@@ -317,7 +316,7 @@ module Java2Ruby
               arguments = match_arguments
               expression = { :type => :super_call, :method => identifier, :arguments => arguments }
             else
-              expression = { :type => :super_field, :method => identifier }
+              expression = { :type => :super_field, :name => identifier }
             end
           end
         else
@@ -367,7 +366,7 @@ module Java2Ruby
                 elsif try_match "new"
                   match :innerCreator do
                     type = match_name
-                    expression = match_classCreatorRest JavaClassType.new(converter, nil, nil, nil, [type]) # TODO this is wrong
+                    expression = match_classCreatorRest({ :type => :class_type, :names => [type] }) # TODO this is wrong
                   end
                 elsif try_match "class"
                   # class names are Class instances by themselves
@@ -424,7 +423,7 @@ module Java2Ruby
           match "["
           index_expression = match_expression
           match "]"
-          expression = Expression.new nil, expression, "[", index_expression, "]"
+          expression = { :type => :array_access, :array => expression, :index => index_expression }
         end
       end
       

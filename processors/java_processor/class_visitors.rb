@@ -24,7 +24,7 @@ module Java2Ruby
 
     def visit_interface_declaration(element, data)
       java_module = JavaModule.new data[:context_module], data[:context_module].is_a?(JavaModule) ? :local_interface : :interface, element[:name]
-      java_module.generic_classes = (element[:generic_classes] || []).map { |e| visit e }
+      java_module.generic_classes = element[:generic_classes] || []
       java_module.interfaces = (element[:interfaces] || []).map { |e| visit e }
 
       java_module.in_context do
@@ -64,15 +64,6 @@ module Java2Ruby
       end
     end
 
-    def visit_interfaceMethodDeclaratorRest(java_module, return_type, method_name, generic_classes = nil)
-      match :interfaceMethodDeclaratorRest do
-        method_parameters = visit_formalParameters
-        try_visit_throws
-        match ";"
-        java_module.new_abstract_method(false, method_name, method_parameters, return_type, generic_classes)
-      end
-    end
-
     def visit_class_declaration(element, data)
       module_type = if current_method
         :inner_class
@@ -89,7 +80,7 @@ module Java2Ruby
       java_module = JavaModule.new data[:context_module], module_type, element[:name]
       current_method.method_classes << java_module if module_type == :inner_class
       
-      java_module.generic_classes = (element[:generic_classes] || []).map { |e| visit e }
+      java_module.generic_classes = element[:generic_classes] || []
       java_module.superclass = element[:superclass] && visit(element[:superclass])
       java_module.interfaces = (element[:interfaces] || []).map { |e| visit e }
       
@@ -134,36 +125,11 @@ module Java2Ruby
       data[:context_module].new_constant element[:name], nil, Expression.new(nil, "#{data[:java_module].java_type}::#{ruby_name}") if data[:context_module].is_a? JavaModule
     end
 
-    def visit_typeParameters
-      names = []
-      match :typeParameters do
-        match "<"
-        loop do
-          match :typeParameter do
-            names << visit_name
-            if try_match "extends"
-              match :typeBound do
-                loop do
-                  visit_type
-                  try_match "&" or break
-                end
-              end
-            end
-          end
-          try_match "," or break
-        end
-        match ">"
-      end
-      names
-    end
-
     def visit_static_block(element, data)
-      block_body = buffer_match :block do
-        match "{"
-        visit_block_statements
-        match "}"
-      end
-      java_module.new_static_block block_body
+      block_body = lambda {
+        visit_children element, data
+      }
+      data[:java_module].new_static_block block_body
     end
 
     def visit_constructor(element, data)

@@ -1,32 +1,31 @@
 module Java2Ruby
   class JavaProcessor
-    def visit_compilationUnit(element)
+    def visit_compilation_unit(element, data)
       puts_output "require \"rjava\""
       puts_output ""
       
-      @package = JavaPackage.new element[:package]
+      visit_children element, data
 
-      if not element[:package].empty?
-        puts_output "module #{@package.ruby_name}"
-        indent_output do
-          visit_compilation_unit_content element
-        end
-        puts_output "end"
-      else
-        visit_compilation_unit_content element
+      base_module = data[:java_module].base_module
+      if base_module and base_module.has_main
+        puts_output ""
+        puts_output "#{data[:java_module].package ? "#{data[:java_module].package.ruby_name}::" : ""}#{base_module.name}.main($*) if $0 == __FILE__"
       end
     end
     
-    def visit_compilation_unit_content(element)
-      compilation_unit = JavaCompilationUnit.new @package, @basename, converter
+    def visit_package(element, data)
+      package = JavaPackage.new element[:name]
+      data[:java_module].package = package
 
-      element[:imports].each do |import|
-        compilation_unit.new_import import[:names].map{ |name| RubyNaming.ruby_package_name(name) }, import[:package_import], import[:static_import]
+      puts_output "module #{package.ruby_name}"
+      indent_output do
+        visit_children element, data
       end
-      
-      visit_children(element, :java_module => compilation_unit, :context_module => compilation_unit)
-      
-      puts_output compilation_unit
+      puts_output "end"
+    end
+    
+    def visit_import(element, data)
+    	data[:java_module].new_import element[:names].map{ |name| RubyNaming.ruby_package_name(name) }, element[:package_import], element[:static_import]
     end
     
     def visit_typeList

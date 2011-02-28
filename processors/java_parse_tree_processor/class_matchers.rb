@@ -50,8 +50,6 @@ module Java2Ruby
 
     def try_match_normalInterfaceDeclaration
       create_element :interface_declaration do
-        interface_children = []
-
         try_match :normalInterfaceDeclaration do
           match "interface"
           set_attribute :name, match_name
@@ -75,13 +73,13 @@ module Java2Ruby
                       member_name = match_name
                       match :interfaceMethodOrFieldRest do
                         if next_is? :interfaceMethodDeclaratorRest
-                          interface_children << match_interfaceMethodDeclaratorRest(type, member_name)
+                          match_interfaceMethodDeclaratorRest(type, member_name)
                         else
                           match :constantDeclaratorsRest do
                             match :constantDeclaratorRest do
                               match "="
                               value = match_variableInitializer type
-                              interface_children << { :type => :constant_declaration, :name => member_name, :constant_type => type, :value => value }
+                              create_element :constant_declaration, :name => member_name, :constant_type => type, :value => value
                             end
                           end
                           match ";"
@@ -89,12 +87,13 @@ module Java2Ruby
                       end
                     end
                   elsif try_match "void"
-                    method_name = match_name
-                    match :voidInterfaceMethodDeclaratorRest do
-                      method_parameters = match_formalParameters
-                      try_match_throws
-                      match ";"
-                      interface_children << { :type => :method_declaration, :static => false, :name => method_name, :parameters => method_parameters, :return_type => { :type => :void_type } }
+                    create_element :method_declaration, :static => false, :abstract => true, :return_type => { :type => :void_type } do
+                      set_attribute :name, match_name
+                      match :voidInterfaceMethodDeclaratorRest do
+                        set_attribute :parameters, match_formalParameters
+                        try_match_throws
+                        match ";"
+                      end
                     end
                   elsif next_is? :classDeclaration
                     java_module.add_local_module match_classDeclaration(modifiers, java_module)
@@ -104,7 +103,7 @@ module Java2Ruby
                       generic_classes = match_typeParameters
                       return_type = match_type
                       member_name = match_name
-                      interface_children << match_interfaceMethodDeclaratorRest(return_type, member_name, generic_classes)
+                      match_interfaceMethodDeclaratorRest(return_type, member_name, generic_classes)
                     end
                   else
                     try_match_normalInterfaceDeclaration
@@ -115,19 +114,17 @@ module Java2Ruby
             match "}"
           end
         end
-      
-        set_attribute :children, interface_children
       end
     end
 
     def match_interfaceMethodDeclaratorRest(return_type, method_name, generic_classes = nil)
-      method_parameters = nil
-      match :interfaceMethodDeclaratorRest do
-        method_parameters = match_formalParameters
-        try_match_throws
-        match ";"
+      create_element :method_declaration, :static => false, :abstract => true, :name => method_name, :return_type => return_type do
+        match :interfaceMethodDeclaratorRest do
+          set_attribute :parameters, match_formalParameters
+          try_match_throws
+          match ";"
+        end
       end
-      { :type => :method_declaration, :static => false, :name => method_name, :parameters => method_parameters, :return_type => return_type }
     end
 
     def match_classDeclaration(class_modifiers)
@@ -155,22 +152,20 @@ module Java2Ruby
             match "enum"
             set_attribute :name, match_name
 
-            enum_children = []
             match :enumBody do
               match "{"
               match :enumConstants do
                 loop do
                   match :enumConstant do
-                    enum_constant_children = nil
-                    enum_constant_name = match_name
-                    arguments = nil
-                    if next_is? :arguments
-                      arguments = match_arguments
+                    create_element :enum_constant do
+                      set_attribute :name, match_name
+                      if next_is? :arguments
+                        set_attribute :arguments, match_arguments
+                      end
+                      if next_is? :classBody
+                        match_classBody name
+                      end
                     end
-                    if next_is? :classBody
-                      enum_constant_children = match_classBody name
-                    end
-                    enum_children << { :type => :enum_constant, :name => enum_constant_name, :arguments => arguments, :children => enum_constant_children }
                   end
                   try_match "," or break
                 end
@@ -178,12 +173,10 @@ module Java2Ruby
               try_match ","
               try_match :enumBodyDeclarations do
                 match ";"
-                enum_children.concat loop_match_classBodyDeclaration(name)
+                loop_match_classBodyDeclaration name
               end
               match "}"
             end
-          
-            set_attribute :children, enum_children
           end
         end
       end
@@ -227,12 +220,13 @@ module Java2Ruby
         end
         
         if try_match "static"
-          block_body = buffer_match :block do
-            match "{"
-            match_block_statements
-            match "}"
+          create_element :static_block do
+            match :block do
+              match "{"
+              match_block_statements
+              match "}"
+            end
           end
-          java_module.new_static_block block_body
         elsif next_is? :block
           match_block # TODO what is this block?
         else
@@ -288,7 +282,7 @@ module Java2Ruby
                   set_attribute :parameters, match_formalParameters
                   try_match_throws
                   if try_match ";"
-                    # nothing
+                    set_attribute :abstract, true
                   else
                     match :methodBody do
                       method_children = []

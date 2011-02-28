@@ -30,9 +30,5 @@ module Java2Ruby
         visit child, data
       end.flatten.compact
     end
-    
-    def find_child(element, type)
-      element[:children].find { |child| child[:type] == type }
-    end
   end
 end

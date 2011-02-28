@@ -1,4 +1,5 @@
 require "yaml"
+require "zlib"
 require "fileutils"
 
 require "ruby_modifications"
@@ -17,7 +18,15 @@ module Java2Ruby
       end
       
       def yaml_output?
-        File.extname(@output_file) == ".yaml"
+        @output_file =~ /\.yaml(\.gz)?$/
+      end
+      
+      def dump_output?
+        @output_file =~ /\.dump(\.gz)?$/
+      end
+
+      def gz_output?
+        @output_file =~ /\.gz$/
       end
       
       def max(a, b)
@@ -46,8 +55,14 @@ module Java2Ruby
       
       def run(input_provider, input_timestamp)
         last_output_provider = lambda {
-          last_output = File.read @output_file
+          last_output = nil
+          last_output = if gz_output?
+            Zlib::GzipReader.open(@output_file) { |file| last_output = file.read }
+          else
+            File.open(@output_file, "r") { |file| last_output = file.read }
+          end
           last_output = YAML.load last_output if yaml_output?
+          last_output = Marshal.load last_output if dump_output?
           last_output
         }
         
@@ -63,7 +78,14 @@ module Java2Ruby
           output = @block.call input_provider.call
           
           if not File.exist?(@output_file) or output != last_output_provider.call
-            File.open(@output_file, "w") { |file| file.write(yaml_output? ? output.to_yaml : output) }
+            file_output = output
+            file_output = file_output.to_yaml if yaml_output?
+            file_output = Marshal.dump file_output if dump_output? 
+            if gz_output?
+              Zlib::GzipWriter.open(@output_file) { |file| file.write file_output }
+            else
+              File.open(@output_file, "w") { |file| file.write file_output }
+            end
             @next_step.run lambda { output }, Time.new if @next_step
           else
             FileUtils.touch @output_file
@@ -81,6 +103,14 @@ module Java2Ruby
     attr_reader :java_file, :ruby_file, :converter_id, :size
     attr_accessor :log, :error
     
+    def find_dir(base_dir, name)
+      if base_dir.include?("src")
+        new_dir = base_dir.sub "src", name
+        return new_dir if Dir.exists? new_dir
+      end
+      base_dir
+    end
+    
     def initialize(java_file, output_dir = nil, temp_dir = nil, conversion_rules = {}, converter_id = nil, size = nil)
       @java_file = java_file
       @conversion_rules = conversion_rules
@@ -89,11 +119,11 @@ module Java2Ruby
       @log = nil
       @steps = []
       
-      output_dir ||= File.dirname @java_file
-      temp_dir ||= File.dirname @java_file
+      output_dir ||= find_dir File.dirname(@java_file), "lib"
+      temp_dir ||= find_dir File.dirname(@java_file), "tmp"
       basename = File.basename @java_file, ".java"
       
-      step "#{temp_dir}/#{basename}.step1.yaml", "java_code_parser", "comment_simplifier" do |code|
+      step "#{temp_dir}/#{basename}.step1.dump.gz", "java_code_parser", "comment_simplifier" do |code|
         write_log "input code", code
         
         tree = JavaCodeParser.new.parse_java code
@@ -104,11 +134,13 @@ module Java2Ruby
       end
       
       @ruby_file = "#{output_dir}/#{RubyNaming.ruby_constant_name(basename)}.rb"
-      step @ruby_file, "java_parse_tree_processor", "java_processor", "output_indenter" do |tree|
+      step @ruby_file, "java_parse_tree_processor", "case_end_handler", "java_processor", "output_indenter" do |tree|
         tree = JavaParseTreeProcessor.new.process tree
+        tree = CaseEndHandler.new.process tree
         write_log "processed tree", tree
         
         java_processor = JavaProcessor.new @conversion_rules
+        java_processor.basename = basename
         tree = java_processor.process tree
         
         output = OutputIndenter.new.process tree

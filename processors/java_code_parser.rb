@@ -48,7 +48,7 @@ module Java2Ruby
         when JavaLexer::COMMENT
           comment_element = {
               type: :block_comment,
-              text: token.get_text[2..-3].gsub(/\n *\*/, "\n")
+              text: token.get_text[2..-3].gsub(/^[ \t]*\*[ \t]*/, "")
             }
           new_result = result + [comment_element]
           [new_result, false]
@@ -64,8 +64,7 @@ module Java2Ruby
       comments + [
         {
           type: :java_parse_tree,
-          internal_name: (parse_tree.attr_payload.is_a?(String) ? parse_tree.attr_payload.to_sym : parse_tree.attr_payload.get_text),
-          text: parse_tree.get_text,
+          payload: (parse_tree.attr_payload.is_a?(String) ? parse_tree.attr_payload.to_sym : parse_tree.attr_payload.get_text)
         }
         .merge(children_entry || {})
       ]

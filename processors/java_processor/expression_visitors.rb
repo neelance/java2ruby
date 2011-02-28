@@ -5,7 +5,11 @@ module Java2Ruby
     end
     
     def visit_expression_list(element, data)
-      element[:children].each { |child| puts_output visit(child) }
+      element[:children].each do |child|
+        expression = visit child
+        expression.result_used = false
+        puts_output expression
+      end
     end
     
     def visit_assignment(element, data)
@@ -72,11 +76,13 @@ module Java2Ruby
       type = visit element[:cast_type]
       expression = visit element[:value]
       if type.is_a?(JavaPrimitiveType)
-        case type
+        case type.name
         when "int", "short", "char"
-          Expression.new nil, "RJava.cast_to_#{type}(", expression, ")"
+          Expression.new nil, "RJava.cast_to_#{type.name}(", expression, ")"
         when "float", "double"
           Expression.new nil, "(", expression, ").to_f"
+        else
+          raise type.name
         end
       else
         expression
@@ -158,22 +164,17 @@ module Java2Ruby
     def visit_array_class(element, data)
       Expression.new nil, "Array"
     end
-    
-    def visit_super(element, data)
-      match :superSuffix do
-        match "."
-        identifier = visit_name
-        if next_is? :arguments
-          arguments = visit_arguments
-          if identifier == current_method.name
-            expression = Expression.new nil, "super", *compose_arguments(arguments)
-          else
-            expression = Expression.new nil, current_module.superclass, ".instance_method(:", ruby_method_name(identifier), ").bind(self).call", *compose_arguments(arguments)
-          end
-        else
-          expression = Expression.new nil, "@#{ruby_field_name identifier}"
-        end
+        
+    def visit_super_call(element, data)
+      if element[:method] == current_method.name
+        Expression.new nil, "super", *compose_arguments(element[:arguments])
+      else
+        Expression.new nil, current_module.superclass, ".instance_method(:", ruby_method_name(element[:method]), ").bind(self).call", *compose_arguments(element[:arguments])
       end
+    end
+    
+    def visit_super_field(element, data)
+      Expression.new nil, "@#{ruby_field_name element[:name]}"
     end
     
     def visit_call(element, data)
@@ -308,8 +309,7 @@ module Java2Ruby
       arguments = element[:arguments]
       local_module = current_module && current_module.find_local_module(type.names.first)
       if local_module and local_module.type == :local_class
-        arguments.unshift({ :type => :self })
-        Expression.new nil, type, ".new_local", *compose_arguments(arguments)
+        Expression.new nil, type, ".new_local", *compose_arguments([{ :type => :self }] + arguments)
       else
         Expression.new nil, type, ".new", *compose_arguments(arguments)
       end

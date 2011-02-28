@@ -22,7 +22,7 @@ module Java2Ruby
 
         self.elements = element[:children]
         result = yield
-        raise ArgumentError, "Elements of #{element[:internal_name]} not processed: #{@elements[@next_element_index..-1].map{ |child| child[:internal_name] }.join(", ")}" if not @next_element_index == @elements.size
+        raise ArgumentError, "Elements of #{element[:payload]} not processed: #{@elements[@next_element_index..-1].map{ |child| child[:payload] }.join(", ")}" if not @next_element_index == @elements.size
   
         self.elements = parent_elements
         self.next_element_index = parent_next_element_index
@@ -52,7 +52,7 @@ module Java2Ruby
     end
     
     def next_is?(*names)
-      next_element && names.include?(next_element[:internal_name])
+      next_element && names.include?(next_element[:payload])
     end
     
     def consume
@@ -62,17 +62,17 @@ module Java2Ruby
     end
 
     def match(*names)
-      raise "Wrong match: #{next_element[:internal_name].inspect} instead one of #{names.inspect}" if not names.include? next_element[:internal_name]
+      raise "Wrong match: #{next_element[:payload].inspect} instead one of #{names.inspect}" if not names.include? next_element[:payload]
       element = consume
       process_children element do
         yield if block_given?
       end
-      element[:text]
+      element[:payload]
     end
 
     def match_name
-      raise "Wrong match: #{next_element[:internal_name].inspect} instead one of name string" if not next_element[:internal_name].is_a? String
-      consume[:text] # string elements have no children
+      raise "Wrong match: #{next_element[:payload].inspect} instead one of name string" if not next_element[:payload].is_a? String
+      consume[:payload] # string elements have no children
     end
 
     def try_match(*names)
@@ -81,7 +81,7 @@ module Java2Ruby
       process_children element do
         yield if block_given?
       end
-      element[:text]
+      element[:payload]
     end
 
     def loop_match(name)

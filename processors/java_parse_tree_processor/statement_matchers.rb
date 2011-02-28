@@ -52,7 +52,7 @@ module Java2Ruby
             match "{"
             match :switchBlockStatementGroups do
               loop_match :switchBlockStatementGroup do
-                create_element :case_branch do
+                create_element :case_branch, :closed => false do
                   values = []
                   loop_match :switchLabel do
                     if try_match "case"
@@ -127,34 +127,33 @@ module Java2Ruby
             end
           end
         elsif try_match "try"
-          try_children = []
-          try_body_children = []
-          match_block try_children
-          try_children << { :type => :try_body, :children => try_body_children }
-          try_match :catches do
-            loop_match :catchClause do
-              exception_type, exception_variable = nil
-              match "catch"
-              match "("
-              match :formalParameter do
-                match_variableModifiers
-                exception_type = match_type
-                match :variableDeclaratorId do
-                  exception_variable = match_name
-                end
-              end
-              match ")"
-              catch_children = []
-              match_block catch_children
-              try_children << { :type => :rescue, :exception_type => exception_type, :exception_variable => exception_variable, :children => catch_children }
-            end
-          end
-          if try_match "finally"
-            finally_children = []
-            match_block finally_children
-            try_children << { :type => :ensure, :children => try_body_children }
-          end
-          create_element :try, :children => try_children
+        	create_element :try do
+	          create_element :try_body do
+	          	match_block
+	         	end
+	          try_match :catches do
+	            loop_match :catchClause do
+	            	create_element :rescue do
+		              match "catch"
+		              match "("
+		              match :formalParameter do
+		                match_variableModifiers
+		                set_attribute :exception_type, match_type
+		                match :variableDeclaratorId do
+		                  set_attribute :exception_variable, match_name
+		                end
+		              end
+		              match ")"
+		              match_block
+		            end
+	            end
+	          end
+	          if try_match "finally"
+	          	create_element :ensure do
+	            	match_block
+	           	end
+	          end
+	        end
         elsif try_match "break"
           if try_match ";"
             create_element :break
@@ -163,8 +162,6 @@ module Java2Ruby
             match ";"
             create_element :break, :name => name
           end
-        elsif try_match :disabled_break
-          match ";"
         elsif try_match "continue"
           if try_match ";"
             create_element :continue
@@ -197,7 +194,6 @@ module Java2Ruby
           assert_line.push " if not (", assert_expression, ")"
           puts_output(*assert_line)
         elsif next_is? :block
-          children = []
           create_element :block do
             match_block
           end
@@ -210,31 +206,6 @@ module Java2Ruby
             match_statement
           end
         end
-      end
-    end
-    
-    def handle_case_end(element)
-      case element[:internal_name]
-      when :block
-        handle_case_end element[:children][-2]
-      when :blockStatement
-        handle_case_end element[:children].first
-      when :statement
-        case element[:children].first[:internal_name]
-        when "break"
-          element[:children].first[:internal_name] = :disabled_break if element[:children][1][:internal_name] == ";"
-          true
-        when "return", "throw"
-          true
-        when "if"
-          handle_case_end(element[:children][2]) && (element[:children].size < 5 || handle_case_end(element[:children][4]))
-        when :block
-          handle_case_end element[:children].first
-        else
-          false
-        end
-      else
-        false
       end
     end
     

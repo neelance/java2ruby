@@ -21,7 +21,7 @@ module Java2Ruby
       @statement_context = nil
       @explicit_call_counter = -1
       
-      compilation_unit = CompilationUnit.new self, element
+      compilation_unit = JavaCompilationUnit.new element, @basename, converter
       { :type => :output_tree, :children => compilation_unit.output_parts.first }
     end
     
@@ -94,7 +94,9 @@ module Java2Ruby
         parts = ["("]
         arguments and arguments.each do |argument|
           parts << ", " if parts.size > 1
-          parts << visit(argument)
+          part = visit(argument)
+          # raise argument.inspect if part.nil?
+          parts << part
         end
         parts << ")"
         parts

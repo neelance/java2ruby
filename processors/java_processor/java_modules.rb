@@ -412,17 +412,17 @@ module Java2Ruby
     
     class JavaCompilationUnit
       include OutputGenerator
+      attr_accessor :package
+      attr_reader :base_module
       
-      def initialize(package, basename, converter)
+      def initialize(element, basename, converter)
         super converter
-        @package = package
+        @element = element
         @basename = basename
         @imports = []
         @modules = []
-      end
-      
-      def package
-        @package
+        @imports_module_written = false
+        @base_module = nil
       end
       
       def new_import(names, package_import, static_import)
@@ -441,17 +441,28 @@ module Java2Ruby
         nil
       end
       
-      def add_module(java_module)
-        @modules << java_module
+      def write_output
+        converter.visit @element, :java_module => self, :context_module => self
       end
       
-      def write_output
+      def add_module(mod)
+        @base_module = mod if mod.name == @basename
+        
+        write_imports_module
+        puts_output mod
+        puts_output ""
+      end
+      
+      def write_imports_module
+        return if @imports_module_written
+        @imports_module_written = true
+        
         puts_output "module ", java_type, " #:nodoc:"
         indent_output do
           puts_output "class_module.module_eval {"
           indent_output do
             puts_output 'include ::Java::Lang'
-            puts_output "include ::#{@package.ruby_name}" unless @package.names.empty? or @package.names == ["java", "lang"]
+            puts_output "include ::#{@package.ruby_name}" unless @package.nil? or @package.names == ["java", "lang"]
             
             @imports.each do |names, package_import, static_import|
               if package_import
@@ -470,15 +481,15 @@ module Java2Ruby
         end
         puts_output "end"
         puts_output ""
+      end
       
-        @modules.each do |java_module|
-          puts_output java_module
-          puts_output ""
-        end
-        
-        base_module = @modules.find { |java_module| java_module.name == converter.basename }
-        puts_output "#{base_module.name}.main($*) if $0 == __FILE__" if base_module and base_module.has_main
-        end
+      def current_module
+        nil
+      end
+      
+      def current_method
+        nil
+      end
     end
     
     class JavaPackage
@@ -504,27 +515,6 @@ module Java2Ruby
       end
       
       ROOT = self.new
-    end
-    
-    class CompilationUnit
-      include OutputGenerator
-      
-      def initialize(converter, element)
-        super converter
-        @element = element
-      end
-      
-      def write_output
-        @converter.visit_compilationUnit @element
-      end
-      
-      def current_module
-        nil
-      end
-      
-      def current_method
-        nil
-      end
     end
   end
 end

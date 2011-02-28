@@ -32,7 +32,7 @@ module Java2Ruby
               loop do
                 try_match "[" or break
                 match "]"
-                type = JavaArrayType.new self, type
+                type = { :type => :array_type, :entry_type => type }
               end
             end
             value = nil

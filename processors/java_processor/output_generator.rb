@@ -12,6 +12,7 @@ module Java2Ruby
         else
           @generator_comments = []
         end
+        @output_lines = []
       end
       
       def in_context(&block)
@@ -24,7 +25,6 @@ module Java2Ruby
       end
       
       def output_parts
-        @output_lines = []
         @comment_lines.concat @generator_comments
         in_context do
           write_output
@@ -41,7 +41,7 @@ module Java2Ruby
       end
       
       def write_comments
-        @output_lines.concat(@comment_lines.map { |comment| { :type => :output_line, :content => "# #{comment}" } })
+        @output_lines.concat(@comment_lines.map { |comment| { :type => :output_line, :content => "##{comment}" } })
         @comment_lines.clear
       end
       
@@ -53,6 +53,7 @@ module Java2Ruby
       def puts_output_without_comments(*parts)
         lines = []
         combine_output_parts parts, lines
+        # lines.each { |line| raise line.inspect if not line.is_a?(Hash) or not (line[:type] == :output_line or line[:type] == :output_block) }
         @output_lines.concat lines
       end
       

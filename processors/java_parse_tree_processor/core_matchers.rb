@@ -3,48 +3,53 @@ module Java2Ruby
     def match_compilationUnit
       create_element :compilation_unit do
         match :compilationUnit do
-          
-          package = []
-          try_match :packageDeclaration do
-            match "package"
-            match :qualifiedName do
-              loop do
-                package << match_name
-                try_match "." or break
-              end
-            end
-            match ";"
-          end
-          set_attribute :package, package
-  
-          imports = []
-          loop_match :importDeclaration do
-            match "import"
-            static_import = !try_match("static").nil?
-            names = []
-            package_import = false
-            match :qualifiedName do
-              names << match_name
-              while try_match "."
-                names << match_name
-              end
-            end
-            if try_match "."
-              match "*"
-            package_import = true
-            end
-            match ";"
-  
-            imports << { :type => :import, :names => names, :package_import => package_import, :static_import => static_import }
-          end
-          set_attribute :imports, imports
+          name = []
+          if try_match :packageDeclaration do
+	            match "package"
+	            match :qualifiedName do
+	              loop do
+	                name << match_name
+	                try_match "." or break
+	              end
+	            end
+	            match ";"
+	          end
 
-          loop_match :typeDeclaration do
-            try_match ";" \
-            or begin
-              match_classOrInterfaceDeclaration
-            end
+            create_element :package, :name => name do
+		          match_package_content
+	          end
+	       	else
+						match_package_content
+					end
+        end
+      end
+    end
+    
+    def match_package_content
+      loop_match :importDeclaration do
+        match "import"
+        static_import = !try_match("static").nil?
+        names = []
+        package_import = false
+        match :qualifiedName do
+          names << match_name
+          while try_match "."
+            names << match_name
           end
+        end
+        if try_match "."
+          match "*"
+        package_import = true
+        end
+        match ";"
+
+        create_element :import, :names => names, :package_import => package_import, :static_import => static_import
+      end
+
+      loop_match :typeDeclaration do
+        try_match ";" \
+        or begin
+          match_classOrInterfaceDeclaration
         end
       end
     end

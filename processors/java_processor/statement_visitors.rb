@@ -120,11 +120,11 @@ module Java2Ruby
     end
     
     class ForContext < LoopContext
-      attr_reader :for_updates
+      attr_reader :for_update
       
-      def initialize(block_name, break_catch, next_catch, for_updates)
+      def initialize(block_name, break_catch, next_catch, for_update)
         super block_name, break_catch, next_catch
-        @for_updates = for_updates
+        @for_update = for_update
       end
     end
     
@@ -186,27 +186,36 @@ module Java2Ruby
     end
     
     def visit_if(element, data)
+      if_branches = {}
+      visit_children element, if_branches: if_branches
+      
       puts_output "if ", visit(element[:condition])
-      indent_output { visit_children find_child(element, :true_statement) }
-      false_statement = find_child element, :false_statement
-      if false_statement
+      indent_output { visit_children if_branches[:true] }
+      if if_branches[:false]
         puts_output "else"
-        indent_output { visit_children false_statement }
+        indent_output { visit_children if_branches[:false] }
       end
       puts_output "end"
+    end
+    
+    def visit_true_statement(element, data)
+      data[:if_branches][:true] = element
+    end
+    
+    def visit_false_statement(element, data)
+      data[:if_branches][:false] = element
     end
     
     def visit_case(element, data)
       CatchBlock.new(self, "break_case") do |break_case_catch|
         puts_output "case ", visit(element[:value])
-        
         visit_children element, data.merge({ :break_case_catch => break_case_catch })
-        
         puts_output "end"
       end
     end
     
     def visit_case_branch(element, data)
+      raise if not element[:closed]
       if element[:values] == :default
         puts_output "else"
       else
@@ -244,7 +253,10 @@ module Java2Ruby
     end
     
     def visit_for(element, data)
-      visit_children find_child(element, :for_init)
+      for_branches = {}
+      visit_children element, for_branches: for_branches
+      
+      visit_children for_branches[:init]
       if element[:condition]
         puts_output "while ", visit(element[:condition])
       else
@@ -252,22 +264,37 @@ module Java2Ruby
       end
       indent_output do
         CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
-          switch_statement_context ForContext.new(data[:block_name], data[:break_catch], next_catch, element[:updates]) do
-            visit_children find_child(element, :for_child_statement)
+          switch_statement_context ForContext.new(data[:block_name], data[:break_catch], next_catch, for_branches[:update]) do
+            visit_children for_branches[:child_statement]
           end
         end
-        visit_children find_child(element, :for_update)
+        visit_children for_branches[:update]
       end
       puts_output "end"
     end
     
+    def visit_for_init(element, data)
+      data[:for_branches][:init] = element
+    end
+
+    def visit_for_update(element, data)
+      data[:for_branches][:update] = element
+    end
+    
+    def visit_for_child_statement(element, data)
+      data[:for_branches][:child_statement] = element
+    end
+    
     def visit_for_each(element, data)
+      for_branches = {}
+      visit_children element, for_branches: for_branches
+      
       puts_output visit(element[:iterable]), ".each do |#{element[:variable]}|"
       indent_output do
         CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
           switch_statement_context LoopContext.new(data[:block_name], data[:break_catch], next_catch) do
             @statement_context.new_variable element[:variable], element[:entry_type]
-            visit_children find_child(element, :for_child_statement)
+            visit_children for_branches[:child_statement]
           end
         end
       end
@@ -330,7 +357,7 @@ module Java2Ruby
         name = RubyNaming.lower_name(element[:name])
         loop_context = @statement_context.find_block name
         if loop_context == @statement_context.current_java_next_context
-          loop_context.for_updates.each { |e| puts_output visit(e) } if loop_context.is_a?(ForContext)
+          visit_children loop_context.for_update if loop_context.is_a?(ForContext)
           puts_output "next"
         else
           puts_output "throw :next_#{name}, :thrown"
@@ -338,7 +365,7 @@ module Java2Ruby
         end
       else
         loop_context = @statement_context.current_java_next_context
-        loop_context.for_updates.each { |e| puts_output visit(e) } if loop_context.is_a?(ForContext)
+        visit_children loop_context.for_update if loop_context.is_a?(ForContext)
         puts_output "next"
       end
     end
@@ -385,31 +412,6 @@ module Java2Ruby
       block_name = RubyNaming.lower_name(element[:name])
       CatchBlock.new(self, "break_#{block_name}") do |break_catch|
         visit_children element, :block_name => block_name, :break_catch => break_catch
-      end
-    end
-    
-    def handle_case_end(element)
-      case element[:internal_name]
-      when :block
-        handle_case_end element[:children][-2]
-      when :blockStatement
-        handle_case_end element[:children].first
-      when :statement
-        case element[:children].first[:internal_name]
-        when "break"
-          element[:children].first[:internal_name] = :disabled_break if element[:children][1][:internal_name] == ";"
-          true
-        when "return", "throw"
-          true
-        when "if"
-          handle_case_end(element[:children][2]) && (element[:children].size < 5 || handle_case_end(element[:children][4]))
-        when :block
-          handle_case_end element[:children].first
-        else
-          false
-        end
-      else
-        false
       end
     end
     

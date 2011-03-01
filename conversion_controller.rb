@@ -45,21 +45,18 @@ module Java2Ruby
       if process_count.nil?
         ConversionController.client_convert_loop self, true
       else
-        File.delete "drburi" if File.exist? "drburi"
+        DRb.start_service nil, self
+        drb_uri = DRb.uri
+        
         process_count.to_i.times do
           fork do
             DRb.start_service
-            sleep 0.1 until File.exist? "drburi"
-            controller = DRbObject.new nil, File.read("drburi")
+            controller = DRbObject.new nil, drb_uri
             ConversionController.client_convert_loop controller, false
           end
         end
-        DRb.start_service nil, self
-        File.open("drburi", "w") do |file|
-          file.write DRb.uri
-        end
+        
         sleep 1 until @pending_converters.empty?
-        File.delete "drburi"
       end
       
       puts "Conversions complete" + (@failed_converters.empty? ? "" : ", but some of them failed:")

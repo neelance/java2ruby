@@ -11,10 +11,11 @@ module Java2Ruby
     class Step
       attr_accessor :output_file, :next_step
       
-      def initialize(output_file, includes, block)
+      def initialize(converter, method_name, output_file, includes)
+        @converter = converter
+        @method_name = method_name
         @output_file = output_file
         @includes = includes
-        @block = block
       end
       
       def yaml_output?
@@ -75,7 +76,7 @@ module Java2Ruby
             require "#{File.dirname(__FILE__)}/processors/#{include}"
           end
           
-          output = @block.call input_provider.call
+          output = @converter.public_send @method_name, input_provider.call
           
           if not File.exist?(@output_file) or output != last_output_provider.call
             file_output = output
@@ -121,37 +122,41 @@ module Java2Ruby
       
       output_dir ||= find_dir File.dirname(@java_file), "lib"
       temp_dir ||= find_dir File.dirname(@java_file), "tmp"
-      basename = File.basename @java_file, ".java"
       
-      step "#{temp_dir}/#{basename}.step1.dump.gz", "java_code_parser", "comment_simplifier" do |code|
-        write_log "input code", code
-        
-        tree = JavaCodeParser.new.parse_java code
-        tree = CommentSimplifier.new.process tree
-        write_log "input tree", tree
-        
-        tree
-      end
+      @basename = File.basename @java_file, ".java"
+      @ruby_file = "#{output_dir}/#{RubyNaming.ruby_constant_name(@basename)}.rb"
       
-      @ruby_file = "#{output_dir}/#{RubyNaming.ruby_constant_name(basename)}.rb"
-      step @ruby_file, "java_parse_tree_processor", "case_end_handler", "java_processor", "output_indenter" do |tree|
-        tree = JavaParseTreeProcessor.new.process tree
-        tree = CaseEndHandler.new.process tree
-        write_log "processed tree", tree
-        
-        java_processor = JavaProcessor.new @conversion_rules
-        java_processor.basename = basename
-        tree = java_processor.process tree
-        
-        output = OutputIndenter.new.process tree
-        write_log "output code", output
-        
-        output
-      end
+      register_step :step1, "#{temp_dir}/#{@basename}.step1.dump.gz", "java_code_parser", "comment_simplifier"
+      register_step :step2, @ruby_file, "java_parse_tree_processor", "case_end_handler", "java_processor", "output_indenter"
+     end
+    
+    def step1(code)
+      write_log "input code", code
+      
+      tree = JavaCodeParser.new.parse_java code
+      tree = CommentSimplifier.new.process tree
+      write_log "input tree", tree
+      
+      tree
     end
     
-    def step(output_file, *includes, &block)
-      new_step = Step.new output_file, includes, block
+    def step2(tree)
+      tree = JavaParseTreeProcessor.new.process tree
+      tree = CaseEndHandler.new.process tree
+      write_log "processed tree", tree
+      
+      java_processor = JavaProcessor.new @conversion_rules
+      java_processor.basename = @basename
+      tree = java_processor.process tree
+      
+      output = OutputIndenter.new.process tree
+      write_log "output code", output
+      
+      output
+    end
+    
+    def register_step(method_name, output_file, *includes)
+      new_step = Step.new self, method_name, output_file, includes
       @steps.last.next_step = new_step unless @steps.empty?
       @steps << new_step
     end

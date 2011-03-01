@@ -50,7 +50,7 @@ module Java2Ruby
       
       def nothing_to_do?(input_timestamp)
         last_output_timestamp = File.exist?(@output_file) ? File.mtime(@output_file) : Time.at(0)
-        input_timestamp < last_output_timestamp && includes_timestamp < last_output_timestamp && (@next_step.nil? || @next_step.nothing_to_do?(last_output_timestamp)) 
+        input_timestamp <= last_output_timestamp && includes_timestamp <= last_output_timestamp && (@next_step.nil? || @next_step.nothing_to_do?(last_output_timestamp)) 
       end
       
       def run(input_provider, input_timestamp)

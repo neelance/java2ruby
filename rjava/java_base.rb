@@ -302,7 +302,7 @@ module RJava
     end
   
     def int_chars
-      chars.map { |c| c.ord }
+      chars.map(&:ord)
     end
   
     def to_char_array
@@ -313,9 +313,9 @@ module RJava
   
     def get_int_chars(index, a2 = nil)
       if a2
-        self[index, a2].chars.map { |c| c.ord }
+        self[index, a2].chars.map(&:ord)
       elsif index.is_a? Range
-        self[index].chars.map { |c| c.ord }
+        self[index].chars.map(&:ord)
       else
         self[index].ord
       end
@@ -423,9 +423,9 @@ if not is_ruby_1_9?
       s = ""
       s.extend UnicodeString
       s.chars = if a2
-        @chars[index, a2].map { |c| c.to_int }
+        @chars[index, a2].map(&:to_int)
       elsif index.is_a? Range
-        @chars[index].map { |c| c.to_int }
+        @chars[index].map(&:to_int)
       else
         [@chars[index].to_int]
       end
@@ -473,9 +473,9 @@ if not is_ruby_1_9?
 
     def set_int_chars(index, a2, a3 = nil)
       if a3
-        @chars[index, a2] = a3.map { |c| c.to_int }
+        @chars[index, a2] = a3.map(&:to_int)
       elsif index.is_a? Range
-        @chars[index] = a2.map { |c| c.to_int }
+        @chars[index] = a2.map(&:to_int)
       else
         @chars[index] = a2.to_int
       end
@@ -490,7 +490,7 @@ if not is_ruby_1_9?
     end
     
     def to_s
-			@chars.map{ |c| c.chr }.join
+			@chars.map(&:chr).join
     end
     
     alias_method :to_str, :to_s

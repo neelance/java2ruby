@@ -53,7 +53,7 @@ class CharArray < Array.typed(Java::Char)
   end
   
   def inspect
-    "[" + self[0, size].map{ |e| e.to_int }.join(", ") + "]"
+    "[" + self[0, size].map(&:to_int).join(", ") + "]"
   end
     
   alias_method :attr_length, :size

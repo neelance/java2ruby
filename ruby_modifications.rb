@@ -110,7 +110,7 @@ if is_ruby_1_8?
   class Module
     alias_method :module_instance_methods, :instance_methods
     def instance_methods(include_super = true)
-      module_instance_methods(include_super).map { |name| name.to_sym }
+      module_instance_methods(include_super).map(&:to_sym)
     end
   end
 

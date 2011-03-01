@@ -45,7 +45,7 @@ class Module
         if var[4].nil?
           var[4] = "#{name}_#{var[0].__id__.abs}".to_sym
           var[2].define_method var[4], var[3]
-          var[5] = "#{name}__#{@@parameter_id_hash[var[0].map{ |c| c.__id__ }]}".to_sym
+          var[5] = "#{name}__#{@@parameter_id_hash[var[0].map(&:__id__ )]}".to_sym
           var[2].define_method var[5], var[3]
         end
         var[6] ||= var[0].map { |t| t.is_a?(Vararg) ? t.type : t }

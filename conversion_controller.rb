@@ -45,6 +45,14 @@ module Java2Ruby
       if not process_count
         ConversionController.client_convert_loop self, true
       else
+        # preload processors
+        processor_path = "#{File.dirname(__FILE__)}/processors"
+        Dir.foreach(processor_path) do |file|
+          next if File.extname(file) != ".rb"
+          require File.join(processor_path, file)
+        end
+        
+        # start workers
         DRb.start_service nil, self
         drb_uri = DRb.uri
         

@@ -1,3 +1,5 @@
+require "processors/tree_visitor"
+
 module Java2Ruby
   class CommentSimplifier < TreeVisitor
     def auto_process_missing
@@ -13,7 +15,7 @@ module Java2Ruby
     end
     
     def visit_line_comment(element, data)
-    	{ type: :line_comment, text: fix_blanks(element[:text]), same_line: element[:same_line] }
+    	create_element :line_comment, text: fix_blanks(element[:text]), same_line: element[:same_line]
     end
     
     def visit_block_comment(element, data)
@@ -22,7 +24,11 @@ module Java2Ruby
       first = lines.index { |line| !line.strip.empty? }
       last = lines.rindex { |line| !line.strip.empty? }
       
-      first && lines[first..last].map{ |line| { type: :line_comment, text: fix_blanks(line), same_line: false } }
+      if first
+        lines[first..last].each do |line|
+          create_element :line_comment, text: fix_blanks(line), same_line: false
+        end
+      end
     end
   end
 end

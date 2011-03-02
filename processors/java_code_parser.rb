@@ -1,5 +1,6 @@
 require "rjava"
 require "antlr4ruby"
+require "processors/element_creator"
 
 non_verbose {
   require "#{File.dirname(__FILE__)}/java_code_parser/JavaLexer"
@@ -16,6 +17,8 @@ end
 
 module Java2Ruby
   class JavaCodeParser
+    include ElementCreator
+    
     include Org::Antlr::Runtime
     include Org::Antlr::Runtime::Debug
     
@@ -29,45 +32,35 @@ module Java2Ruby
       parser = JavaParser.new tokens, builder
       parser.compilation_unit
 
-      process_parse_tree(builder.get_tree).first
+      collect_children do
+        process_parse_tree builder.get_tree
+      end.first
     end
     
     def process_parse_tree(parse_tree)
+      payload = parse_tree.attr_payload.is_a?(String) ? parse_tree.attr_payload.to_sym : parse_tree.attr_payload.get_text
       hidden_tokens = parse_tree.attr_hidden_tokens || []
+      children = parse_tree.attr_children || []
       
-      comments, _ = hidden_tokens.inject([[], true]) { |(result, comment_on_same_line), token|
+      comment_on_same_line = true
+      hidden_tokens.each do |token|
         case token.attr_type
         when JavaLexer::LINE_COMMENT
-          comment_element = {
-              type: :line_comment,
-              same_line: comment_on_same_line,
-              text: token.get_text[2..-2]
-            }
-          new_result = result + [comment_element]
-          [new_result, false]
+          create_element :line_comment, same_line: comment_on_same_line, text: token.get_text[2..-2]
+          comment_on_same_line = false
         when JavaLexer::COMMENT
-          comment_element = {
-              type: :block_comment,
-              text: token.get_text[2..-3].gsub(/^[ \t]*\*[ \t]*/, "")
-            }
-          new_result = result + [comment_element]
-          [new_result, false]
+          create_element :block_comment, text: token.get_text[2..-3].gsub(/^[ \t]*\*[ \t]*/, "")
+          comment_on_same_line = false
         when JavaLexer::WS
-          [result, comment_on_same_line && token.get_text != "\n"]
-        else
-          [result, comment_on_same_line]
+          comment_on_same_line &&= token.get_text != "\n"
         end
-      }
-      
-      children_entry = parse_tree.attr_children && { children: parse_tree.attr_children.map{ |child| process_parse_tree child }.flatten }
-      
-      comments + [
-        {
-          type: :java_parse_tree,
-          payload: (parse_tree.attr_payload.is_a?(String) ? parse_tree.attr_payload.to_sym : parse_tree.attr_payload.get_text)
-        }
-        .merge(children_entry || {})
-      ]
+      end
+        
+      create_element :java_parse_tree, payload: payload do
+        children.each do |child|
+          process_parse_tree child
+        end
+      end
     end
   end
 end

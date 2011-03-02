@@ -1,3 +1,5 @@
+require "processors/tree_visitor"
+
 module Java2Ruby
   class CaseEndHandler < TreeVisitor
     def auto_process_missing
@@ -5,22 +7,28 @@ module Java2Ruby
     end
     
     def visit_children_data_only_last_child(element, data)
-      element[:children] && (element[:children][0..-2].map { |child| visit child } + [visit(element[:children].last, data)]).flatten.compact
+      if element[:children]
+        element[:children][0..-2].each { |child| visit child }
+        visit element[:children].last, data
+      end
     end
     
     def visit_case(element, data)
-    	children = visit_children element, open_branches: []
-    	{ type: :case, value: element[:value], children: children }
+    	create_element :case, value: element[:value] do
+    	  visit_children element, open_branches: []
+    	end
     end
     
     def visit_case_branch(element, data)
       raise if element[:closed]
       
-      new_element = { type: :case_branch, closed: true, values: element[:values], children: [] }
+      new_element = create_element :case_branch, closed: true, values: element[:values], children: []
       data[:open_branches] << new_element
 
       case_end_data = { break_found: false }
-      children = visit_children_data_only_last_child(element, handle_case_end: case_end_data) || []
+      children = collect_children do
+        visit_children_data_only_last_child element, handle_case_end: case_end_data
+      end
       is_closed = case_end_data[:break_found]
       
       data[:open_branches].each do |branch|
@@ -28,31 +36,30 @@ module Java2Ruby
       end
       
       data[:open_branches].clear if is_closed
-      
-      new_element
     end
     
     def visit_break(element, data)
       if not element[:name] and data[:handle_case_end]
         data[:handle_case_end][:break_found] = true
-        nil
       else
-        element
+        add_child element
       end
     end
     
     def visit_return(element, data)
       data[:handle_case_end][:break_found] = true if data[:handle_case_end]
-      element
+      add_child element
     end
 
     def visit_raise(element, data)
       data[:handle_case_end][:break_found] = true if data[:handle_case_end]
-      element
+      add_child element
     end
     
     def visit_block(element, data)
-      { :type => :block, :children => visit_children_data_only_last_child(element, data) }
+      create_element :block do
+        visit_children_data_only_last_child element, data
+      end
     end
   end
 end

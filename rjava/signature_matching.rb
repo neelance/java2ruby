@@ -88,18 +88,18 @@ class Module
           __send__ single_variation[4], *args
         else
           cache = {}
-          method = cls.define_method name do |*args|
+          method = cls.define_method name do |*args2|
             current_cache = cache
-            args.each do |arg|
+            args2.each do |arg|
               current_cache = (current_cache[arg.class] ||= {})
             end
             var_name = current_cache[nil]
             
             if not var_name
-              var_name = Module.match_signature ranked_variations, args
+              var_name = Module.match_signature ranked_variations, args2
               current_cache[nil] = var_name
             end
-            __send__ var_name, *args
+            __send__ var_name, *args2
           end
           method.call(*args)
         end

@@ -4,11 +4,12 @@ require "fileutils"
 
 require "ruby_modifications"
 require "ruby_naming"
-require "processors/tree_visitor"
 
 module Java2Ruby
   class Converter
     class Step
+      @@loaded_includes = []
+
       attr_accessor :output_file, :next_step
       
       def initialize(converter, method_name, output_file, includes)
@@ -73,7 +74,10 @@ module Java2Ruby
           puts "Creating #{@output_file}" if $verbose
           
           @includes.each do |include|
-            require "#{File.dirname(__FILE__)}/processors/#{include}"
+            unless @@loaded_includes.include? include
+              require "#{File.dirname(__FILE__)}/processors/#{include}"
+              @@loaded_includes << include
+            end
           end
           
           output = @converter.public_send @method_name, input_provider.call

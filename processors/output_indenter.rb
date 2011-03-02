@@ -1,9 +1,15 @@
+require "processors/tree_visitor"
+
 module Java2Ruby
   class OutputIndenter < TreeVisitor
-    def visit_output_tree(element, data)
+    def process(tree)
       output = ""
-      visit_children element, :indention => 0, :output => output
+      visit tree, :output => output
       output
+    end
+    
+    def visit_output_tree(element, data)
+      visit_children element, :indention => 0, :output => data[:output]
     end
     
     def visit_output_block(element, data)

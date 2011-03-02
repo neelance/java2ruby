@@ -1,18 +1,22 @@
+require "processors/element_creator"
+
 module Java2Ruby
   class JavaParseTreeProcessor
+    include ElementCreator
+    
     EPSILON = "<epsilon>".to_sym
 
     attr_reader :next_element, :next_element_index
 
     def process(tree)
-      @current_new_element = {}
-      self.elements = []
-
-      process_children(tree) do
-        match_compilationUnit
-      end
+      collect_children do
+        self.elements = []
+  
+        process_children(tree) do
+          match_compilationUnit
+        end
       
-      @current_new_element[:children].first
+      end.first
     end
 
     def process_children(element)
@@ -106,34 +110,6 @@ module Java2Ruby
         index += 1
       end
       result
-    end
-    
-    def create_element(type, attributes = {})
-      last_new_element = @current_new_element
-      @current_new_element = { :type => type }.merge(attributes)
-      
-      yield if block_given?
-      
-      (last_new_element[:children] ||= []) << @current_new_element
-      @current_new_element = last_new_element
-    end
-    
-    def collect_children
-      last_new_element = @current_new_element
-      list = @current_new_element = {}
-      
-      yield if block_given?
-      
-      @current_new_element = last_new_element
-      list[:children]
-    end
-    
-    def set_attribute(name, value)
-      @current_new_element[name] = value
-    end
-    
-    def add_child(child)
-      (@current_new_element[:children] ||= []) << child
     end
   end
 end

@@ -1,13 +1,19 @@
+require "processors/element_creator"
+
 module Java2Ruby
   class TreeVisitor
+    include ElementCreator
+    
     @@visit_methods = Hash.new { |h, k| h[k] = "visit_#{k}".to_sym }
     
     def auto_process_missing
       false
     end
     
-    def process(element)
-      visit element
+    def process(tree)
+      collect_children do
+        visit tree
+      end.first
     end
     
     def visit(element, data = {})
@@ -15,9 +21,11 @@ module Java2Ruby
       raise ArgumentError, element.inspect if not type.is_a?(Symbol)
       if auto_process_missing and not respond_to?(@@visit_methods[type])
         if element[:children]
-          element.merge({ :children => visit_children(element) })
+          create_element element do
+            visit_children element
+          end
         else
-          element
+          add_child element
         end
       else
         __send__ @@visit_methods[type], element, data
@@ -25,10 +33,11 @@ module Java2Ruby
     end
     
     def visit_children(element, data = {})
-    	return [] if element[:children].nil?
-      element[:children].map do |child|
-        visit child, data
-      end.flatten.compact
+    	if element[:children]
+        element[:children].each do |child|
+          visit child, data
+        end
+      end
     end
   end
 end

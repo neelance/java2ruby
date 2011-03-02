@@ -1,4 +1,5 @@
 require "ruby_naming"
+require "processors/tree_visitor"
 
 module Java2Ruby
   class JavaProcessor < TreeVisitor

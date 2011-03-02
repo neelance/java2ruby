@@ -42,13 +42,13 @@ module Java2Ruby
     end
     
     def run(process_count)
-      if process_count.nil?
+      if not process_count
         ConversionController.client_convert_loop self, true
       else
         DRb.start_service nil, self
         drb_uri = DRb.uri
         
-        process_count.to_i.times do
+        process_count.times do
           fork do
             DRb.start_service
             controller = DRbObject.new nil, drb_uri

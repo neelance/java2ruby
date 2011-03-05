@@ -77,7 +77,9 @@ module Java2Ruby
       expression = visit element[:value]
       if type.is_a?(JavaPrimitiveType)
         case type.name
-        when "int", "short", "char"
+        when "long", "int", "byte"
+          Expression.new nil, "(", expression, ").to_int"
+        when "short", "char"
           Expression.new nil, "RJava.cast_to_#{type.name}(", expression, ")"
         when "float", "double"
           Expression.new nil, "(", expression, ").to_f"
@@ -133,34 +135,6 @@ module Java2Ruby
       Expression.new :Float, element[:value]
     end
     
-    def visit_new(element, data)
-      type = nil
-      match :creator do
-        match :createdName do
-          if try_match :primitiveType do
-              type = JavaPrimitiveType.new visit_name
-            end
-          elsif next_is? :classOrInterfaceType
-            type = visit_classOrInterfaceType
-          end
-        end
-        if try_match :arrayCreatorRest do
-            sizes = []
-            while try_match "["
-              if next_is? :expression
-                sizes << visit
-              end
-              match "]"
-              type = JavaArrayType.new self, type
-            end
-            expression = try_visit_arrayInitializer(type) || type.default(sizes) 
-          end
-        elsif next_is? :classCreatorRest
-          expression = visit_classCreatorRest type
-        end
-      end
-    end
-    
     def visit_array_class(element, data)
       Expression.new nil, "Array"
     end
@@ -214,7 +188,7 @@ module Java2Ruby
       Expression.new nil, visit(element[:array]), "[", visit(element[:index]), "]"
     end
     
-    def visit_expression_stuff
+    def visit_expression_stuff # TODO delete this
       if try_match :identifierSuffix
         if next_is? "["
           loop do

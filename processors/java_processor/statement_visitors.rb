@@ -383,21 +383,17 @@ module Java2Ruby
     end
     
     def visit_synchronized(element, data)
-      puts_output "synchronized(", visit_parExpression, ") do"
+      puts_output "synchronized(", visit(element[:monitor]), ") do"
       indent_output do
-        visit_block
+        visit_children element
       end
       puts_output "end"
     end
     
-    def visit_assert(element, data)
+    def visit_assertion(element, data)
       assert_line = ["raise AssertError"]
-      assert_expression = visit
-      if try_match ":"
-        assert_line.push ", ", visit.typecast(JavaType::STRING)
-      end
-      match ";"
-      assert_line.push " if not (", assert_expression, ")"
+      assert_line.push ", ", visit(element[:message]).typecast(JavaType::STRING) if element[:message]
+      assert_line.push " if not (", visit(element[:condition]), ")"
       puts_output(*assert_line)
     end
     

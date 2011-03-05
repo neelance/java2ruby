@@ -28,17 +28,6 @@ module Java2Ruby
     	data[:java_module].new_import element[:names].map{ |name| RubyNaming.ruby_package_name(name) }, element[:package_import], element[:static_import]
     end
     
-    def visit_typeList
-      list = []
-      match :typeList do
-        loop do
-          list << visit_type
-          try_match "," or break
-        end
-      end
-      list
-    end
-    
     def visit_void_type(element, data)
       JavaType::VOID
     end
@@ -55,74 +44,9 @@ module Java2Ruby
       JavaArrayType.new converter, visit(element[:entry_type])
     end
     
-    def visit_classOrInterfaceType
-      type = nil
-      match :classOrInterfaceType do
-        package_names = true
-        package = nil
-        names = []
-        loop do
-          name = visit_name
-					is_last = !try_match(".")
-          package_names = false if name =~ /^[A-Z]/ or is_last
-          if package_names
-            package ||= JavaPackage.new
-            package << name
-          else
-            names << name
-          end
-          break if is_last
-        end
-        type = JavaClassType.new converter, current_module, current_method, package, names
-        try_match :typeArguments do
-          match "<"
-          loop do
-            match :typeArgument do
-              if try_match "?"
-                try_match "extends", "super" and visit_type
-              else
-                visit_type
-              end
-            end
-            try_match "," or break
-          end
-          match ">"
-        end
-      end
-      type
-    end
-    
-    def visit_annotation
-      match :annotation do
-        match "@"
-        match :annotationName do
-          visit_name
-        end
-        if try_match "("
-          match :elementValue do
-            if try_match :elementValueArrayInitializer do
-                match "{"
-                loop do
-                  match :elementValue do
-                    visit_conditionalExpression
-                  end
-                  try_match "," or break
-                end
-                match "}"
-              end
-            else
-              visit_conditionalExpression
-            end
-          end
-          match ")"
-        end
-      end
-    end
-    
     def visit_line_comment(element, data)
       @current_generator.comment element[:text], element[:same_line]
       nil
     end
-    
   end
 end

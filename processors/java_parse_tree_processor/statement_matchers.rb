@@ -155,44 +155,42 @@ module Java2Ruby
 	          end
 	        end
         elsif try_match "break"
-          if try_match ";"
-            create_element :break
-          else
-            name = match_name
-            match ";"
-            create_element :break, :name => name
+          create_element :break do
+            if not try_match ";"
+              set_attribute :name, match_name
+              match ";"
+            end
           end
         elsif try_match "continue"
-          if try_match ";"
-            create_element :continue
-          else
-            name = match_name
-            match ";"
-            create_element :continue, :name => name
+          create_element :continue do
+            if not try_match ";"
+              set_attribute :name, match_name
+              match ";"
+            end
           end
         elsif try_match "return"
-          expression = next_is?(:expression) ? match_expression : nil
-          create_element :return, :value => expression
-          match ";"
+          create_element :return do
+            set_attribute :value, match_expression if next_is?(:expression)
+            match ";"
+          end
         elsif try_match "throw"
-          throw_expression = match_expression
-          match ";"
-          create_element :raise, :exception => throw_expression
+          create_element :raise do
+            set_attribute :exception, match_expression
+            match ";"
+          end
         elsif try_match "synchronized"
-          puts_output "synchronized(", match_parExpression, ") do"
-          indent_output do
+          create_element :synchronized do
+            set_attribute :monitor, match_parExpression
             match_block
           end
-          puts_output "end"
         elsif try_match "assert"
-          assert_line = ["raise AssertError"]
-          assert_expression = match_expression
-          if try_match ":"
-            assert_line.push ", ", match_expression.typecast(JavaType::STRING)
+          create_element :assertion do
+            set_attribute :condition, match_expression
+            if try_match ":"
+              set_attribute :message, match_expression
+            end
+            match ";"
           end
-          match ";"
-          assert_line.push " if not (", assert_expression, ")"
-          puts_output(*assert_line)
         elsif next_is? :block
           create_element :block do
             match_block

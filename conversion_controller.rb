@@ -99,6 +99,7 @@ module Java2Ruby
       loop do
         converter = remote_controller.fetch_converter
         break if converter.nil?
+        raise if converter.is_a? DRbObject
         begin
           converter.convert
           remote_controller.converter_complete converter.converter_id

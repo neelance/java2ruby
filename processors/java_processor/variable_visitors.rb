@@ -7,18 +7,6 @@ module Java2Ruby
       puts_output "#{var_name} = ", real_value
     end
     
-    def visit_variableModifiers
-      match :variableModifiers do
-        if try_match :variableModifier do
-            try_match "final" \
-            or visit_annotation
-          end
-        else
-          match EPSILON
-        end
-      end
-    end
-    
     def visit_array_initializer(element, data)
       output_parts = [visit(element[:value_type]), ".new(["]
       element[:values].each_index do |i|
@@ -28,6 +16,5 @@ module Java2Ruby
       output_parts << "])"
       Expression.new :Array, *output_parts
     end
-    
   end
 end

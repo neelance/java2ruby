@@ -23,26 +23,28 @@ module Java2Ruby
       match :interfaceDeclaration do
         try_match_normalInterfaceDeclaration
         try_match :annotationTypeDeclaration do
-          match "@"
-          match "interface"
-          java_module = JavaModule.new context_module, :interface, match_name
-          match :annotationTypeBody do
-            match "{"
-            loop_match :annotationTypeElementDeclaration do
-              match_modifiers
-              match :annotationTypeElementRest do
-                match_type
-                match :annotationMethodOrConstantRest do
-                  match :annotationMethodRest do
-                    match_name
-                    match "("
-                    match ")"
+          create_element :interface_declaration do
+            match "@"
+            match "interface"
+            set_attribute :name, match_name
+            match :annotationTypeBody do
+              match "{"
+              loop_match :annotationTypeElementDeclaration do
+                match_modifiers
+                match :annotationTypeElementRest do
+                  match_type
+                  match :annotationMethodOrConstantRest do
+                    match :annotationMethodRest do
+                      match_name
+                      match "("
+                      match ")"
+                    end
                   end
+                  match ";"
                 end
-                match ";"
               end
+              match "}"
             end
-            match "}"
           end
         end
       end
@@ -96,14 +98,14 @@ module Java2Ruby
                       end
                     end
                   elsif next_is? :classDeclaration
-                    java_module.add_local_module match_classDeclaration(modifiers, java_module)
+                    match_classDeclaration modifiers
                   elsif next_is? :interfaceDeclaration
-                    java_module.add_local_module match_interfaceDeclaration(java_module)
+                    match_interfaceDeclaration
                   elsif try_match :interfaceGenericMethodDecl do
                       generic_classes = match_typeParameters
                       return_type = match_type
                       member_name = match_name
-                      match_interfaceMethodDeclaratorRest(return_type, member_name, generic_classes)
+                      match_interfaceMethodDeclaratorRest return_type, member_name, generic_classes
                     end
                   else
                     try_match_normalInterfaceDeclaration
@@ -296,14 +298,14 @@ module Java2Ruby
                 end
               end
             elsif next_is? :classDeclaration
-              match_classDeclaration(modifiers)
+              match_classDeclaration modifiers
             elsif next_is? :interfaceDeclaration
               match_interfaceDeclaration
             elsif try_match :genericMethodOrConstructorDecl do
                 generic_classes = match_typeParameters
                 match :genericMethodOrConstructorRest do
                   return_type = if try_match "void"
-                    JavaType::VOID
+                    { :type => :void_type }
                   else
                     match_type
                   end
@@ -378,7 +380,7 @@ module Java2Ruby
             loop do
               try_match "[" or break
               match "]"
-              type = JavaArrayType.new(converter, type)
+              type = { :type => :array_type, :entry_type => type }
             end
             method_parameters << [parameter_name, type, array_arg]
           end

@@ -1,27 +1,5 @@
 module Java2Ruby
   class JavaProcessor
-    def visit_annotation_type_declaration(element, data)
-      java_module = JavaModule.new context_module, :interface, visit_name
-      match :annotationTypeBody do
-        match "{"
-        loop_match :annotationTypeElementDeclaration do
-          visit_modifiers
-          match :annotationTypeElementRest do
-            visit_type
-            match :annotationMethodOrConstantRest do
-              match :annotationMethodRest do
-                visit_name
-                match "("
-                match ")"
-              end
-            end
-            match ";"
-          end
-        end
-      end
-      java_module
-    end
-
     def visit_interface_declaration(element, data)
       java_module = JavaModule.new data[:context_module], data[:context_module].is_a?(JavaModule) ? :local_interface : :interface, element[:name]
       java_module.generic_classes = element[:generic_classes] || []
@@ -32,36 +10,6 @@ module Java2Ruby
       end
       
       data[:java_module].add_module java_module
-    end
-        
-    def visit_interface_declaration_stuff
-      loop_match :interfaceBodyDeclaration do
-        if try_match ";"
-        else
-          modifiers = visit_modifiers
-          try_match :interfaceMemberDecl do
-            if try_match :interfaceMethodOrFieldDecl do
-                type = visit_type
-                member_name = visit_name
-                match :interfaceMethodOrFieldRest do
-                  if next_is? :interfaceMethodDeclaratorRest
-                    visit_interfaceMethodDeclaratorRest java_module, type, member_name
-                  else
-                  end
-                end
-              end
-            elsif try_match :interfaceGenericMethodDecl do
-                generic_classes = visit_typeParameters
-                return_type = visit_type
-                member_name = visit_name
-                visit_interfaceMethodDeclaratorRest java_module, return_type, member_name, generic_classes
-              end
-            else
-              try_visit_normalInterfaceDeclaration java_module
-            end
-          end
-        end
-      end
     end
 
     def visit_class_declaration(element, data)
@@ -181,19 +129,6 @@ module Java2Ruby
       type = visit element[:constant_type]
       value = element[:value] && lambda { visit element[:value] }
       data[:java_module].new_constant name, type, value
-    end
-        
-    def visit_generic_method_or_constructor_decl(element, data)
-      generic_classes = visit_typeParameters
-      match :genericMethodOrConstructorRest do
-        return_type = if try_match "void"
-          JavaType::VOID
-        else
-          visit_type
-        end
-        method_name = visit_name
-        visit_methodDeclaratorRest java_module, static, native, synchronized, return_type, method_name, generic_classes
-      end
     end
         
     def visit_method_declaration(element, data)

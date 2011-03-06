@@ -57,11 +57,11 @@ module Java2Ruby
                   loop_match :switchLabel do
                     if try_match "case"
                       match :constantExpression do
-                         values << match_expression
+                        values << match_expression
                       end
                     else
                       match "default"
-                      values = :default
+                      values << :default
                     end
                     match ":"
                   end

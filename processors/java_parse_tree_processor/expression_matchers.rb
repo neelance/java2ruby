@@ -379,7 +379,7 @@ module Java2Ruby
           
           if expression.nil?
             if identifiers.size == 1 and arguments
-              expression = { :type => :self_call, :name => identifiers.first, :arguments => arguments }
+              expression = { :type => :self_call, :method => identifiers.first, :arguments => arguments }
             else
               method_identifier = arguments ? identifiers.pop : nil
               
@@ -406,7 +406,7 @@ module Java2Ruby
               identifier = match_name
               if next_is? :arguments
                 arguments = match_arguments
-                expression = Expression.new nil, expression, ".superclass.instance_method(:", ruby_method_name(identifier), ").bind(self).call", *compose_arguments(arguments)
+                expression = { :type => :super_call, :class => expression, :method => identifier, :arguments => arguments }
               else
                 raise ArgumentError
               end

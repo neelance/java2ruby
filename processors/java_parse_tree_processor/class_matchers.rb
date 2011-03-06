@@ -146,13 +146,13 @@ module Java2Ruby
               set_attribute :interfaces, match_typeList
             end
             
-            match_classBody(name)
+            match_classBody name
           end
         end \
         or match :enumDeclaration do
           create_element :enum_declaration do
             match "enum"
-            set_attribute :name, match_name
+            set_attribute :name, name = match_name
 
             match :enumBody do
               match "{"
@@ -210,7 +210,7 @@ module Java2Ruby
     def match_classBody(class_name)
       match :classBody do
         match "{"
-        loop_match_classBodyDeclaration(class_name)
+        loop_match_classBodyDeclaration class_name
         match "}"
       end
     end
@@ -268,7 +268,9 @@ module Java2Ruby
                 type = match_type
                 try_match :methodDeclaration do
                   method_name = match_name
-                  match_methodDeclaratorRest(static, native, synchronized, type, method_name)
+                  match :methodDeclaratorRest do
+                    match_methodDeclaratorRestContent static, native, synchronized, type, method_name
+                  end
                 end \
                 or try_match :fieldDeclaration do
                   match_variableDeclarators(type) do |name, var_type, value|
@@ -280,22 +282,7 @@ module Java2Ruby
             elsif try_match "void"
               method_name = match_name
               match :voidMethodDeclaratorRest do
-                create_element :method_declaration, :static => static, :name => method_name, :return_type => { :type => :void_type }, :synchronized => synchronized do
-                  set_attribute :parameters, match_formalParameters
-                  try_match_throws
-                  if try_match ";"
-                    set_attribute :abstract, true
-                  else
-                    match :methodBody do
-                      method_children = []
-                      match :block do
-                        match "{"
-                        match_block_statements
-                        match "}"
-                      end
-                    end
-                  end
-                end
+                match_methodDeclaratorRestContent static, native, synchronized, { :type => :void_type }, method_name, nil
               end
             elsif next_is? :classDeclaration
               match_classDeclaration modifiers
@@ -310,7 +297,9 @@ module Java2Ruby
                     match_type
                   end
                   method_name = match_name
-                  match_methodDeclaratorRest java_module, static, native, synchronized, return_type, method_name, generic_classes
+                  match :methodDeclaratorRest do
+                    match_methodDeclaratorRestContent static, native, synchronized, return_type, method_name, generic_classes
+                  end
                 end
               end
             end
@@ -319,23 +308,21 @@ module Java2Ruby
       end
     end
     
-    def match_methodDeclaratorRest(static, native, synchronized, return_type, method_name, generic_classes = nil)
-      create_element :method_declaration, :static => static, :native => native, :name => method_name, :return_type => return_type, :generic_classes => generic_classes do
-        match :methodDeclaratorRest do
-          set_attribute :parameters, match_formalParameters
-          if try_match "["
-            match "]"
-          end
-          try_match_throws
-          if try_match ";"
-            set_attribute :abstract, true
-          else
-            match :methodBody do
-              match :block do
-                match "{"
-                match_block_statements
-                match "}"
-              end
+    def match_methodDeclaratorRestContent(static, native, synchronized, return_type, method_name, generic_classes = nil)
+      create_element :method_declaration, :static => static, :native => native, :synchronized => synchronized, :name => method_name, :return_type => return_type, :generic_classes => generic_classes do
+        set_attribute :parameters, match_formalParameters
+        if try_match "["
+          match "]"
+        end
+        try_match_throws
+        if try_match ";"
+          set_attribute :abstract, true
+        else
+          match :methodBody do
+            match :block do
+              match "{"
+              match_block_statements
+              match "}"
             end
           end
         end

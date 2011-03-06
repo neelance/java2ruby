@@ -33,7 +33,7 @@ module Java2Ruby
       end
             
       def comment(text, same_line)
-        if same_line and not @output_lines.empty?
+        if same_line and not @output_lines.empty? and @output_lines.last[:type] == :output_line
           @output_lines.last[:content] << " ##{text}"
         else
           @comment_lines << text

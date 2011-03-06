@@ -131,7 +131,7 @@ module Java2Ruby
       @ruby_file = "#{output_dir}/#{RubyNaming.ruby_constant_name(@basename)}.rb"
       
       register_step :step1, "#{temp_dir}/#{@basename}.step1.dump.gz", "java_code_parser", "comment_simplifier"
-      register_step :step2, @ruby_file, "java_parse_tree_processor", "case_end_handler", "java_processor", "output_indenter"
+      register_step :step2, @ruby_file, "java_parse_tree_processor", "case_handler", "synchronized_method_handler", "java_processor", "output_indenter"
      end
     
     def step1(code)
@@ -146,7 +146,8 @@ module Java2Ruby
     
     def step2(tree)
       tree = JavaParseTreeProcessor.new.process tree
-      tree = CaseEndHandler.new.process tree
+      tree = CaseHandler.new.process tree
+      tree = SynchronizedMethodHandler.new.process tree
       write_log "processed tree", tree
       
       java_processor = JavaProcessor.new @conversion_rules

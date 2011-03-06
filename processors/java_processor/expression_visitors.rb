@@ -77,12 +77,14 @@ module Java2Ruby
       expression = visit element[:value]
       if type.is_a?(JavaPrimitiveType)
         case type.name
-        when "long", "int", "byte"
+        when "int"
           Expression.new nil, "(", expression, ").to_int"
         when "short", "char"
           Expression.new nil, "RJava.cast_to_#{type.name}(", expression, ")"
         when "float", "double"
           Expression.new nil, "(", expression, ").to_f"
+        when "long", "byte", "boolean"
+          expression
         else
           raise type.name
         end
@@ -140,7 +142,9 @@ module Java2Ruby
     end
         
     def visit_super_call(element, data)
-      if element[:method] == current_method.name
+      if element[:class]
+        Expression.new nil, visit(element[:class]), ".superclass.instance_method(:", ruby_method_name(element[:method]), ").bind(self).call", *compose_arguments(element[:arguments])
+      elsif element[:method] == current_method.name
         Expression.new nil, "super", *compose_arguments(element[:arguments])
       else
         Expression.new nil, current_module.superclass, ".instance_method(:", ruby_method_name(element[:method]), ").bind(self).call", *compose_arguments(element[:arguments])
@@ -185,7 +189,11 @@ module Java2Ruby
     end
     
     def visit_array_access(element, data)
-      Expression.new nil, visit(element[:array]), "[", visit(element[:index]), "]"
+      if element[:index]
+        Expression.new nil, visit(element[:array]), "[", visit(element[:index]), "]"
+      else
+        Expression.new nil, visit(element[:array]), "[]"
+      end
     end
     
     def visit_expression_stuff # TODO delete this
@@ -294,8 +302,8 @@ module Java2Ruby
     end
     
     def visit_self_call(element, data)
-      current_module && current_module.method_used(element[:name])
-      expression = Expression.new nil, (element[:name] == "equals" ? "self.==" : ruby_method_name(element[:name])), *compose_arguments(element[:arguments])
+      current_module && current_module.method_used(element[:method])
+      expression = Expression.new nil, (element[:method] == "equals" ? "self.==" : ruby_method_name(element[:method])), *compose_arguments(element[:arguments])
     end
     
     def visit_local_instance_access(element, data)

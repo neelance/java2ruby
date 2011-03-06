@@ -190,10 +190,10 @@ module Java2Ruby
       visit_children element, if_branches: if_branches
       
       puts_output "if ", visit(element[:condition])
-      indent_output { visit_children if_branches[:true] }
+      indent_output { visit_children if_branches[:true], context_module: data[:context_module] }
       if if_branches[:false]
         puts_output "else"
-        indent_output { visit_children if_branches[:false] }
+        indent_output { visit_children if_branches[:false], context_module: data[:context_module] }
       end
       puts_output "end"
     end
@@ -209,21 +209,22 @@ module Java2Ruby
     def visit_case(element, data)
       CatchBlock.new(self, "break_case") do |break_case_catch|
         puts_output "case ", visit(element[:value])
-        visit_children element, data.merge({ :break_case_catch => break_case_catch })
+        visit_children element, context_module: data[:context_module], break_case_catch: break_case_catch
         puts_output "end"
       end
     end
     
     def visit_case_branch(element, data)
       raise if not element[:closed]
-      if element[:values] == :default
+      if element[:values] == [:default]
         puts_output "else"
       else
+        raise if element[:values].include? :default
         puts_output "when ", *element[:values].map{ |v| visit v }.insert_seperators(", ")
       end
       indent_output do
         switch_statement_context SwitchContext.new(data[:block_name], data[:break_catch], data[:break_case_catch]) do
-          visit_children element
+          visit_children element, context_module: data[:context_module]
         end
       end
     end
@@ -233,7 +234,7 @@ module Java2Ruby
       indent_output do
         CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
           switch_statement_context LoopContext.new(data[:block_name], data[:break_catch], next_catch) do
-            visit_children element
+            visit_children element, context_module: data[:context_module]
           end
         end
       end
@@ -245,7 +246,7 @@ module Java2Ruby
       indent_output do
         CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
           switch_statement_context LoopContext.new(data[:block_name], data[:break_catch], next_catch) do
-            visit_children element
+            visit_children element, context_module: data[:context_module]
           end
         end
       end
@@ -256,7 +257,7 @@ module Java2Ruby
       for_branches = {}
       visit_children element, for_branches: for_branches
       
-      visit_children for_branches[:init]
+      visit_children for_branches[:init], context_module: data[:context_module]
       if element[:condition]
         puts_output "while ", visit(element[:condition])
       else
@@ -265,10 +266,10 @@ module Java2Ruby
       indent_output do
         CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
           switch_statement_context ForContext.new(data[:block_name], data[:break_catch], next_catch, for_branches[:update]) do
-            visit_children for_branches[:child_statement]
+            visit_children for_branches[:child_statement], context_module: data[:context_module]
           end
         end
-        visit_children for_branches[:update]
+        visit_children for_branches[:update], context_module: data[:context_module]
       end
       puts_output "end"
     end
@@ -294,7 +295,7 @@ module Java2Ruby
         CatchBlock.new(self, "next_#{data[:block_name]}") do |next_catch|
           switch_statement_context LoopContext.new(data[:block_name], data[:break_catch], next_catch) do
             @statement_context.new_variable element[:variable], element[:entry_type]
-            visit_children for_branches[:child_statement]
+            visit_children for_branches[:child_statement], context_module: data[:context_module]
           end
         end
       end
@@ -303,13 +304,13 @@ module Java2Ruby
     
     def visit_try(element, data)
       puts_output "begin"
-      visit_children element
+      visit_children element, context_module: data[:context_module]
       puts_output "end"
     end
     
     def visit_try_body(element, data)
       indent_output do
-        visit_children element
+        visit_children element, context_module: data[:context_module]
       end
     end
     
@@ -319,7 +320,7 @@ module Java2Ruby
         var_name = @statement_context.new_variable element[:exception_variable], exception_type
         puts_output "rescue #{exception_type} => #{var_name}"
         indent_output do
-          visit_children element
+          visit_children element, context_module: data[:context_module]
         end
       end
     end
@@ -327,7 +328,7 @@ module Java2Ruby
     def visit_ensure(element, data)
       puts_output "ensure"
       indent_output do
-        visit_children element
+        visit_children element, context_module: data[:context_module]
       end
     end
     
@@ -357,7 +358,7 @@ module Java2Ruby
         name = RubyNaming.lower_name(element[:name])
         loop_context = @statement_context.find_block name
         if loop_context == @statement_context.current_java_next_context
-          visit_children loop_context.for_update if loop_context.is_a?(ForContext)
+          visit_children loop_context.for_update, context_module: data[:context_module] if loop_context.is_a?(ForContext)
           puts_output "next"
         else
           puts_output "throw :next_#{name}, :thrown"
@@ -365,7 +366,7 @@ module Java2Ruby
         end
       else
         loop_context = @statement_context.current_java_next_context
-        visit_children loop_context.for_update if loop_context.is_a?(ForContext)
+        visit_children loop_context.for_update, context_module: data[:context_module] if loop_context.is_a?(ForContext)
         puts_output "next"
       end
     end
@@ -385,7 +386,7 @@ module Java2Ruby
     def visit_synchronized(element, data)
       puts_output "synchronized(", visit(element[:monitor]), ") do"
       indent_output do
-        visit_children element
+        visit_children element, context_module: data[:context_module]
       end
       puts_output "end"
     end
@@ -400,14 +401,14 @@ module Java2Ruby
     def visit_block(element, data)
       block_context = BlockContext.new data[:block_name], data[:break_catch]
       switch_statement_context block_context do
-        visit_children element
+        visit_children element, context_module: data[:context_module]
       end
     end
     
     def visit_label(element, data)
       block_name = RubyNaming.lower_name(element[:name])
       CatchBlock.new(self, "break_#{block_name}") do |break_catch|
-        visit_children element, :block_name => block_name, :break_catch => break_catch
+        visit_children element, context_module: data[:context_module], :block_name => block_name, :break_catch => break_catch
       end
     end
     

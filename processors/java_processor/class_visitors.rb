@@ -6,7 +6,7 @@ module Java2Ruby
       java_module.interfaces = (element[:interfaces] || []).map { |e| visit e }
 
       java_module.in_context do
-        visit_children element, :java_module => java_module
+        visit_children element, :java_module => java_module, :context_module => java_module
       end
       
       data[:java_module].add_module java_module
@@ -60,8 +60,8 @@ module Java2Ruby
     def visit_enum_constant(element, data)
       enum_constant_module = data[:java_module]
       if element[:children]
-        enum_constant_module = JavaModule.new java_module, :inner_class, element[:name]
-        enum_constant_module.superclass = java_module.java_type
+        enum_constant_module = JavaModule.new data[:java_module], :inner_class, element[:name]
+        enum_constant_module.superclass = data[:java_module].java_type
         enum_constant_module.new_constructor [], lambda { puts_output "super \"#{element[name]}\"" }
         visit_children element, :java_module => enum_constant_module
       end
@@ -132,6 +132,8 @@ module Java2Ruby
     end
         
     def visit_method_declaration(element, data)
+      raise if element[:synchronized]
+      
       method_parameters = element[:parameters].map do |parameter_name, type, array_arg|
         [parameter_name, visit(type), array_arg]
       end

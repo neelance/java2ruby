@@ -1,4 +1,10 @@
 /doc
+/stable
+/test/*.class
+/test/*.rb
+/test/*.dump.gz
+/test/*.yaml.gz
+/test/*.log.yaml
 .loadpath
 .project
 .DS_Store

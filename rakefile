@@ -2,6 +2,20 @@ require "rake/rdoctask"
 
 files = ["java2ruby.rb", "rjava.rb", "LICENSE"] + Dir.glob("converter/**/*.*") + Dir.glob("rjava/**/*.*")
 
+require "drb"
+require "stringio"
+require "yaml"
+
+class Dir
+  def self.dir_glob(dir, pattern)
+    files = nil
+    chdir dir do
+      files = Dir.glob(pattern).sort
+    end
+    files
+  end
+end
+
 task :gemspec do
   File.open("java2ruby.gemspec", "w") do |file|
     file.write Gem::Specification.new { |s|
@@ -20,4 +34,171 @@ end
 Rake::RDocTask.new do |rd|
   rd.rdoc_files.include(*files.select { |file| file =~ /\.rb$/ })
   rd.rdoc_dir = "doc"
+end
+
+libraries = ["antlr4ruby", "jface4ruby", "jre4ruby", "swt4ruby"]
+
+file "stable" do
+  puts "creating stable copy of converter libraries"
+  mkdir "stable"
+  cp_r ["../jre4ruby", "../antlr4ruby"], "stable"
+end
+
+task :load_current_converter do
+  $:.unshift "."
+  $:.unshift "../jre4ruby"
+  $:.unshift "../antlr4ruby"
+  require "converter"
+end
+
+task :load_stable_converter => ["stable"] do
+  $:.unshift "."
+  $:.unshift "stable/jre4ruby"
+  $:.unshift "stable/antlr4ruby"
+  require "converter"
+end
+
+rule ".class" => ".java" do |t|
+  sh "javac -J-Xms64m -J-Xmx512m #{t.source}"
+end
+
+fakeout = StringIO.new
+stdout = $stdout
+
+task "test" do
+  Rake.application.invoke_task :load_current_converter
+
+  Dir.glob("test/*.java").sort.each do |file|
+    basename = File.basename file, ".java"
+    log = {}
+
+    begin
+      converter = Java2Ruby::Converter.new file
+      converter.log = log
+
+      converter.convert
+      
+      java_output = File.popen("java -Xms64m -Xmx512m -cp #{File.dirname(file)} #{basename} 2>/dev/null").read
+      log["java output"] = java_output
+
+      begin
+        fakeout.string = ""    
+        $stdout = fakeout
+        require File.absolute_path(converter.ruby_file)
+        Object.const_get(File.basename(converter.ruby_file, ".rb")).main([])
+      ensure
+        $stdout = stdout
+      end
+
+      if fakeout.string != java_output
+        log["mri output"] = fakeout.string
+        raise "Result output does not match"
+      end
+    rescue Interrupt
+      exit
+    rescue Exception => e
+      last = e.backtrace.index{ |bt| bt.include? "rakefile" }
+      log["exception"] = "#{e} (#{e.class})\n#{e.backtrace[0..(last ? last - 1 : -1)].join("\n")}"
+    end
+    
+    File.open("#{File.dirname(file)}/#{basename}.log.yaml", "w") do |f|
+      log.each do |header, content|
+        f.puts "--- #{header.upcase} ---"
+        f.puts content
+        f.puts
+      end
+    end
+    
+    print log["exception"] ? "\n#{file} failed: #{e}\n" : "."
+    $stdout.flush
+  end
+  puts "Done"
+end
+
+task :delete_test_results do
+  rm Dir.glob("test/*.rb")
+  rm Dir.glob("test/*.log.yaml")
+  rm Dir.glob("test/*.dump.gz")
+end
+
+task :retest => [:delete_test_results, :test]
+
+convert_libraries = lambda { |selected_libraries, args|
+  profile = args.profile == "true"
+  process_count = args.process_count.to_i
+  process_count = nil if process_count < 1
+  
+  if profile
+    require "perftools"
+    PerfTools::CpuProfiler.start("perftools_profile")
+  end
+
+  begin
+    Rake.application.invoke_task :load_stable_converter
+    require "conversion_controller"
+    controller = Java2Ruby::ConversionController.new
+
+    selected_libraries.each do |library|
+      rule_file = "../#{library}/conversion_rules.yaml"
+      conversion_rules = File.exists?(rule_file) ? YAML.load_file(rule_file) : {}
+      controller.add_files Dir.dir_glob("../#{library}/#{library}/src", "**/*"), "../#{library}/#{library}/src", "../#{library}/#{library}/lib", "../#{library}/#{library}/tmp", conversion_rules
+    end
+    controller.run process_count
+  ensure
+    PerfTools::CpuProfiler.stop if profile
+  end
+}
+
+libraries.each do |library|
+  task "convert_#{library}", [:process_count, :profile] do |t, args|
+    convert_libraries.call [library], args
+  end
+  task "reconvert_#{library}", [:process_count, :profile] do |t, args|
+    rm_rf "../#{library}/#{library}/lib"
+    rm_rf "../#{library}/#{library}/tmp"
+    convert_libraries.call [library], args
+  end
+end
+
+task "convert_all", [:process_count] do |t, args|
+  convert_libraries.call libraries, args.process_count
+end
+
+task "reconvert_all", [:process_count] do |t, args|
+  libraries.each { |library| rm_rf "#{library}/#{library}/lib" }
+  convert_libraries.call libraries, args.process_count
+end
+
+task :push_reconverted do
+  libraries.each do |library|
+    chdir "../#{library}" do
+      system "git add #{library}/lib"
+      system 'git commit -m "Reconverted."'
+      system "git push"
+    end
+  end
+end
+
+desc "generate FFI structs"
+task :ffi_generate do
+  require "ffi"
+  require "ffi/tools/generator"
+  require "ffi/tools/struct_generator"
+
+  unless uptodate?("java2ruby/rjava/jni/jni_structs.rb", ["java2ruby/rjava/jni/jni_structs.rb.ffi", "java2ruby/rjava/jni/jni.rb"])
+    require "java2ruby/rjava/rjava_module"
+    require "java2ruby/rjava/jni/jni_structures"
+    filename = "java2ruby/rjava/jni/#{RJava::PLATFORM}/jni_structs.rb"
+    puts "generating: #{filename}"
+    FFI::Generator.new "java2ruby/rjava/jni/jni_structs.rb.ffi", filename, { :cflags => "-Ijava2ruby/rjava/jni -Ijava2ruby/rjava/jni/#{RJava::PLATFORM}" }
+  end
+end
+
+desc "build JNI tools"
+task :build_jni_tools do
+  require "java2ruby/rjava/rjava_module"
+  chdir "java2ruby/rjava/jni" do
+    system "erb jni_tools.c.erb > jni_tools.c"
+    system "gcc jni_tools.c -shared -fPIC -g -I#{RJava::PLATFORM} -o #{RJava::PLATFORM}/jni_tools.so"
+  end
 end

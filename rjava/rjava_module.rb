@@ -79,6 +79,10 @@ module RJava
     v -= 0x10000 if v >= 0x8000
     v
   end
+  
+  def self.cast_to_int(v)
+    v.to_int
+  end
     
   def self.cast_to_char(v)
     Java::Lang::Character.new v.to_i

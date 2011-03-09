@@ -81,7 +81,7 @@ module Java2Ruby
                             match :constantDeclaratorRest do
                               match "="
                               value = match_variableInitializer type
-                              create_element :constant_declaration, :name => member_name, :constant_type => type, :value => value
+                              create_element :constant_declaration, name: member_name, constant_type: type, value: value
                             end
                           end
                           match ";"
@@ -89,7 +89,7 @@ module Java2Ruby
                       end
                     end
                   elsif try_match "void"
-                    create_element :method_declaration, :static => false, :abstract => true, :return_type => { :type => :void_type } do
+                    create_element :method_declaration, static: false, abstract: true, return_type: { type: :void_type } do
                       set_attribute :name, match_name
                       match :voidInterfaceMethodDeclaratorRest do
                         set_attribute :parameters, match_formalParameters
@@ -120,7 +120,7 @@ module Java2Ruby
     end
 
     def match_interfaceMethodDeclaratorRest(return_type, method_name, generic_classes = nil)
-      create_element :method_declaration, :static => false, :abstract => true, :name => method_name, :return_type => return_type do
+      create_element :method_declaration, static: false, abstract: true, name: method_name, return_type: return_type do
         match :interfaceMethodDeclaratorRest do
           set_attribute :parameters, match_formalParameters
           try_match_throws
@@ -132,7 +132,7 @@ module Java2Ruby
     def match_classDeclaration(class_modifiers)
       match :classDeclaration do
         try_match :normalClassDeclaration do
-          create_element :class_declaration, :class_modifiers => class_modifiers do
+          create_element :class_declaration, class_modifiers: class_modifiers do
             match "class"
             set_attribute :name, name = match_name
   
@@ -274,7 +274,7 @@ module Java2Ruby
                 end \
                 or try_match :fieldDeclaration do
                   match_variableDeclarators(type) do |name, var_type, value|
-                    create_element :field_declaration, :static => static, :final => final, :name => name, :field_type => var_type, :value => value
+                    create_element :field_declaration, static: static, final: final, name: name, field_type: var_type, value: value
                   end
                   match ";"
                 end
@@ -282,7 +282,7 @@ module Java2Ruby
             elsif try_match "void"
               method_name = match_name
               match :voidMethodDeclaratorRest do
-                match_methodDeclaratorRestContent static, native, synchronized, { :type => :void_type }, method_name, nil
+                match_methodDeclaratorRestContent static, native, synchronized, { type: :void_type }, method_name, nil
               end
             elsif next_is? :classDeclaration
               match_classDeclaration modifiers
@@ -292,7 +292,7 @@ module Java2Ruby
                 generic_classes = match_typeParameters
                 match :genericMethodOrConstructorRest do
                   return_type = if try_match "void"
-                    { :type => :void_type }
+                    { type: :void_type }
                   else
                     match_type
                   end
@@ -309,7 +309,7 @@ module Java2Ruby
     end
     
     def match_methodDeclaratorRestContent(static, native, synchronized, return_type, method_name, generic_classes = nil)
-      create_element :method_declaration, :static => static, :native => native, :synchronized => synchronized, :name => method_name, :return_type => return_type, :generic_classes => generic_classes do
+      create_element :method_declaration, static: static, native: native, synchronized: synchronized, name: method_name, return_type: return_type, generic_classes: generic_classes do
         set_attribute :parameters, match_formalParameters
         if try_match "["
           match "]"
@@ -367,7 +367,7 @@ module Java2Ruby
             loop do
               try_match "[" or break
               match "]"
-              type = { :type => :array_type, :entry_type => type }
+              type = { type: :array_type, entry_type: type }
             end
             method_parameters << [parameter_name, type, array_arg]
           end

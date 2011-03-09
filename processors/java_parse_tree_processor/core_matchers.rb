@@ -15,7 +15,7 @@ module Java2Ruby
 	            match ";"
 	          end
 
-            create_element :package, :name => name do
+            create_element :package, name: name do
 		          match_package_content
 	          end
 	       	else
@@ -43,7 +43,7 @@ module Java2Ruby
         end
         match ";"
 
-        create_element :import, :names => names, :package_import => package_import, :static_import => static_import
+        create_element :import, names: names, package_import: package_import, static_import: static_import
       end
 
       loop_match :typeDeclaration do
@@ -69,14 +69,14 @@ module Java2Ruby
       type = nil
       match :type do
         if try_match :primitiveType do
-            type = { :type => :primitive_type, :name => match_name }
+            type = { type: :primitive_type, name: match_name }
           end
         elsif next_is? :classOrInterfaceType
           type = match_classOrInterfaceType
         end
         while try_match "["
           match "]"
-          type = { :type => :array_type, :entry_type => type }
+          type = { type: :array_type, entry_type: type }
         end
       end
       type
@@ -100,7 +100,7 @@ module Java2Ruby
           end
           break if is_last
         end
-        type = { :type => :class_type, :package => package, :names => names }
+        type = { type: :class_type, package: package, names: names }
         try_match :typeArguments do
           match "<"
           loop do

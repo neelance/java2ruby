@@ -23,7 +23,7 @@ module Java2Ruby
       @explicit_call_counter = -1
       
       compilation_unit = JavaCompilationUnit.new element, @basename, converter
-      { :type => :output_tree, :children => compilation_unit.output_parts.first }
+      { type: :output_tree, children: compilation_unit.output_parts.first }
     end
     
     def converter

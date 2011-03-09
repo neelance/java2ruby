@@ -442,7 +442,7 @@ module Java2Ruby
       end
       
       def write_output
-        converter.visit @element, :java_module => self, :context_module => self
+        converter.visit @element, java_module: self, context_module: self
       end
       
       def add_module(mod)

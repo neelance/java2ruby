@@ -6,7 +6,7 @@ module Java2Ruby
       java_module.interfaces = (element[:interfaces] || []).map { |e| visit e }
 
       java_module.in_context do
-        visit_children element, :java_module => java_module, :context_module => java_module
+        visit_children element, java_module: java_module, context_module: java_module
       end
       
       data[:java_module].add_module java_module
@@ -33,7 +33,7 @@ module Java2Ruby
       java_module.interfaces = (element[:interfaces] || []).map { |e| visit e }
       
       java_module.in_context do
-        visit_children element, :context_module => java_module, :java_module => java_module
+        visit_children element, context_module: java_module, java_module: java_module
       end
       
       if data[:in_method]
@@ -47,7 +47,7 @@ module Java2Ruby
       java_module = JavaModule.new data[:context_module], :class, element[:name]
       constant_names = []
       java_module.in_context do
-        visit_children element, :context_module => data[:context_module], :java_module => java_module, :constant_names => constant_names
+        visit_children element, context_module: data[:context_module], java_module: java_module, constant_names: constant_names
       end
 
       java_module.new_method(false, "set_value_name", [["name", JavaClassType::STRING, false]], nil, lambda { puts_output "@value_name = name"; puts_output "self" })
@@ -63,7 +63,7 @@ module Java2Ruby
         enum_constant_module = JavaModule.new data[:java_module], :inner_class, element[:name]
         enum_constant_module.superclass = data[:java_module].java_type
         enum_constant_module.new_constructor [], lambda { puts_output "super \"#{element[name]}\"" }
-        visit_children element, :java_module => enum_constant_module
+        visit_children element, java_module: enum_constant_module
       end
       expression_parts = [enum_constant_module.java_type, ".new"]
       expression_parts.concat compose_arguments(element[:arguments])
@@ -99,7 +99,7 @@ module Java2Ruby
           end
         end
 
-        visit_children element, :in_method => true
+        visit_children element, in_method: true
       }
       
       data[:java_module].new_constructor method_parameters, constructor_body
@@ -151,7 +151,7 @@ module Java2Ruby
             end
             puts_output "end"
           else
-            visit_children element, :context_module => data[:java_module], :java_module => data[:java_module], :in_method => true
+            visit_children element, context_module: data[:java_module], java_module: data[:java_module], in_method: true
           end
         }
         data[:java_module].new_method(element[:static], element[:name], method_parameters, visit(element[:return_type]), method_body, element[:generic_classes])

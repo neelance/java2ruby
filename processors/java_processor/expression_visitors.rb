@@ -282,8 +282,8 @@ module Java2Ruby
       puts_output current_module.java_type, " = self.class" if current_module.type == :inner_class
       java_module = JavaModule.new current_module, :inner_class, nil
       java_module.superclass = visit element[:superclass]
-      visit_children element, :java_module => java_module, :context_module => java_module
-      Expression.new nil, java_module, ".new_local", *compose_arguments([{ :type => :self }] + element[:arguments])
+      visit_children element, java_module: java_module, context_module: java_module
+      Expression.new nil, java_module, ".new_local", *compose_arguments([{ type: :self }] + element[:arguments])
     end
     
     def visit_class_creator(element, data)
@@ -291,7 +291,7 @@ module Java2Ruby
       arguments = element[:arguments]
       local_module = current_module && current_module.find_local_module(type.names.first)
       if local_module and local_module.type == :local_class
-        Expression.new nil, type, ".new_local", *compose_arguments([{ :type => :self }] + arguments)
+        Expression.new nil, type, ".new_local", *compose_arguments([{ type: :self }] + arguments)
       else
         Expression.new nil, type, ".new", *compose_arguments(arguments)
       end

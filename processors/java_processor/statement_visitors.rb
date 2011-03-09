@@ -408,7 +408,7 @@ module Java2Ruby
     def visit_label(element, data)
       block_name = RubyNaming.lower_name(element[:name])
       CatchBlock.new(self, "break_#{block_name}") do |break_catch|
-        visit_children element, context_module: data[:context_module], :block_name => block_name, :break_catch => break_catch
+        visit_children element, context_module: data[:context_module], block_name: block_name, break_catch: break_catch
       end
     end
     

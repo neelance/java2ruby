@@ -5,7 +5,7 @@ module Java2Ruby
         match_variableModifiers
         type = match_type
         match_variableDeclarators(type) do |name, var_type, value|
-          create_element :variable_declaration, :name => name, :var_type => var_type, :value => value
+          create_element :variable_declaration, name: name, var_type: var_type, value: value
         end
       end
     end
@@ -32,7 +32,7 @@ module Java2Ruby
               loop do
                 try_match "[" or break
                 match "]"
-                type = { :type => :array_type, :entry_type => type }
+                type = { type: :array_type, entry_type: type }
               end
             end
             value = nil
@@ -55,7 +55,7 @@ module Java2Ruby
     end
     
     def try_match_arrayInitializer(type_element)
-      element = { :type => :array_initializer, :value_type => type_element, :values => [] }
+      element = { type: :array_initializer, value_type: type_element, values: [] }
       try_match :arrayInitializer do
         match "{"
         loop do

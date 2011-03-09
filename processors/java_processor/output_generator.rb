@@ -41,7 +41,7 @@ module Java2Ruby
       end
       
       def write_comments
-        @output_lines.concat(@comment_lines.map { |comment| { :type => :output_line, :content => "##{comment}" } })
+        @output_lines.concat(@comment_lines.map { |comment| { type: :output_line, content: "##{comment}" } })
         @comment_lines.clear
       end
       
@@ -61,7 +61,7 @@ module Java2Ruby
         parts.each do |part|
           case part
           when String, JavaType
-            lines << { :type => :output_line, :content => "" } if lines.empty?
+            lines << { type: :output_line, content: "" } if lines.empty?
             lines.last[:content] << part.to_s
           when Array
             unless part.empty?
@@ -83,7 +83,7 @@ module Java2Ruby
         @output_lines = []
         yield
         write_comments
-        outer_array << { :type => :output_block, :children => @output_lines }
+        outer_array << { type: :output_block, children: @output_lines }
         @output_lines = outer_array
       end
       

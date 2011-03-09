@@ -30,7 +30,7 @@ module Java2Ruby
       match :statement do
         if try_match :statementExpression do
             expression = match_expression
-            create_element :expression, :value => expression
+            create_element :expression, value: expression
           end
           match ";"
         elsif try_match "if"
@@ -52,7 +52,7 @@ module Java2Ruby
             match "{"
             match :switchBlockStatementGroups do
               loop_match :switchBlockStatementGroup do
-                create_element :case_branch, :closed => false do
+                create_element :case_branch, closed: false do
                   values = []
                   loop_match :switchLabel do
                     if try_match "case"

@@ -8,8 +8,8 @@ module Java2Ruby
     
     def visit_method_declaration(element, data)
       if element[:synchronized]
-      	create_element element, :synchronized => false do
-    	    create_element :synchronized, :monitor => { :type => :self } do
+      	create_element element, synchronized: false do
+    	    create_element :synchronized, monitor: { type: :self } do
             visit_children element
           end
         end

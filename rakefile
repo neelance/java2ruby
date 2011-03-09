@@ -38,10 +38,10 @@ end
 
 libraries = ["antlr4ruby", "jface4ruby", "jre4ruby", "swt4ruby"]
 
-file "stable" do
+file "../stable" do
   puts "creating stable copy of converter libraries"
-  mkdir "stable"
-  cp_r ["../jre4ruby", "../antlr4ruby"], "stable"
+  mkdir "../stable"
+  cp_r ["../jre4ruby", "../antlr4ruby"], "../stable"
 end
 
 task :load_current_converter do
@@ -51,15 +51,11 @@ task :load_current_converter do
   require "converter"
 end
 
-task :load_stable_converter => ["stable"] do
+task :load_stable_converter => ["../stable"] do
   $:.unshift "."
-  $:.unshift "stable/jre4ruby"
-  $:.unshift "stable/antlr4ruby"
+  $:.unshift "../stable/jre4ruby"
+  $:.unshift "../stable/antlr4ruby"
   require "converter"
-end
-
-rule ".class" => ".java" do |t|
-  sh "javac -J-Xms64m -J-Xmx512m #{t.source}"
 end
 
 fakeout = StringIO.new
@@ -77,6 +73,10 @@ task "test" do
       converter.log = log
 
       converter.convert
+      
+      if not File.exists? file.sub(".java", ".class")
+        sh "javac -J-Xms64m -J-Xmx512m #{file}"
+      end
       
       java_output = File.popen("java -Xms64m -Xmx512m -cp #{File.dirname(file)} #{basename} 2>/dev/null").read
       log["java output"] = java_output

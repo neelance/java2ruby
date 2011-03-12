@@ -120,7 +120,7 @@ module Java2Ruby
     end
 
     def match_interfaceMethodDeclaratorRest(return_type, method_name, generic_classes = nil)
-      create_element :method_declaration, static: false, abstract: true, name: method_name, return_type: return_type do
+      create_element :method_declaration, static: false, abstract: true, name: method_name, return_type: return_type, generic_classes: generic_classes do
         match :interfaceMethodDeclaratorRest do
           set_attribute :parameters, match_formalParameters
           try_match_throws
@@ -159,6 +159,7 @@ module Java2Ruby
               match :enumConstants do
                 loop do
                   match :enumConstant do
+                    catch_comments
                     create_element :enum_constant do
                       set_attribute :name, match_name
                       if next_is? :arguments

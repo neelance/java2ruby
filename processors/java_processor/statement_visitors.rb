@@ -186,24 +186,24 @@ module Java2Ruby
     end
     
     def visit_if(element, data)
-      if_branches = {}
-      visit_children element, if_branches: if_branches
+      if_data = {}
+      visit_children element, if_data
       
       puts_output "if ", visit(element[:condition])
-      indent_output { visit_children if_branches[:true], context_module: data[:context_module] }
-      if if_branches[:false]
+      indent_output { visit_children if_data[:true_branch], context_module: data[:context_module] }
+      if if_data[:false_branch]
         puts_output "else"
-        indent_output { visit_children if_branches[:false], context_module: data[:context_module] }
+        indent_output { visit_children if_data[:false_branch], context_module: data[:context_module] }
       end
       puts_output "end"
     end
     
     def visit_true_statement(element, data)
-      data[:if_branches][:true] = element
+      data[:true_branch] = element
     end
     
     def visit_false_statement(element, data)
-      data[:if_branches][:false] = element
+      data[:false_branch] = element
     end
     
     def visit_case(element, data)

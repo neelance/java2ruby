@@ -35,11 +35,11 @@ module Java2Ruby
         data[:open_branches] << new_element
       end
 
-      case_end_data = { handle_case_end: true, break_found: false }
+      case_end_data = { delete_trailing_break: true, end_found: false }
       children = collect_children do
         visit_children_data_only_last_child element, case_end_data
       end
-      is_closed = case_end_data[:break_found]
+      is_closed = case_end_data[:end_found]
       
       data[:open_branches].each do |branch|
         branch[:children].concat children
@@ -49,26 +49,47 @@ module Java2Ruby
     end
     
     def visit_break(element, data)
-      if not element[:name] and data[:handle_case_end]
-        data[:break_found] = true
-      else
-        add_child element
-      end
+      data[:end_found] = true
+      add_child element if element[:name] or not data[:delete_trailing_break]
     end
     
     def visit_return(element, data)
-      data[:break_found] = true if data[:handle_case_end]
+      data[:end_found] = true
       add_child element
     end
 
     def visit_raise(element, data)
-      data[:break_found] = true if data[:handle_case_end]
+      data[:end_found] = true
       add_child element
     end
     
     def visit_block(element, data)
       create_element :block do
         visit_children_data_only_last_child element, data
+      end
+    end
+    
+    def visit_if(element, data)
+      create_element element do
+        if_data = {}
+        visit_children element, if_data
+        data[:end_found] = if_data[:true_branch_end_found] && (if_data[:false_branch_end_found].nil? || if_data[:false_branch_end_found])
+      end
+    end
+    
+    def visit_true_statement(element, data)
+      create_element element do
+        branch_data = {}
+        visit_children element, branch_data
+        data[:true_branch_end_found] = branch_data[:end_found]
+      end
+    end
+    
+    def visit_false_statement(element, data)
+      create_element element do
+        branch_data = {}
+        visit_children element, branch_data
+        data[:false_branch_end_found] = branch_data[:end_found]
       end
     end
   end

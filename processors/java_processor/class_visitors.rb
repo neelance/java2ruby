@@ -36,7 +36,7 @@ module Java2Ruby
         visit_children element, context_module: java_module, java_module: java_module
       end
       
-      if data[:in_method]
+      if current_method
         puts_output java_module.java_type, " = ", java_module
       else
         data[:context_module].add_module java_module
@@ -58,14 +58,15 @@ module Java2Ruby
     end
     
     def visit_enum_constant(element, data)
-      enum_constant_module = data[:java_module]
-      if element[:children]
+      expression_parts = if element[:children]
         enum_constant_module = JavaModule.new data[:java_module], :inner_class, element[:name]
         enum_constant_module.superclass = data[:java_module].java_type
-        enum_constant_module.new_constructor [], lambda { puts_output "super \"#{element[name]}\"" }
+        enum_constant_module.new_constructor [], lambda { puts_output "super \"#{element[:name]}\"" }
         visit_children element, java_module: enum_constant_module
+        [enum_constant_module, ".new"]
+      else
+        [data[:java_module].java_type, ".new"]
       end
-      expression_parts = [enum_constant_module.java_type, ".new"]
       expression_parts.concat compose_arguments(element[:arguments])
       expression_parts << ".set_value_name(\"#{element[:name]}\")"
       ruby_name = data[:java_module].new_constant element[:name], nil, Expression.new(nil, *expression_parts)

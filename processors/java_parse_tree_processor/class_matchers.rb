@@ -23,9 +23,9 @@ module Java2Ruby
       match :interfaceDeclaration do
         try_match_normalInterfaceDeclaration
         try_match :annotationTypeDeclaration do
+          match "@"
+          match "interface"
           create_element :interface_declaration do
-            match "@"
-            match "interface"
             set_attribute :name, match_name
             match :annotationTypeBody do
               match "{"
@@ -51,9 +51,9 @@ module Java2Ruby
     end
 
     def try_match_normalInterfaceDeclaration
-      create_element :interface_declaration do
-        try_match :normalInterfaceDeclaration do
-          match "interface"
+      try_match :normalInterfaceDeclaration do
+        match "interface"
+        create_element :interface_declaration do
           set_attribute :name, match_name
           
           if next_is? :typeParameters
@@ -132,8 +132,8 @@ module Java2Ruby
     def match_classDeclaration(class_modifiers)
       match :classDeclaration do
         try_match :normalClassDeclaration do
+          match "class"
           create_element :class_declaration, class_modifiers: class_modifiers do
-            match "class"
             set_attribute :name, name = match_name
   
             if next_is? :typeParameters
@@ -150,8 +150,8 @@ module Java2Ruby
           end
         end \
         or match :enumDeclaration do
+          match "enum"
           create_element :enum_declaration do
-            match "enum"
             set_attribute :name, name = match_name
 
             match :enumBody do

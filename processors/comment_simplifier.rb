@@ -6,27 +6,29 @@ module Java2Ruby
       true
     end
     
-    def fix_blanks(text)
-      if text[0] != " "
-        " #{text.rstrip}"
-      else
-        text.rstrip
-      end
-    end
-    
     def visit_line_comment(element, data)
-      create_element :line_comment, text: fix_blanks(element[:text]), same_line: element[:same_line]
+      text = element[:text].rstrip
+      text = " #{text}" if text[0] != " "
+      create_element :line_comment, text: text, same_line: element[:same_line]
     end
     
     def visit_block_comment(element, data)
       lines = element[:text].split "\n"
+      lines[0] = (" " * element[:line_offset]) + lines[0]
       
-      first = lines.index { |line| !line.strip.empty? }
-      last = lines.rindex { |line| !line.strip.empty? }
+      offsets = lines.map { |line| line.index(/[^ \t*]/) }
+      first = offsets.index { |offset| offset }
+      last = offsets.rindex { |offset| offset }
       
       if first
-        lines[first..last].each do |line|
-          create_element :line_comment, text: fix_blanks(line), same_line: false
+        if first == last and element[:same_line]
+          create_element :line_comment, text: " #{lines[first].strip}", same_line: true
+        else
+          offset = offsets[first..last].compact.min
+          lines[first..last].each do |line|
+            text = line[offset..-1] || ""
+            create_element :line_comment, text: " #{text.rstrip}", same_line: false
+          end
         end
       end
     end

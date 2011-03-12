@@ -47,12 +47,15 @@ module Java2Ruby
     end
     
     def next_element
+      catch_comments
+      @next_element
+    end
+    
+    def catch_comments
       while @next_element && @next_element[:type] == :line_comment
         add_child @next_element
         self.next_element_index += 1
       end
-      
-      @next_element
     end
     
     def next_is?(*names)
@@ -110,6 +113,18 @@ module Java2Ruby
         index += 1
       end
       result
+    end
+    
+    def create_element(*args)
+      if block_given?
+        element = super(*args) do
+          yield
+          catch_comments
+        end
+        element
+      else
+        super
+      end
     end
   end
 end

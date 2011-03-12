@@ -43,16 +43,25 @@ module Java2Ruby
       children = parse_tree.attr_children || []
       
       comment_on_same_line = true
+      line_offset = 0
       hidden_tokens.each do |token|
         case token.attr_type
         when JavaLexer::LINE_COMMENT
-          create_element :line_comment, same_line: comment_on_same_line, text: token.get_text[2..-2]
+          create_element :line_comment, same_line: comment_on_same_line, text: token.get_text[2..-2].gsub("\t", "    ")
           comment_on_same_line = false
+          line_offset = 0
         when JavaLexer::COMMENT
-          create_element :block_comment, text: token.get_text[2..-3].gsub(/^[ \t]*\*[ \t]*/, "")
-          comment_on_same_line = false
+          create_element :block_comment, same_line: comment_on_same_line, line_offset: line_offset + 2, text: token.get_text[2..-3].gsub("\t", "    ")
         when JavaLexer::WS
-          comment_on_same_line &&= token.get_text != "\n"
+          case token.get_text
+          when "\n"
+            comment_on_same_line = false
+            line_offset = 0
+          when " "
+            line_offset += 1
+          when "\t"
+            line_offset += 4
+          end
         end
       end
         

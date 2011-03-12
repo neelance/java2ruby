@@ -33,7 +33,7 @@ module Java2Ruby
     end
     
     def visit_children(element, data = {})
-    	if element[:children]
+      if element[:children]
         element[:children].each do |child|
           visit child, data
         end

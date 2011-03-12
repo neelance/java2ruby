@@ -190,8 +190,8 @@ Swt4Ruby.new_display {
 #                  }
 #                end
 #              }
-#  		        size = button.compute_size Org::Eclipse::Swt::SWT::DEFAULT, Org::Eclipse::Swt::SWT::DEFAULT
-#          	  set_size compute_size(size.attr_x, size.attr_y)
+#              size = button.compute_size Org::Eclipse::Swt::SWT::DEFAULT, Org::Eclipse::Swt::SWT::DEFAULT
+#              set_size compute_size(size.attr_x, size.attr_y)
 #              set_control button
 #            }
 #          }

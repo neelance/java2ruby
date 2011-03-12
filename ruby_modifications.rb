@@ -168,12 +168,12 @@ class Module
   end
 
   def overload_protected
-	  ancestor_list = ancestors
+    ancestor_list = ancestors
     yield
     ancestors.each do |ancestor|
       next if ancestor_list.include?(ancestor)
       ancestor.instance_methods(false).each do |name|
-				next if not superclass.method_defined?(name)
+        next if not superclass.method_defined?(name)
         define_method name, superclass.instance_method(name)
       end
     end

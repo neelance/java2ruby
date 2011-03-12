@@ -5,22 +5,22 @@ module Java2Ruby
         match :compilationUnit do
           name = []
           if try_match :packageDeclaration do
-	            match "package"
-	            match :qualifiedName do
-	              loop do
-	                name << match_name
-	                try_match "." or break
-	              end
-	            end
-	            match ";"
-	          end
+              match "package"
+              match :qualifiedName do
+                loop do
+                  name << match_name
+                  try_match "." or break
+                end
+              end
+              match ";"
+            end
 
             create_element :package, name: name do
-		          match_package_content
-	          end
-	       	else
-						match_package_content
-					end
+              match_package_content
+            end
+           else
+            match_package_content
+          end
         end
       end
     end

@@ -490,17 +490,17 @@ if not is_ruby_1_9?
     end
     
     def to_s
-			@chars.map(&:chr).join
+      @chars.map(&:chr).join
     end
     
     alias_method :to_str, :to_s
     
     def inspect
-			'"' + to_s + '"'
+      '"' + to_s + '"'
     end
     
     def ==(other)
-			other.to_u.chars == @chars
+      other.to_u.chars == @chars
     end
     
     alias_method :===, :==
@@ -549,7 +549,7 @@ end
 
 class Symbol
   def hash_code
-		to_s.hash_code
+    to_s.hash_code
   end
 
   def equal?(other)

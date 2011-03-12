@@ -47,12 +47,12 @@ module Java2Ruby
     end
     
     def next_element
-    	while @next_element && @next_element[:type] == :line_comment
+      while @next_element && @next_element[:type] == :line_comment
         add_child @next_element
         self.next_element_index += 1
       end
       
-    	@next_element
+      @next_element
     end
     
     def next_is?(*names)

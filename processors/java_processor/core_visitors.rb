@@ -25,7 +25,7 @@ module Java2Ruby
     end
     
     def visit_import(element, data)
-    	data[:java_module].new_import element[:names].map{ |name| RubyNaming.ruby_package_name(name) }, element[:package_import], element[:static_import]
+      data[:java_module].new_import element[:names].map{ |name| RubyNaming.ruby_package_name(name) }, element[:package_import], element[:static_import]
     end
     
     def visit_void_type(element, data)

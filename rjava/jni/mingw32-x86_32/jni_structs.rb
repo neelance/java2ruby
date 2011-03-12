@@ -2,7 +2,7 @@
 
 module JNI
   JNI::EnvFunctions.each_function do |name, arg_types, return_type, block|
-  	callback name, arg_types, return_type if arg_types
+    callback name, arg_types, return_type if arg_types
   end
   
   class EnvStruct < FFI::Struct
@@ -238,7 +238,7 @@ module JNI
   end
   
   JNI::JvmFunctions.each_function do |name, arg_types, return_type, block|
-  	callback name, arg_types, return_type
+    callback name, arg_types, return_type
   end
   
   class JvmStruct < FFI::Struct

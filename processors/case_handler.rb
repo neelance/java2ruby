@@ -14,11 +14,11 @@ module Java2Ruby
     end
     
     def visit_case(element, data)
-    	create_element :case, value: element[:value] do
+      create_element :case, value: element[:value] do
         case_data = { open_branches: [], default_branch: nil }
-    	  visit_children element, case_data
-    	  add_child case_data[:default_branch] if case_data[:default_branch]
-    	end
+        visit_children element, case_data
+        add_child case_data[:default_branch] if case_data[:default_branch]
+      end
     end
     
     def visit_case_branch(element, data)

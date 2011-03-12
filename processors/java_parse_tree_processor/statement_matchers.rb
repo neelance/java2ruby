@@ -101,7 +101,7 @@ module Java2Ruby
                 end
               else
                 create_element :for_init do
-	                try_match :forInit do
+                  try_match :forInit do
                     if next_is? :localVariableDeclaration
                       match_localVariableDeclaration
                     else
@@ -115,7 +115,7 @@ module Java2Ruby
                 end
                 match ";"
                 create_element :for_update do
-	                try_match :forUpdate do
+                  try_match :forUpdate do
                     match_expression_list
                   end
                 end
@@ -127,33 +127,33 @@ module Java2Ruby
             end
           end
         elsif try_match "try"
-        	create_element :try do
-	          create_element :try_body do
-	          	match_block
-	         	end
-	          try_match :catches do
-	            loop_match :catchClause do
-	            	create_element :rescue do
-		              match "catch"
-		              match "("
-		              match :formalParameter do
-		                match_variableModifiers
-		                set_attribute :exception_type, match_type
-		                match :variableDeclaratorId do
-		                  set_attribute :exception_variable, match_name
-		                end
-		              end
-		              match ")"
-		              match_block
-		            end
-	            end
-	          end
-	          if try_match "finally"
-	          	create_element :ensure do
-	            	match_block
-	           	end
-	          end
-	        end
+          create_element :try do
+            create_element :try_body do
+              match_block
+             end
+            try_match :catches do
+              loop_match :catchClause do
+                create_element :rescue do
+                  match "catch"
+                  match "("
+                  match :formalParameter do
+                    match_variableModifiers
+                    set_attribute :exception_type, match_type
+                    match :variableDeclaratorId do
+                      set_attribute :exception_variable, match_name
+                    end
+                  end
+                  match ")"
+                  match_block
+                end
+              end
+            end
+            if try_match "finally"
+              create_element :ensure do
+                match_block
+               end
+            end
+          end
         elsif try_match "break"
           create_element :break do
             if not try_match ";"

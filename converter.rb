@@ -109,23 +109,25 @@ module Java2Ruby
     attr_accessor :log, :error
     
     def find_dir(base_dir, name)
-      if base_dir.include?("src")
-        new_dir = base_dir.sub "src", name
+      if base_dir.include?("/src/")
+        new_dir = base_dir.sub "/src/", "/#{name}/"
         return new_dir if Dir.exists? new_dir
       end
       base_dir
     end
     
-    def initialize(java_file, output_dir = nil, temp_dir = nil, conversion_rules = {}, converter_id = nil, size = nil)
+    def initialize(java_file, converter_id = nil, size = nil)
       @java_file = java_file
-      @conversion_rules = conversion_rules
       @converter_id = converter_id
       @size = size
       @log = nil
       @steps = []
       
-      output_dir ||= find_dir File.dirname(@java_file), "lib"
-      temp_dir ||= find_dir File.dirname(@java_file), "tmp"
+      output_dir = find_dir File.dirname(@java_file), "lib"
+      temp_dir = find_dir File.dirname(@java_file), "tmp"
+      
+      conversion_rules_file = @java_file.sub(/\/src\/.*$/, "/conversion_rules.yaml")
+      @conversion_rules = File.exists?(conversion_rules_file) ? YAML.load_file(conversion_rules_file) : conversion_rules_file
       
       @basename = File.basename @java_file, ".java"
       @ruby_file = "#{output_dir}/#{RubyNaming.ruby_constant_name(@basename)}.rb"

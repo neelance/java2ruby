@@ -1,7 +1,5 @@
 module Java2Ruby
   class ConversionController
-    attr_reader :prefix, :prefix_class_names, :constants, :no_constants, :constant_name_mapping, :field_name_mapping
-    
     def initialize
       @current_converter_id = 0
       @pending_converters = {}
@@ -11,20 +9,19 @@ module Java2Ruby
       @converted_amount = 0
     end
     
-    def add_files(files, src_dir, lib_dir, tmp_dir, conversion_rules)
-      files.each do |file|
-        src_file = "#{src_dir}/#{file}"  
+    def add_files(files)
+      files.each do |src_file|
         next if File.directory? src_file
+        lib_file_dir = File.dirname(src_file).sub "/src/", "/lib/"
+        mkdir_p lib_file_dir unless File.exist? lib_file_dir
         
-        if File.extname(file) == ".java"
-          lib_file_dir = "#{lib_dir}/#{File.dirname(file)}"
-          tmp_file_dir = "#{tmp_dir}/#{File.dirname(file)}"
-          mkdir_p lib_file_dir unless File.exist? lib_file_dir
+        if File.extname(src_file) == ".java"
+          tmp_file_dir = File.dirname(src_file).sub "/src/", "/tmp/"
           mkdir_p tmp_file_dir unless File.exist? tmp_file_dir
           
           size = File.size src_file
           @amount_to_convert += size
-          converter = Java2Ruby::Converter.new src_file, lib_file_dir, tmp_file_dir, conversion_rules, @current_converter_id, size
+          converter = Java2Ruby::Converter.new src_file, @current_converter_id, size
           if converter.nothing_to_do?
             @converted_amount += size
           else
@@ -33,9 +30,7 @@ module Java2Ruby
             @queued_converters << converter
           end
         else
-          lib_file = "#{lib_dir}/#{file}"
-          lib_file_dir = File.dirname lib_file
-          mkdir_p lib_file_dir unless File.exist? lib_file_dir
+          lib_file = src_file.sub "/src/", "/lib/"
           cp src_file, lib_file unless File.exist? lib_file
         end
       end

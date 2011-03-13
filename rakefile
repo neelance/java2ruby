@@ -6,16 +6,6 @@ require "drb"
 require "stringio"
 require "yaml"
 
-class Dir
-  def self.dir_glob(dir, pattern)
-    files = nil
-    chdir dir do
-      files = Dir.glob(pattern).sort
-    end
-    files
-  end
-end
-
 task :gemspec do
   File.open("java2ruby.gemspec", "w") do |file|
     file.write Gem::Specification.new { |s|
@@ -139,9 +129,9 @@ convert_libraries = lambda { |selected_libraries, args|
     controller = Java2Ruby::ConversionController.new
 
     selected_libraries.each do |library|
-      rule_file = "../#{library}/conversion_rules.yaml"
-      conversion_rules = File.exists?(rule_file) ? YAML.load_file(rule_file) : {}
-      controller.add_files Dir.dir_glob("../#{library}/#{library}/src", "**/*"), "../#{library}/#{library}/src", "../#{library}/#{library}/lib", "../#{library}/#{library}/tmp", conversion_rules
+      src_dir = "../#{library}/#{library}/src"
+      files = Dir.glob("#{src_dir}/**/*").sort      
+      controller.add_files files
     end
     controller.run process_count
   ensure

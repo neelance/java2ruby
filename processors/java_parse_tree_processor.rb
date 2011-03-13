@@ -8,6 +8,10 @@ module Java2Ruby
 
     attr_reader :next_element, :next_element_index
 
+    def initialize
+      @next_comments = nil
+    end
+
     def process(tree)
       collect_children do
         self.elements = []
@@ -23,6 +27,7 @@ module Java2Ruby
       if element[:children]
         parent_elements = @elements
         parent_next_element_index = @next_element_index
+        parent_next_comments = @next_comments
 
         self.elements = element[:children]
         result = yield
@@ -30,6 +35,7 @@ module Java2Ruby
   
         self.elements = parent_elements
         self.next_element_index = parent_next_element_index
+        @next_comments = parent_next_comments
       end
 
       result
@@ -38,12 +44,18 @@ module Java2Ruby
     def elements=(list)
       @elements = list
       self.next_element_index = 0
-      @next_element = @elements.first
     end
     
     def next_element_index=(value)
       @next_element_index = value
       @next_element = @elements[@next_element_index]
+      
+      @next_comments = []
+      while @next_element and @next_element[:type] == :line_comment
+        @next_comments << @next_element
+        @next_element_index += 1
+        @next_element = @elements[@next_element_index]
+      end
     end
     
     def next_element
@@ -52,9 +64,9 @@ module Java2Ruby
     end
     
     def catch_comments
-      while @next_element && @next_element[:type] == :line_comment
-        add_child @next_element
-        self.next_element_index += 1
+      if @next_comments
+        add_children @next_comments
+        @next_comments = nil
       end
     end
     
